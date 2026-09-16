@@ -27,7 +27,7 @@ PRE-LOG > POST-LOG · MEAL > INDIVIDUAL INGREDIENTS · BATCH > SINGLE PORTION ·
 ## Data ownership
 
 - **Google Sheets is the SOURCE OF TRUTH for the meal library** (meal type, name, DT/DNT variant, ingredients + quantities, kcal/macros, prep time, batch size, fridge life, freezable).
-  Sheet: https://docs.google.com/spreadsheets/d/10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI/edit?gid=587242956#gid=587242956
+  Sheet: https://docs.google.com/spreadsheets/d/10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI/edit?gid=965578947#gid=965578947 (tab gid `965578947`)
 - Never create another manually maintained meal database. Never duplicate editable meal definitions into Supabase.
 - **Supabase stores only operational state**: settings, DT/DNT targets, default day templates, day plans, planned meals, eaten state, prep batches, fridge/freezer portions, shopping state, weight history.
 - Historical planned/eaten meals MAY store macro snapshots so past days do not change when the sheet changes.
@@ -71,6 +71,8 @@ Optional and secondary. Never required for the core app. No chatbot as the main 
 - Server secrets (`src/lib/env.ts`, `src/lib/supabase/server.ts`) are `server-only`; never import them from client components. There is no browser Supabase client by design.
 - Schema lives in `supabase/migrations/` (one file per change, never edit an applied file). All queries live in `src/lib/db/*`; UI and server actions call those functions, never Supabase directly.
 - Rows are validated with Zod at the data-access boundary; there are no generated Supabase types.
+- Meal library: `src/lib/google-sheets/` talks to the Sheets API (service account, server-only); `src/lib/meals/` parses rows by normalized header names, groups DT/DNT rows into one meal, caches, and falls back to the last good copy. Ingredients stay raw text. Fixtures in `src/lib/meals/fixtures.ts` are development-only.
+- UI never calls Google Sheets directly; pages call `getMealLibrary()`.
 - Before each task: `npm run lint && npm run typecheck && npm run build` must pass.
 
 <!-- BEGIN:nextjs-agent-rules -->
