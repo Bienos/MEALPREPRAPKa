@@ -48,8 +48,21 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui-style comp
 
 ## Supabase
 
-Create a Supabase project and copy its URL and secret key into `.env.local`.
-No tables are required yet; the schema arrives with the first feature that needs it.
+1. Create a Supabase project and copy its URL and secret key into `.env.local`.
+2. Apply the schema in `supabase/migrations/` (in order). Either paste each file into the
+   SQL Editor in the Supabase dashboard, or use the CLI:
+
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <your-project-ref>
+   npx supabase db push
+   ```
+
+The first migration creates the operational tables (settings, DT/DNT targets, day plans,
+planned meals, prep batches, portions, shopping items, weight logs) and seeds the default
+targets. Meal definitions are never stored in Supabase; Google Sheets owns them.
+
+All database access goes through `src/lib/db/*` (server-only). UI code never calls Supabase directly.
 
 ## Deployment
 

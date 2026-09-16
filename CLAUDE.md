@@ -69,6 +69,8 @@ Optional and secondary. Never required for the core app. No chatbot as the main 
 - Before adding an abstraction, ask whether the current scope needs it.
 - Do not refactor unrelated working code.
 - Server secrets (`src/lib/env.ts`, `src/lib/supabase/server.ts`) are `server-only`; never import them from client components. There is no browser Supabase client by design.
+- Schema lives in `supabase/migrations/` (one file per change, never edit an applied file). All queries live in `src/lib/db/*`; UI and server actions call those functions, never Supabase directly.
+- Rows are validated with Zod at the data-access boundary; there are no generated Supabase types.
 - Before each task: `npm run lint && npm run typecheck && npm run build` must pass.
 
 <!-- BEGIN:nextjs-agent-rules -->
