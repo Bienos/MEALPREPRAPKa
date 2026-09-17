@@ -25,6 +25,14 @@ export default async function PrepPage() {
 
   let stage: PrepStage;
 
+  // The next four days, each defaulting to the configured day type. Offered
+  // both on a fresh start and right after a finished prep, so there is never
+  // a screen with no way to plan the next one.
+  const nextDays: PrepDayView[] = Array.from({ length: 4 }, (_, index) => {
+    const date = addDays(today, index);
+    return { date, label: longDateLabel(date), dayType: settings.default_day_type };
+  });
+
   // A prep finished moments ago still gets its summary screen.
   const justFinished = session ? null : await getJustCompletedPrepSession();
 
@@ -37,14 +45,10 @@ export default async function PrepPage() {
         variant: item.variant,
         count: item.portions,
       })),
+      days: nextDays,
     };
   } else if (!session) {
-    // Offer the next four days, defaulting each to the configured day type.
-    const days: PrepDayView[] = Array.from({ length: 4 }, (_, index) => {
-      const date = addDays(today, index);
-      return { date, label: longDateLabel(date), dayType: settings.default_day_type };
-    });
-    stage = { kind: "start", days };
+    stage = { kind: "start", days: nextDays };
   } else {
     const items = await listPrepSessionItems(session.id);
 

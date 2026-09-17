@@ -28,7 +28,7 @@ export type PrepStage =
       short: boolean;
     }
   | { kind: "cooking"; steps: CookingStep[]; currentStep: number }
-  | { kind: "complete"; portions: CreatedPortion[] };
+  | { kind: "complete"; portions: CreatedPortion[]; days: PrepDayView[] };
 
 export function PrepClient({ stage }: { stage: PrepStage }) {
   if (stage.kind === "start") {
@@ -68,5 +68,16 @@ export function PrepClient({ stage }: { stage: PrepStage }) {
     );
   }
 
-  return <PrepComplete portions={stage.portions} />;
+  return (
+    <div className="flex flex-col gap-8">
+      <PrepComplete portions={stage.portions} />
+      <section className="flex flex-col gap-4">
+        <h2 className="text-xl font-extrabold">Kolejny prep</h2>
+        <DayPicker
+          initialDays={stage.days}
+          onBuild={(days: { date: string; day_type: DayType }[]) => buildPrepAction(days)}
+        />
+      </section>
+    </div>
+  );
 }

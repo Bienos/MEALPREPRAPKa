@@ -35,7 +35,8 @@ export function PrepComplete({ portions }: { portions: CreatedPortion[] }) {
         </ul>
       </Card>
 
-      <Button size="lg" className="h-16 w-full text-xl" asChild>
+      {/* Outline, so the one primary button on this screen is the next prep. */}
+      <Button size="lg" variant="outline" className="h-16 w-full text-xl" asChild>
         <Link href="/prep/lodowka">
           <Refrigerator className="size-6" />
           ZOBACZ LODÓWKĘ
