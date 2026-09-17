@@ -17,8 +17,13 @@ export async function GET() {
     sheet: Boolean(process.env.GOOGLE_SHEETS_SPREADSHEET_ID),
   };
 
+  // TEMPORARY DIAGNOSTIC — remove. Names only, never values.
+  const seenKeys = Object.keys(process.env)
+    .filter((k) => /SUPABASE|GOOGLE|ANTHROPIC|APP_PASSWORD|SESSION_SECRET/i.test(k))
+    .sort();
+
   return NextResponse.json(
-    { status: "ok", configured },
+    { status: "ok", configured, seenKeys },
     { headers: { "cache-control": "no-store" } },
   );
 }
