@@ -75,6 +75,11 @@ export async function listPlannedMeals(date: IsoDate): Promise<PlannedMeal[]> {
   return rows(plannedMealSchema, result);
 }
 
+export async function getPlannedMeal(id: string): Promise<PlannedMeal | null> {
+  const result = await getSupabase().from("planned_meals").select("*").eq("id", id).maybeSingle();
+  return maybeRow(plannedMealSchema, result);
+}
+
 export type NewPlannedMeal = Macros & {
   plan_date: IsoDate;
   slot: string;

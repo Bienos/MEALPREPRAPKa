@@ -3,11 +3,13 @@
 import { refresh } from "next/cache";
 
 import {
+  getPlannedMeal,
   markEaten,
   unmarkEaten,
   updatePlannedMealPortions,
   upsertDayPlan,
 } from "@/lib/db/day-plans";
+import { consumeEarliestPortion, restorePortion } from "@/lib/db/prep";
 import type { DayType } from "@/lib/db/helpers";
 import { applyDefaultDay, type ApplyDefaultDayResult } from "@/lib/meals/plan";
 
@@ -35,13 +37,20 @@ export async function applyDefaultDayAction(date: string, dayType: DayType): Pro
 /**
  * ZJEDZONE. The screen updates optimistically before this resolves, so this
  * deliberately does not call refresh(): the client already holds the new state.
+ *
+ * If a prepared portion of the same meal is in the fridge, one is consumed
+ * automatically (earliest expiry first) so the fridge never needs hand-editing.
  */
 export async function markEatenAction(id: string): Promise<void> {
-  await markEaten(id);
+  const meal = await getPlannedMeal(id);
+  const portionId = meal?.meal_key ? await consumeEarliestPortion(meal.meal_key, meal.variant) : null;
+  await markEaten(id, portionId ?? undefined);
 }
 
-/** Undo for ZJEDZONE. */
+/** Undo for ZJEDZONE, which also puts any auto-consumed portion back. */
 export async function undoEatenAction(id: string): Promise<void> {
+  const meal = await getPlannedMeal(id);
+  if (meal?.portion_id) await restorePortion(meal.portion_id);
   await unmarkEaten(id);
 }
 

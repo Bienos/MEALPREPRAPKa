@@ -95,6 +95,43 @@ export async function movePortion(id: string, location: PortionLocation, expires
   ok(await getSupabase().from("portions").update(patch).eq("id", id));
 }
 
+/** Puts a consumed portion back, used when ZJEDZONE is undone. */
+export async function restorePortion(id: string): Promise<void> {
+  ok(
+    await getSupabase()
+      .from("portions")
+      .update({ status: "available", consumed_at: null })
+      .eq("id", id),
+  );
+}
+
+/** ZAMROŹ: move a portion from the fridge to the freezer. */
+export async function freezePortion(id: string): Promise<void> {
+  ok(await getSupabase().from("portions").update({ location: "freezer" }).eq("id", id));
+}
+
+/**
+ * Consumes ONE available portion of a meal, earliest expiry first, and returns
+ * its id. Used when a meal is marked eaten on Today so the fridge keeps itself
+ * up to date. Returns null when nothing matches.
+ */
+export async function consumeEarliestPortion(
+  mealKey: string,
+  variant: DayType | null,
+): Promise<string | null> {
+  const available = await listAvailablePortions();
+  const matching = available.filter((portion) => portion.batch.meal_key === mealKey);
+  // Prefer the exact variant; fall back to any portion of the same dish.
+  const sameVariant = matching.filter((portion) => portion.batch.variant === variant);
+  const pool = sameVariant.length > 0 ? sameVariant : matching;
+  if (pool.length === 0) return null;
+
+  // listAvailablePortions already orders by expiry, nulls last.
+  const chosen = pool[0];
+  await consumePortion(chosen.id, "eaten");
+  return chosen.id;
+}
+
 export async function consumePortion(id: string, status: "eaten" | "discarded" = "eaten"): Promise<void> {
   ok(
     await getSupabase()
