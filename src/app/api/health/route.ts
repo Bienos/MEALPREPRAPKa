@@ -26,30 +26,23 @@ export async function GET(request: Request) {
   if (new URL(request.url).searchParams.has("probe")) {
     const id = (process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? "").trim();
     const configuredGid = (process.env.GOOGLE_SHEETS_TARGET_GID ?? "").trim();
-    const targets: [string, string][] = [
-      ["configured", configuredGid],
-      ["700302857", "700302857"],
-      ["first-tab", ""],
-    ];
+    const response = await fetch(
+      `https://docs.google.com/spreadsheets/d/${id}/htmlview`,
+      { cache: "no-store" },
+    );
+    const html = await response.text();
+    const tabs = new Map<string, string>();
+    for (const m of html.matchAll(/\{"(?:name|sheetName)":"([^"]+)"[^}]*?"gid":"?(\d+)"?/g)) {
+      tabs.set(m[2], m[1]);
+    }
+    for (const m of html.matchAll(/id="sheet-button-(\d+)"[^>]*>([^<]+)</g)) {
+      tabs.set(m[1], m[2]);
+    }
     probe = {
       configuredGid,
-      results: await Promise.all(
-        targets.map(async ([label, gid]) => {
-          const url = `https://docs.google.com/spreadsheets/d/${id}/export?format=csv${gid ? `&gid=${gid}` : ""}`;
-          try {
-            const response = await fetch(url, { cache: "no-store" });
-            const text = await response.text();
-            return {
-              label,
-              status: response.status,
-              bytes: text.length,
-              head: text.slice(0, 300),
-            };
-          } catch (error) {
-            return { label, error: String(error) };
-          }
-        }),
-      ),
+      status: response.status,
+      bytes: html.length,
+      tabs: [...tabs].map(([gid, name]) => ({ gid, name })),
     };
   }
 
