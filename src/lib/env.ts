@@ -41,10 +41,27 @@ const coreSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "A Supabase service role / secret key is required"),
 });
 
+const DEFAULT_TARGET_GID = 965578947;
+
 const sheetsSchema = z.object({
   GOOGLE_SHEETS_SPREADSHEET_ID: z.string().min(1, "GOOGLE_SHEETS_SPREADSHEET_ID is required"),
-  GOOGLE_SHEETS_TARGET_GID: z.coerce.number().int().nonnegative().default(965578947),
+  GOOGLE_SHEETS_TARGET_GID: z.coerce.number().int().nonnegative().default(DEFAULT_TARGET_GID),
 });
+
+/**
+ * Accepts either a bare spreadsheet id or a full sheet URL pasted from the
+ * browser, since that is what the address bar gives you.
+ */
+function extractSpreadsheetId(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  return /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/.exec(raw)?.[1] ?? raw.trim();
+}
+
+/** Accepts a bare gid or anything containing "gid=1234", as pasted sheet URLs do. */
+function extractGid(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  return /gid=(\d+)/.exec(raw)?.[1] ?? raw.trim();
+}
 
 const serviceAccountSchema = z.object({
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.email("GOOGLE_SERVICE_ACCOUNT_EMAIL must be an email"),
@@ -107,8 +124,11 @@ export function hasSheetsEnv(): boolean {
 
 export function getSheetsEnv(): SheetsEnv {
   cachedSheets ??= parse(sheetsSchema, {
-    GOOGLE_SHEETS_SPREADSHEET_ID: process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
-    GOOGLE_SHEETS_TARGET_GID: process.env.GOOGLE_SHEETS_TARGET_GID,
+    // firstOf, not process.env: a variable saved with no value is an empty
+    // string, and an empty string coerces to gid 0 rather than taking the
+    // default, which asks Google for a tab that does not exist.
+    GOOGLE_SHEETS_SPREADSHEET_ID: extractSpreadsheetId(firstOf("GOOGLE_SHEETS_SPREADSHEET_ID")),
+    GOOGLE_SHEETS_TARGET_GID: extractGid(firstOf("GOOGLE_SHEETS_TARGET_GID")),
   });
   return cachedSheets;
 }

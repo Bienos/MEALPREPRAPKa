@@ -51,10 +51,18 @@ async function readRowsPublic(spreadsheetId: string, gid: number): Promise<strin
   const response = await fetch(url, { cache: "no-store" });
   const text = await response.text();
   const looksLikeHtml = /^\s*<(!doctype|html)/i.test(text);
-  if (!response.ok || looksLikeHtml) {
+  // A sign-in page means sharing; a 400 means Google accepted the request but
+  // not the ids, so pointing at sharing would send you the wrong way.
+  if (looksLikeHtml || response.status === 401 || response.status === 403) {
     throw new Error(
       `Nie udało się pobrać arkusza bez logowania (status ${response.status}). ` +
         `Upewnij się, że arkusz jest udostępniony jako „Każda osoba mająca link — Przeglądający”.`,
+    );
+  }
+  if (!response.ok) {
+    throw new Error(
+      `Google odrzucił żądanie arkusza (status ${response.status}). ` +
+        `Sprawdź GOOGLE_SHEETS_SPREADSHEET_ID oraz GOOGLE_SHEETS_TARGET_GID (zakładka gid ${gid}).`,
     );
   }
   return parseCsv(text);
