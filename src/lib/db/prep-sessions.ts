@@ -10,9 +10,13 @@ export type PrepStatus = (typeof prepStatuses)[number];
 const prepDaySchema = z.object({ date: isoDateSchema, day_type: dayTypeSchema });
 export type PrepDayRow = z.infer<typeof prepDaySchema>;
 
+export const prepSlots = ["sniadanie", "obiad", "kolacja"] as const;
+export type PrepSlotName = (typeof prepSlots)[number];
+
 const sessionSchema = z.object({
   id: z.uuid(),
   status: z.enum(prepStatuses),
+  slot: z.enum(prepSlots),
   days: z.array(prepDaySchema),
   current_step: z.number().int(),
   created_at: z.string(),
@@ -85,11 +89,23 @@ export async function listPrepSessionItems(sessionId: string): Promise<PrepSessi
 }
 
 /** Replaces any unfinished prep with a fresh one. Only one is ever active. */
-export async function createPrepSession(days: { date: string; day_type: DayType }[]): Promise<PrepSession> {
+export async function createPrepSession(
+  days: { date: string; day_type: DayType }[],
+  slot: PrepSlotName = "obiad",
+): Promise<PrepSession> {
   const db = getSupabase();
   ok(await db.from("prep_sessions").delete().in("status", ["draft", "cooking"]));
-  const result = await db.from("prep_sessions").insert({ days }).select("*").single();
+  const result = await db.from("prep_sessions").insert({ days, slot }).select("*").single();
   return row(sessionSchema, result);
+}
+
+/** Adds one dish to an existing prep, for picking by hand. */
+export async function addPrepSessionItem(sessionId: string, item: NewPrepSessionItem): Promise<void> {
+  ok(await getSupabase().from("prep_session_items").insert({ ...item, session_id: sessionId }));
+}
+
+export async function deletePrepSessionItem(id: string): Promise<void> {
+  ok(await getSupabase().from("prep_session_items").delete().eq("id", id));
 }
 
 export async function replacePrepSessionItems(sessionId: string, items: NewPrepSessionItem[]): Promise<void> {

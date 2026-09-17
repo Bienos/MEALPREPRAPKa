@@ -7,10 +7,13 @@ import { PrepResult } from "@/components/prep/prep-result";
 import type { CookingStep } from "@/lib/meals/cooking-steps";
 import type { DayType, PrepDayView, PrepItemView } from "@/lib/meals/prep-view-types";
 import {
+  addDishAction,
   alternativesAction,
   buildPrepAction,
   discardPrepAction,
+  dishesToAddAction,
   finishPrepAction,
+  removeDishAction,
   setCookingStepAction,
   startCookingAction,
   swapDishAction,
@@ -21,6 +24,7 @@ export type PrepStage =
   | {
       kind: "result";
       days: number;
+      slotLabel: string;
       items: PrepItemView[];
       estimatedMinutes: number;
       fromFridge: number;
@@ -35,7 +39,7 @@ export function PrepClient({ stage }: { stage: PrepStage }) {
     return (
       <DayPicker
         initialDays={stage.days}
-        onBuild={(days: { date: string; day_type: DayType }[]) => buildPrepAction(days)}
+        onBuild={(days: { date: string; day_type: DayType }[], slot) => buildPrepAction(days, slot)}
       />
     );
   }
@@ -44,6 +48,7 @@ export function PrepClient({ stage }: { stage: PrepStage }) {
     return (
       <PrepResult
         days={stage.days}
+        slotLabel={stage.slotLabel}
         items={stage.items}
         estimatedMinutes={stage.estimatedMinutes}
         fromFridge={stage.fromFridge}
@@ -53,6 +58,9 @@ export function PrepClient({ stage }: { stage: PrepStage }) {
         onAlternatives={alternativesAction}
         onSwap={swapDishAction}
         onDiscard={discardPrepAction}
+        onBrowse={dishesToAddAction}
+        onAdd={addDishAction}
+        onRemove={removeDishAction}
       />
     );
   }
@@ -75,7 +83,7 @@ export function PrepClient({ stage }: { stage: PrepStage }) {
         <h2 className="text-xl font-extrabold">Kolejny prep</h2>
         <DayPicker
           initialDays={stage.days}
-          onBuild={(days: { date: string; day_type: DayType }[]) => buildPrepAction(days)}
+          onBuild={(days: { date: string; day_type: DayType }[], slot) => buildPrepAction(days, slot)}
         />
       </section>
     </div>

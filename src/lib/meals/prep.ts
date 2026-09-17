@@ -2,7 +2,9 @@ import "server-only";
 
 import { listPantryStaples } from "@/lib/db/pantry";
 import {
+  addPrepSessionItem,
   createPrepSession,
+  deletePrepSessionItem,
   getActivePrepSession,
   listPrepSessionItems,
   replacePrepSessionItems,
@@ -18,7 +20,13 @@ import { replacePrepShoppingItems } from "@/lib/db/shopping";
 import { addDays, todayIso } from "@/lib/date";
 import { aggregateIngredients } from "./ingredients";
 import { getMealLibrary } from "./library";
-import { buildPrepPlan, swapAlternatives, type PrepItem } from "./prep-plan";
+import {
+  availableDishes,
+  buildPrepPlan,
+  swapAlternatives,
+  type PrepItem,
+  type PrepSlot,
+} from "./prep-plan";
 
 /** Strips the database-generated keys so a row can be re-inserted. */
 function toItemRow(item: PrepSessionItem): NewPrepSessionItem {
@@ -91,17 +99,21 @@ async function fridgeStock() {
  * [ BUILD PREP ]: generates the plan for the chosen days, stores it as the
  * active session and regenerates the shopping list.
  */
-export async function buildPrep(days: { date: string; day_type: DayType }[]): Promise<PrepSession> {
+export async function buildPrep(
+  days: { date: string; day_type: DayType }[],
+  slot: PrepSlot = "obiad",
+): Promise<PrepSession> {
   const [{ library }, targets, fridge] = await Promise.all([getMealLibrary(), getTargets(), fridgeStock()]);
 
   const plan = buildPrepPlan({
     days: days.map((day) => ({ date: day.date, dayType: day.day_type })),
     meals: library.meals,
     targets,
+    slot,
     fridge,
   });
 
-  const session = await createPrepSession(days);
+  const session = await createPrepSession(days, slot);
   await replacePrepSessionItems(session.id, toRows(plan.items));
   await regenerateShoppingList(session.id);
   return session;
@@ -125,8 +137,51 @@ export async function alternativesFor(sessionId: string, itemId: string): Promis
     meals: library.meals,
     targets,
     spanDays,
+    slot: session?.slot ?? "obiad",
     exclude: items.map((item) => item.meal_key),
   });
+}
+
+/**
+ * [ DODAJ DANIE ]: the whole slot to choose from, minus what the prep already
+ * has. Uncapped on purpose — this is the screen for picking by hand.
+ */
+export async function dishesToAdd(sessionId: string): Promise<PrepItem[]> {
+  const [{ library }, targets, items, session] = await Promise.all([
+    getMealLibrary(),
+    getTargets(),
+    listPrepSessionItems(sessionId),
+    getActivePrepSession(),
+  ]);
+  if (!session) return [];
+
+  return availableDishes({
+    meals: library.meals,
+    targets,
+    spanDays: Math.max(session.days.length, 1),
+    slot: session.slot,
+    // Cover the day type the prep needs most, so a hand-picked dish still fits.
+    dayType: session.days.some((day) => day.day_type === "DT") ? "DT" : "DNT",
+    exclude: items.map((item) => item.meal_key),
+  });
+}
+
+export async function addDishToPrep(sessionId: string, mealKey: string): Promise<void> {
+  const options = await dishesToAdd(sessionId);
+  const chosen = options.find((option) => option.mealKey === mealKey);
+  if (!chosen) return;
+
+  await addPrepSessionItem(sessionId, toRows([chosen])[0]);
+  await regenerateShoppingList(sessionId);
+}
+
+export async function removeDishFromPrep(sessionId: string, mealKey: string): Promise<void> {
+  const items = await listPrepSessionItems(sessionId);
+  // A dish can hold one row per day type, so remove them all together.
+  await Promise.all(
+    items.filter((item) => item.meal_key === mealKey).map((item) => deletePrepSessionItem(item.id)),
+  );
+  await regenerateShoppingList(sessionId);
 }
 
 /** Swaps every row of one dish for another, keeping portion counts and variants. */

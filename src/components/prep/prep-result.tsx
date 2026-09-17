@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Check, Clock, Play, Repeat, ShoppingBasket } from "lucide-react";
+import { Check, Clock, Play, Plus, Repeat, ShoppingBasket, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ export type Alternative = { mealKey: string; mealName: string; kcal: number; pro
 /** The generated prep: what to cook, how long, and the way into cooking mode. */
 export function PrepResult({
   days,
+  slotLabel,
   items,
   estimatedMinutes,
   fromFridge,
@@ -23,8 +24,12 @@ export function PrepResult({
   onAlternatives,
   onSwap,
   onDiscard,
+  onBrowse,
+  onAdd,
+  onRemove,
 }: {
   days: number;
+  slotLabel: string;
   items: PrepItemView[];
   estimatedMinutes: number;
   fromFridge: number;
@@ -34,15 +39,21 @@ export function PrepResult({
   onAlternatives: (itemId: string) => Promise<Alternative[]>;
   onSwap: (itemId: string, mealKey: string) => Promise<void>;
   onDiscard: () => Promise<void>;
+  onBrowse: () => Promise<Alternative[]>;
+  onAdd: (mealKey: string) => Promise<void>;
+  onRemove: (mealKey: string) => Promise<void>;
 }) {
   const dishes = groupIntoDishes(items);
   const totalPortions = items.reduce((sum, item) => sum + item.portions, 0);
   const [pending, startTransition] = useTransition();
+  const [browsing, setBrowsing] = useState<Alternative[] | null>(null);
 
   return (
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-1">
-        <p className="text-xs font-bold tracking-widest text-primary uppercase">Prep · {days} dni</p>
+        <p className="text-xs font-bold tracking-widest text-primary uppercase">
+          {slotLabel} · {days} dni
+        </p>
         <h1 className="text-3xl font-extrabold tracking-tight">{totalPortions} porcji</h1>
         <p className="text-muted-foreground">
           {dishes.length === 1 ? "1 danie" : `${dishes.length} dania`}
@@ -52,7 +63,8 @@ export function PrepResult({
 
       {short ? (
         <p className="rounded-lg bg-primary/10 px-4 py-3 text-sm">
-          Biblioteka nie pokrywa wszystkich dni. Dodaj więcej dań typu „Meal prep” w arkuszu.
+          Biblioteka nie pokrywa wszystkich dni. Dodaj dania ręcznie albo dopisz więcej w arkuszu
+          (kategoria „{slotLabel}”, z batchem i czasem w lodówce).
         </p>
       ) : null}
 
@@ -63,9 +75,61 @@ export function PrepResult({
             dish={dish}
             onAlternatives={onAlternatives}
             onSwap={onSwap}
+            onRemove={onRemove}
           />
         ))}
       </ul>
+
+      {browsing === null ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          onClick={() => startTransition(async () => { setBrowsing(await onBrowse()); })}
+        >
+          <Plus className="size-4" />
+          {pending ? "Szukam…" : "Dodaj danie"}
+        </Button>
+      ) : (
+        <Card className="gap-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
+              Cała biblioteka · {browsing.length}
+            </p>
+            <button
+              type="button"
+              onClick={() => setBrowsing(null)}
+              className="text-sm font-semibold text-muted-foreground underline-offset-2 hover:underline"
+            >
+              Zamknij
+            </button>
+          </div>
+          {browsing.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nic więcej w tej kategorii nie nadaje się na batch.
+            </p>
+          ) : (
+            <ul className="flex max-h-96 flex-col gap-2 overflow-y-auto">
+              {browsing.map((option) => (
+                <li key={option.mealKey}>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => startTransition(async () => { await onAdd(option.mealKey); setBrowsing(null); })}
+                    className="flex min-h-12 w-full items-center gap-3 rounded-lg border bg-card px-3 py-2 text-left hover:bg-muted"
+                  >
+                    <Plus className="size-4 shrink-0 text-primary" />
+                    <span className="min-w-0 flex-1 font-semibold">{option.mealName}</span>
+                    <span className="shrink-0 text-sm text-muted-foreground">
+                      {Math.round(option.kcal)} kcal · {Math.round(option.protein_g)} B
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      )}
 
       <Card className="gap-3">
         <div className="flex items-center gap-3">
@@ -111,10 +175,12 @@ function DishCard({
   dish,
   onAlternatives,
   onSwap,
+  onRemove,
 }: {
   dish: PrepDishView;
   onAlternatives: (itemId: string) => Promise<Alternative[]>;
   onSwap: (itemId: string, mealKey: string) => Promise<void>;
+  onRemove: (mealKey: string) => Promise<void>;
 }) {
   const [options, setOptions] = useState<Alternative[] | null>(null);
   const [pending, startTransition] = useTransition();
@@ -140,20 +206,33 @@ function DishCard({
         </div>
 
         {options === null ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={pending}
-            onClick={() =>
-              startTransition(async () => {
-                setOptions(await onAlternatives(dish.itemId));
-              })
-            }
-          >
-            <Repeat className="size-4" />
-            {pending ? "Szukam…" : "Zamień danie"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              disabled={pending}
+              onClick={() =>
+                startTransition(async () => {
+                  setOptions(await onAlternatives(dish.itemId));
+                })
+              }
+            >
+              <Repeat className="size-4" />
+              {pending ? "Szukam…" : "Zamień danie"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label={`Usuń ${dish.mealName}`}
+              disabled={pending}
+              onClick={() => startTransition(async () => { await onRemove(dish.mealKey); })}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
         ) : options.length === 0 ? (
           <p className="text-sm text-muted-foreground">Brak alternatyw w bibliotece.</p>
         ) : (

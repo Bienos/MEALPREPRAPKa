@@ -12,6 +12,7 @@ import {
 import { getSettings } from "@/lib/db/settings";
 import { listShoppingItems } from "@/lib/db/shopping";
 import { buildCookingSteps } from "@/lib/meals/cooking-steps";
+import { PREP_SLOT_LABELS } from "@/lib/meals/prep-plan";
 import { toPrepItems } from "@/lib/meals/prep";
 import type { PrepDayView, PrepItemView } from "@/lib/meals/prep-view-types";
 import { PrepClient, type PrepStage } from "./prep-client";
@@ -74,6 +75,7 @@ export default async function PrepPage() {
       stage = {
         kind: "result",
         days: session.days.length,
+        slotLabel: PREP_SLOT_LABELS[session.slot],
         items: view,
         estimatedMinutes: [...new Set(items.map((item) => item.meal_key))].reduce((total, key) => {
           const item = items.find((entry) => entry.meal_key === key);

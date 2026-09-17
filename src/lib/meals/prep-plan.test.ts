@@ -3,7 +3,9 @@ import { describe, test } from "node:test";
 
 import {
   buildPrepPlan,
+  availableDishes,
   isMealPrepCategory,
+  matchesSlot,
   parseBatchMax,
   parseFridgeDays,
   parsePrepMinutes,
@@ -245,5 +247,54 @@ describe("swapping a dish", () => {
     });
     const options = swapAlternatives({ item: plan.items[0], meals, targets: TARGETS, spanDays: 2, exclude: [] });
     assert.equal(options[0].portions, plan.items[0].portions);
+  });
+});
+
+describe("prep slots", () => {
+  test("matches the sheet's own categories, diacritics and all", () => {
+    assert.equal(matchesSlot("Śniadanie", "sniadanie"), true);
+    assert.equal(matchesSlot("Meal prep", "obiad"), true);
+    assert.equal(matchesSlot("Kolacja", "kolacja"), true);
+    // A slot never borrows from another.
+    assert.equal(matchesSlot("Meal prep", "sniadanie"), false);
+    assert.equal(matchesSlot("Śniadanie", "obiad"), false);
+    // "Awaryjne" belongs to no prep slot.
+    assert.equal(matchesSlot("Awaryjne — NO COOK", "obiad"), false);
+  });
+
+  test("plans from the chosen slot only", () => {
+    const meals = [
+      meal("chicken-rice"),
+      meal("oats", { category: "Śniadanie" }),
+    ];
+    const days = [{ date: "2026-09-17", dayType: "DT" as const }];
+
+    const breakfast = buildPrepPlan({ days, meals, targets: TARGETS, slot: "sniadanie" });
+    assert.deepEqual([...new Set(breakfast.items.map((item) => item.mealKey))], ["oats"]);
+
+    const dinner = buildPrepPlan({ days, meals, targets: TARGETS, slot: "obiad" });
+    assert.deepEqual([...new Set(dinner.items.map((item) => item.mealKey))], ["chicken-rice"]);
+  });
+
+  test("availableDishes lists the whole slot, uncapped and one row per dish", () => {
+    const meals = Array.from({ length: 7 }, (_, index) => meal(`dish-${index}`));
+
+    const all = availableDishes({ meals, targets: TARGETS, spanDays: 2, slot: "obiad" });
+    assert.equal(all.length, 7, "every dish is offered, not just three");
+    assert.equal(new Set(all.map((item) => item.mealKey)).size, 7, "no dish appears twice");
+    // Portions default to one batch, as the sheet defines it.
+    assert.equal(all[0].portions, 6);
+  });
+
+  test("availableDishes drops what is already in the plan", () => {
+    const meals = [meal("a"), meal("b")];
+    const rest = availableDishes({
+      meals,
+      targets: TARGETS,
+      spanDays: 2,
+      slot: "obiad",
+      exclude: ["a"],
+    });
+    assert.deepEqual(rest.map((item) => item.mealKey), ["b"]);
   });
 });

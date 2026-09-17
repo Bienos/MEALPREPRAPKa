@@ -74,6 +74,35 @@ export function isMealPrepCategory(category: string): boolean {
   return category.toLowerCase().startsWith("meal prep");
 }
 
+/**
+ * Which meal of the day a prep is for. The sheet's own categories decide what
+ * belongs to each, so adding dishes there is all it takes to widen a slot.
+ */
+export const PREP_SLOTS = ["sniadanie", "obiad", "kolacja"] as const;
+export type PrepSlot = (typeof PREP_SLOTS)[number];
+
+export const PREP_SLOT_LABELS: Record<PrepSlot, string> = {
+  sniadanie: "Śniadanie",
+  obiad: "Obiad",
+  kolacja: "Kolacja",
+};
+
+/** Lowercase, without Polish diacritics, so "Śniadanie" matches "sniadanie". */
+function foldCategory(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[łŁ]/g, "l")
+    .toLowerCase()
+    .trim();
+}
+
+export function matchesSlot(category: string, slot: PrepSlot): boolean {
+  const folded = foldCategory(category);
+  if (slot === "obiad") return folded.startsWith("meal prep");
+  return folded.startsWith(slot);
+}
+
 /** Target kcal for one prepped portion on a given day type. */
 export function portionTarget(dayTargetKcal: number): number {
   return (dayTargetKcal * PREP_SHARE_OF_DAY) / PREP_MEALS_PER_DAY;
@@ -94,12 +123,13 @@ function candidatesFor(
   dayType: DayType,
   spanDays: number,
   targets: Record<DayType, { kcal: number; protein_g: number }>,
+  slot: PrepSlot,
 ): Candidate[] {
   const targetKcal = portionTarget(targets[dayType].kcal);
   const targetProtein = (targets[dayType].protein_g * PREP_SHARE_OF_DAY) / PREP_MEALS_PER_DAY;
 
   return meals
-    .filter((meal) => isMealPrepCategory(meal.category))
+    .filter((meal) => matchesSlot(meal.category, slot))
     .flatMap((meal) =>
       meal.variants
         .filter((variant) => variant.variant === dayType || variant.variant === null)
@@ -137,12 +167,14 @@ export function buildPrepPlan({
   days,
   meals,
   targets,
+  slot = "obiad",
   fridge = [],
   mealsPerDay = PREP_MEALS_PER_DAY,
 }: {
   days: PrepDay[];
   meals: Meal[];
   targets: Record<DayType, { kcal: number; protein_g: number }>;
+  slot?: PrepSlot;
   fridge?: FridgeStock[];
   mealsPerDay?: number;
 }): PrepPlan {
@@ -165,8 +197,8 @@ export function buildPrepPlan({
 
   const spanDays = Math.max(days.length, 1);
   const pools: Record<DayType, Candidate[]> = {
-    DT: candidatesFor(meals, "DT", spanDays, targets),
-    DNT: candidatesFor(meals, "DNT", spanDays, targets),
+    DT: candidatesFor(meals, "DT", spanDays, targets, slot),
+    DNT: candidatesFor(meals, "DNT", spanDays, targets, slot),
   };
 
   const items: PrepItem[] = [];
@@ -227,6 +259,7 @@ export function swapAlternatives({
   targets,
   spanDays,
   exclude,
+  slot = "obiad",
   limit = 3,
 }: {
   item: PrepItem;
@@ -234,12 +267,47 @@ export function swapAlternatives({
   targets: Record<DayType, { kcal: number; protein_g: number }>;
   spanDays: number;
   exclude: string[];
+  slot?: PrepSlot;
   limit?: number;
 }): PrepItem[] {
   const dayType: DayType = item.variant ?? "DT";
   const skip = new Set([...exclude, item.mealKey]);
-  return candidatesFor(meals, dayType, spanDays, targets)
+  return candidatesFor(meals, dayType, spanDays, targets, slot)
     .filter((candidate) => !skip.has(candidate.meal.key))
     .slice(0, limit)
     .map((candidate) => toItem(candidate, item.portions));
+}
+
+/**
+ * Every dish in the library that can be batch-cooked for this slot, best macro
+ * fit first. Unlike `swapAlternatives` this is not capped: it backs the screen
+ * where the whole library is browsed and dishes are chosen by hand.
+ */
+export function availableDishes({
+  meals,
+  targets,
+  spanDays,
+  slot,
+  dayType = "DT",
+  exclude = [],
+}: {
+  meals: Meal[];
+  targets: Record<DayType, { kcal: number; protein_g: number }>;
+  spanDays: number;
+  slot: PrepSlot;
+  dayType?: DayType;
+  exclude?: string[];
+}): PrepItem[] {
+  const skip = new Set(exclude);
+  const seen = new Set<string>();
+  const items: PrepItem[] = [];
+
+  for (const candidate of candidatesFor(meals, dayType, spanDays, targets, slot)) {
+    if (skip.has(candidate.meal.key) || seen.has(candidate.meal.key)) continue;
+    seen.add(candidate.meal.key);
+    // One batch of the dish, as the sheet's own batch size defines it.
+    items.push(toItem(candidate, parseBatchMax(candidate.variant.batch)));
+  }
+
+  return items;
 }

@@ -6,6 +6,7 @@ import { ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { PREP_SLOTS, PREP_SLOT_LABELS, type PrepSlot } from "@/lib/meals/prep-plan";
 import type { DayType, PrepDayView } from "@/lib/meals/prep-view-types";
 
 /** PREP start: how many days, then DT/DNT per day, then build. */
@@ -14,8 +15,9 @@ export function DayPicker({
   onBuild,
 }: {
   initialDays: PrepDayView[];
-  onBuild: (days: { date: string; day_type: DayType }[]) => Promise<void>;
+  onBuild: (days: { date: string; day_type: DayType }[], slot: PrepSlot) => Promise<void>;
 }) {
+  const [slot, setSlot] = useState<PrepSlot>("obiad");
   const [count, setCount] = useState(3);
   const [types, setTypes] = useState<Record<string, DayType>>(() =>
     Object.fromEntries(initialDays.map((day) => [day.date, day.dayType])),
@@ -25,6 +27,28 @@ export function DayPicker({
 
   return (
     <div className="flex flex-col gap-5">
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-bold tracking-widest text-muted-foreground uppercase">Co gotujesz?</h2>
+        <div role="group" aria-label="Posiłek" className="grid grid-cols-3 gap-2">
+          {PREP_SLOTS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={option === slot}
+              onClick={() => setSlot(option)}
+              className={cn(
+                "h-14 rounded-xl border text-base font-bold transition-colors",
+                option === slot
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:bg-muted",
+              )}
+            >
+              {PREP_SLOT_LABELS[option]}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-bold tracking-widest text-muted-foreground uppercase">Na ile dni?</h2>
         <div role="group" aria-label="Liczba dni" className="grid grid-cols-3 gap-2">
@@ -82,7 +106,10 @@ export function DayPicker({
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
-            await onBuild(days.map((day) => ({ date: day.date, day_type: types[day.date] ?? day.dayType })));
+            await onBuild(
+              days.map((day) => ({ date: day.date, day_type: types[day.date] ?? day.dayType })),
+              slot,
+            );
           })
         }
       >
