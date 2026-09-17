@@ -31,18 +31,14 @@ export async function GET(request: Request) {
       { cache: "no-store" },
     );
     const html = await response.text();
-    const tabs = new Map<string, string>();
-    for (const m of html.matchAll(/\{"(?:name|sheetName)":"([^"]+)"[^}]*?"gid":"?(\d+)"?/g)) {
-      tabs.set(m[2], m[1]);
-    }
-    for (const m of html.matchAll(/id="sheet-button-(\d+)"[^>]*>([^<]+)</g)) {
-      tabs.set(m[1], m[2]);
-    }
+    const gids = [...new Set([...html.matchAll(/gid[=":\s]{1,4}(\d{2,})/g)].map((m) => m[1]))];
+    const menu = html.indexOf("sheet-menu");
     probe = {
       configuredGid,
       status: response.status,
       bytes: html.length,
-      tabs: [...tabs].map(([gid, name]) => ({ gid, name })),
+      gids,
+      menu: menu >= 0 ? html.slice(menu, menu + 900) : html.slice(0, 500),
     };
   }
 
