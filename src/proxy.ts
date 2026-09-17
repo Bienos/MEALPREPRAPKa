@@ -14,7 +14,11 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!authed) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    // Rewrite, not redirect: the gate has to answer at the URL that was asked
+    // for. A redirect means a shared link carries no metadata of its own, and
+    // link crawlers give up before following it to /login, so previews came out
+    // blank. The address bar also keeps the original link through logging in.
+    return NextResponse.rewrite(new URL("/login", request.url));
   }
 
   return NextResponse.next();
