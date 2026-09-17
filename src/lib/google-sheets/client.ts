@@ -19,16 +19,10 @@ async function sheetsGet<T>(path: string): Promise<T> {
 }
 
 /** Resolves the tab title for a gid from spreadsheet metadata, so tab renames do not break us. */
-async function resolveSheetTitle(spreadsheetId: string, gid: number | undefined): Promise<string> {
+async function resolveSheetTitle(spreadsheetId: string, gid: number): Promise<string> {
   const data = await sheetsGet<{ sheets?: { properties?: { sheetId?: number; title?: string } }[] }>(
     `${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
   );
-  // No gid means the first tab, matching what the public export returns.
-  if (gid === undefined) {
-    const first = data.sheets?.[0]?.properties?.title;
-    if (!first) throw new Error(`Spreadsheet ${spreadsheetId} has no tabs.`);
-    return first;
-  }
   const title = data.sheets?.find((sheet) => sheet.properties?.sheetId === gid)?.properties?.title;
   if (!title) {
     const available = data.sheets?.map((s) => `${s.properties?.title} (gid ${s.properties?.sheetId})`).join(", ");
@@ -52,10 +46,8 @@ async function readRowsAuthenticated(spreadsheetId: string, title: string): Prom
  * (or fully public). If it is not, Google returns an HTML sign-in page instead
  * of CSV, which is detected and reported clearly rather than mis-parsed.
  */
-async function readRowsPublic(spreadsheetId: string, gid: number | undefined): Promise<string[][]> {
-  // Without a gid Google exports the first tab, so the sheet URL alone is enough.
-  const target = gid === undefined ? "" : `&gid=${gid}`;
-  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv${target}`;
+async function readRowsPublic(spreadsheetId: string, gid: number): Promise<string[][]> {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
   const response = await fetch(url, { cache: "no-store" });
   const text = await response.text();
   const looksLikeHtml = /^\s*<(!doctype|html)/i.test(text);
@@ -70,8 +62,7 @@ async function readRowsPublic(spreadsheetId: string, gid: number | undefined): P
   if (!response.ok) {
     throw new Error(
       `Google odrzucił żądanie arkusza (status ${response.status}). ` +
-        `Sprawdź GOOGLE_SHEETS_SPREADSHEET_ID` +
-        (gid === undefined ? "." : ` oraz GOOGLE_SHEETS_TARGET_GID (zakładka gid ${gid}).`),
+        `Sprawdź GOOGLE_SHEETS_SPREADSHEET_ID oraz GOOGLE_SHEETS_TARGET_GID (zakładka gid ${gid}).`,
     );
   }
   return parseCsv(text);

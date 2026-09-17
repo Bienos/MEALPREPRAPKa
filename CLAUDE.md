@@ -27,7 +27,7 @@ PRE-LOG > POST-LOG · MEAL > INDIVIDUAL INGREDIENTS · BATCH > SINGLE PORTION ·
 ## Data ownership
 
 - **Google Sheets is the SOURCE OF TRUTH for the meal library** (meal type, name, DT/DNT variant, ingredients + quantities, kcal/macros, prep time, batch size, fridge life, freezable).
-  Sheet: https://docs.google.com/spreadsheets/d/10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI/edit?gid=700302857#gid=700302857 (tab gid `700302857`)
+  Sheet: https://docs.google.com/spreadsheets/d/10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI/edit?gid=894227705#gid=894227705 (tab gid `894227705`)
 - Never create another manually maintained meal database. Never duplicate editable meal definitions into Supabase.
 - **Supabase stores only operational state**: settings, DT/DNT targets, default day templates, day plans, planned meals, eaten state, prep batches, fridge/freezer portions, shopping state, weight history.
 - Historical planned/eaten meals MAY store macro snapshots so past days do not change when the sheet changes.

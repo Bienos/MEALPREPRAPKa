@@ -41,10 +41,12 @@ const coreSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "A Supabase service role / secret key is required"),
 });
 
+/** The meal-library tab of the sheet in CLAUDE.md. Override only if that tab moves. */
+const MEAL_LIBRARY_GID = 894227705;
+
 const sheetsSchema = z.object({
   GOOGLE_SHEETS_SPREADSHEET_ID: z.string().min(1, "GOOGLE_SHEETS_SPREADSHEET_ID is required"),
-  /** Optional: without it the first tab is read, which is all most sheets need. */
-  GOOGLE_SHEETS_TARGET_GID: z.coerce.number().int().nonnegative().optional(),
+  GOOGLE_SHEETS_TARGET_GID: z.coerce.number().int().nonnegative().default(MEAL_LIBRARY_GID),
 });
 
 /**
