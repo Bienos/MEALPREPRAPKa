@@ -4,7 +4,7 @@ import { refresh } from "next/cache";
 
 import type { DayType } from "@/lib/db/helpers";
 import { deletePrepSession, getActivePrepSession, updatePrepSession } from "@/lib/db/prep-sessions";
-import { freezePortion } from "@/lib/db/prep";
+import { consumePortion, freezePortion } from "@/lib/db/prep";
 import { setStapleInStock } from "@/lib/db/pantry";
 import { setShoppingItemChecked, setShoppingItemOwned } from "@/lib/db/shopping";
 import {
@@ -132,5 +132,14 @@ export async function setStapleStockAction(id: string, inStock: boolean): Promis
 
 export async function freezePortionAction(id: string): Promise<void> {
   await freezePortion(id);
+  refresh();
+}
+
+/**
+ * Food that went off or got thrown out. The portion leaves the fridge but the
+ * batch stays in history, so past days still show what was actually cooked.
+ */
+export async function discardPortionAction(id: string): Promise<void> {
+  await consumePortion(id, "discarded");
   refresh();
 }

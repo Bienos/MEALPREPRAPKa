@@ -7,7 +7,7 @@ import { todayIso } from "@/lib/date";
 import { listAvailablePortions } from "@/lib/db/prep";
 import { getSettings } from "@/lib/db/settings";
 import type { FridgeGroup } from "@/lib/meals/prep-view-types";
-import { freezePortionAction } from "../actions";
+import { discardPortionAction, freezePortionAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +67,7 @@ export default async function FridgePage() {
         Prep
       </Link>
       <PageHeader title="Lodówka" subtitle="Tylko gotowe porcje" />
-      <Fridge groups={sorted} onFreeze={freezePortionAction} />
+      <Fridge groups={sorted} onFreeze={freezePortionAction} onDiscard={discardPortionAction} />
     </>
   );
 }

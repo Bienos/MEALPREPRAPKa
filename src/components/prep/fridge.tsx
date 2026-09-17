@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { Refrigerator, Snowflake } from "lucide-react";
+import { Refrigerator, Snowflake, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,9 +13,11 @@ import { expiryLabel, isUrgent, type FridgeGroup } from "@/lib/meals/prep-view-t
 export function Fridge({
   groups,
   onFreeze,
+  onDiscard,
 }: {
   groups: FridgeGroup[];
   onFreeze: (portionId: string) => Promise<void>;
+  onDiscard: (portionId: string) => Promise<void>;
 }) {
   const fridge = groups.filter((group) => group.location === "fridge");
   const freezer = groups.filter((group) => group.location === "freezer");
@@ -44,9 +46,11 @@ export function Fridge({
       ) : null}
 
       {fridge.length > 0 ? (
-        <Section title="Zjedz najpierw" groups={fridge} onFreeze={onFreeze} />
+        <Section title="Zjedz najpierw" groups={fridge} onFreeze={onFreeze} onDiscard={onDiscard} />
       ) : null}
-      {freezer.length > 0 ? <Section title="Zamrażarka" groups={freezer} onFreeze={onFreeze} frozen /> : null}
+      {freezer.length > 0 ? (
+        <Section title="Zamrażarka" groups={freezer} onFreeze={onFreeze} onDiscard={onDiscard} frozen />
+      ) : null}
     </div>
   );
 }
@@ -55,11 +59,13 @@ function Section({
   title,
   groups,
   onFreeze,
+  onDiscard,
   frozen = false,
 }: {
   title: string;
   groups: FridgeGroup[];
   onFreeze: (portionId: string) => Promise<void>;
+  onDiscard: (portionId: string) => Promise<void>;
   frozen?: boolean;
 }) {
   return (
@@ -68,7 +74,7 @@ function Section({
       <ul className="flex flex-col gap-3">
         {groups.map((group) => (
           <li key={`${group.mealName}-${group.variant}-${group.location}`}>
-            <PortionCard group={group} onFreeze={onFreeze} frozen={frozen} />
+            <PortionCard group={group} onFreeze={onFreeze} onDiscard={onDiscard} frozen={frozen} />
           </li>
         ))}
       </ul>
@@ -79,10 +85,12 @@ function Section({
 function PortionCard({
   group,
   onFreeze,
+  onDiscard,
   frozen,
 }: {
   group: FridgeGroup;
   onFreeze: (portionId: string) => Promise<void>;
+  onDiscard: (portionId: string) => Promise<void>;
   frozen: boolean;
 }) {
   const [pending, startTransition] = useTransition();
@@ -117,19 +125,31 @@ function PortionCard({
         ))}
       </div>
 
-      {!frozen ? (
+      <div className="flex gap-2">
+        {!frozen ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={pending}
+            onClick={() => startTransition(async () => { await onFreeze(group.portionIds[0]); })}
+          >
+            <Snowflake className="size-4" />
+            {pending ? "Mrożę…" : "Zamroź porcję"}
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="self-start"
+          className="text-muted-foreground"
           disabled={pending}
-          onClick={() => startTransition(async () => { await onFreeze(group.portionIds[0]); })}
+          onClick={() => startTransition(async () => { await onDiscard(group.portionIds[0]); })}
         >
-          <Snowflake className="size-4" />
-          {pending ? "Mrożę…" : "Zamroź porcję"}
+          <Trash2 className="size-4" />
+          Wyrzuć porcję
         </Button>
-      ) : null}
+      </div>
     </Card>
   );
 }
