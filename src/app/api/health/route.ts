@@ -17,13 +17,15 @@ export async function GET() {
     sheet: Boolean(process.env.GOOGLE_SHEETS_SPREADSHEET_ID),
   };
 
-  // TEMPORARY DIAGNOSTIC — remove. Names only, never values.
-  const seenKeys = Object.keys(process.env)
-    .filter((k) => /SUPABASE|GOOGLE|ANTHROPIC|APP_PASSWORD|SESSION_SECRET/i.test(k))
-    .sort();
+  // TEMPORARY DIAGNOSTIC — remove. Booleans only, never values.
+  const nonEmpty: Record<string, boolean> = {};
+  for (const k of Object.keys(process.env).sort()) {
+    if (!/SUPABASE|GOOGLE|ANTHROPIC|APP_PASSWORD|SESSION_SECRET/i.test(k)) continue;
+    nonEmpty[k] = (process.env[k] ?? "").trim() !== "";
+  }
 
   return NextResponse.json(
-    { status: "ok", configured, seenKeys },
+    { status: "ok", configured, nonEmpty },
     { headers: { "cache-control": "no-store" } },
   );
 }
