@@ -22,8 +22,10 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Everything is behind the gate except Next's own assets, the PWA files the
-  // browser fetches before login, and the public health check.
+  // browser fetches before login, the public health check, and the share card,
+  // which a messaging app fetches unauthenticated or not at all. The card is
+  // branding and the day targets, nothing private.
   matcher: [
-    "/((?!_next/static|_next/image|api/health|icon.svg|apple-icon.png|icon-192.png|icon-512.png|icon-maskable-512.png|manifest.webmanifest|favicon.ico).*)",
+    "/((?!_next/static|_next/image|api/health|opengraph-image|icon.svg|apple-icon.png|icon-192.png|icon-512.png|icon-maskable-512.png|manifest.webmanifest|favicon.ico).*)",
   ],
 };
