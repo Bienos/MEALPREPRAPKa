@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ChefHat, ChevronLeft } from "lucide-react";
+import { ChefHat } from "lucide-react";
 
 import { PageHeader } from "@/components/shell/page-header";
 import { Card } from "@/components/ui/card";
@@ -106,13 +105,6 @@ export default async function HistoryPage() {
 
   return (
     <>
-      <Link
-        href="/"
-        className="-ml-1 flex h-10 w-fit items-center gap-1 pr-2 font-semibold text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="size-5" />
-        Dziś
-      </Link>
       <PageHeader title="Historia" subtitle={`Ostatnie ${DAYS_BACK} dni`} />
 
       {days.length === 0 ? (

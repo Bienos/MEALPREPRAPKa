@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { CalendarDays, Calculator, HelpCircle, UtensilsCrossed, Wine } from "lucide-react";
+import { Calculator, HelpCircle, UtensilsCrossed, Wine } from "lucide-react";
 
 import { DayTypeToggle } from "@/components/today/day-type-toggle";
 import { DinnerOutSheet } from "@/components/today/dinner-out-sheet";
@@ -241,15 +240,6 @@ export function TodayView({
           </Button>
         </div>
       </div>
-
-      {/* Secondary by design: today comes first, looking back is a quiet link. */}
-      <Link
-        href="/historia"
-        className="flex h-11 items-center justify-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
-      >
-        <CalendarDays className="size-4" />
-        Historia dni
-      </Link>
 
       {notice && meals.length > 0 ? (
         <p role="status" className="text-center text-sm text-muted-foreground">

@@ -47,8 +47,8 @@ Prefer simple server-side functions and a small, clean data-access layer.
 
 ## Information architecture
 
-- Main navigation: exactly 3 tabs — **TODAY / PREP / MEALS**. Do not add more unless clearly necessary.
-- Secondary screens (later): Fridge, Shopping, Progress, Settings.
+- Main navigation: 4 tabs — **TODAY / PREP / MEALS / HISTORY**. Do not add more unless clearly necessary. History was added on the owner's explicit request after it proved unfindable as a link on Today.
+- Secondary screens (later): Fridge, Shopping, Settings.
 - TODAY is the most important screen; the NEXT MEAL card visually dominates; primary CTA is **ZJEDZONE**.
 - MEALS shows the sheet library as friendly mobile cards, never a spreadsheet-like UI.
 

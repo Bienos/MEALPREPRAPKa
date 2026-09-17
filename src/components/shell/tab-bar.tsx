@@ -2,7 +2,7 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat, Sun, UtensilsCrossed } from "lucide-react";
+import { CalendarDays, ChefHat, Sun, UtensilsCrossed } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ const tabs = [
   { href: "/", label: "Dziś", icon: Sun },
   { href: "/prep", label: "Prep", icon: ChefHat },
   { href: "/meals", label: "Posiłki", icon: UtensilsCrossed },
+  { href: "/historia", label: "Historia", icon: CalendarDays },
 ] as const;
 
 /**
