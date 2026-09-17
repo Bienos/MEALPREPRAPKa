@@ -29,7 +29,7 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui-style comp
    | `SESSION_SECRET`      | Signs the session cookie. Optional; falls back to `APP_PASSWORD`.       |
    | `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase key (`service_role` or `sb_secret_...`).     |
    | `GOOGLE_SHEETS_SPREADSHEET_ID` | Spreadsheet that holds the meal library.                       |
-   | `GOOGLE_SHEETS_TARGET_GID` | The gid of the meal-library tab (default `965578947`).              |
+   | `GOOGLE_SHEETS_TARGET_GID` | Optional gid of the meal-library tab; empty reads the first tab.    |
    | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Optional: service account for a private (not link-shared) sheet. |
    | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Optional: its private key, one line with `\n` sequences.  |
 
