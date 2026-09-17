@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { ChefHat, Sun, UtensilsCrossed } from "lucide-react";
 
@@ -11,6 +11,24 @@ const tabs = [
   { href: "/prep", label: "Prep", icon: ChefHat },
   { href: "/meals", label: "Posiłki", icon: UtensilsCrossed },
 ] as const;
+
+/**
+ * Every tab is server-rendered on demand, so a tap can take a beat before
+ * anything changes. Always rendered at a fixed size and only faded in, so it
+ * never shifts the layout.
+ */
+function PendingBar() {
+  const { pending } = useLinkStatus();
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "h-1 w-7 rounded-full bg-primary transition-opacity duration-150",
+        pending ? "animate-pulse opacity-100" : "opacity-0",
+      )}
+    />
+  );
+}
 
 export function TabBar() {
   const pathname = usePathname();
@@ -35,6 +53,7 @@ export function TabBar() {
               >
                 <Icon className="size-6" strokeWidth={active ? 2.5 : 2} />
                 {label}
+                <PendingBar />
               </Link>
             </li>
           );
