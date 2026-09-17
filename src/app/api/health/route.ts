@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { hasDatabaseEnv, hasSheetsEnv } from "@/lib/env";
+import { parseCsv } from "@/lib/google-sheets/csv";
+import { findHeader } from "@/lib/meals/parse";
 
 /**
  * GET /api/health — deliberately says almost nothing.
@@ -32,13 +34,24 @@ export async function GET(request: Request) {
     );
     const html = await response.text();
     const gids = [...new Set([...html.matchAll(/gid[=":\s]{1,4}(\d{2,})/g)].map((m) => m[1]))];
-    const menu = html.indexOf("sheet-menu");
     probe = {
       configuredGid,
-      status: response.status,
-      bytes: html.length,
-      gids,
-      menu: menu >= 0 ? html.slice(menu, menu + 900) : html.slice(0, 500),
+      tabs: await Promise.all(
+        gids.map(async (gid) => {
+          const csv = await fetch(
+            `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`,
+            { cache: "no-store" },
+          );
+          if (!csv.ok) return { gid, status: csv.status };
+          const rows = parseCsv(await csv.text());
+          try {
+            const { index } = findHeader(rows);
+            return { gid, rows: rows.length, headerAt: index, title: rows[0]?.[0] ?? "" };
+          } catch {
+            return { gid, rows: rows.length, headerAt: null, title: rows[0]?.[0] ?? "" };
+          }
+        }),
+      ),
     };
   }
 
