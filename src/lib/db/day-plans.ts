@@ -81,6 +81,24 @@ export async function listPlannedMeals(date: IsoDate): Promise<PlannedMeal[]> {
   return rows(plannedMealSchema, result);
 }
 
+/**
+ * Everything actually eaten in a date range, for history.
+ *
+ * Keyed on `eaten_at` rather than status, because both a planned meal that was
+ * ticked off and ad-hoc food carry the timestamp, and only those two count.
+ */
+export async function listEatenMealsBetween(from: IsoDate, to: IsoDate): Promise<PlannedMeal[]> {
+  const result = await getSupabase()
+    .from("planned_meals")
+    .select("*")
+    .gte("plan_date", from)
+    .lte("plan_date", to)
+    .not("eaten_at", "is", null)
+    .order("plan_date")
+    .order("position");
+  return rows(plannedMealSchema, result);
+}
+
 export async function getPlannedMeal(id: string): Promise<PlannedMeal | null> {
   const result = await getSupabase().from("planned_meals").select("*").eq("id", id).maybeSingle();
   return maybeRow(plannedMealSchema, result);

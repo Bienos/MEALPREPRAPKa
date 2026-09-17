@@ -80,6 +80,17 @@ export async function listPrepBatches(limit = 50): Promise<PrepBatch[]> {
   return rows(batchSchema, result);
 }
 
+/** Batches cooked in a date range, for history. */
+export async function listPrepBatchesBetween(from: IsoDate, to: IsoDate): Promise<PrepBatch[]> {
+  const result = await getSupabase()
+    .from("prep_batches")
+    .select("*")
+    .gte("cooked_on", from)
+    .lte("cooked_on", to)
+    .order("cooked_on", { ascending: false });
+  return rows(batchSchema, result);
+}
+
 /** Everything currently in the fridge or freezer. */
 export async function listAvailablePortions(): Promise<PortionWithBatch[]> {
   const result = await getSupabase()
