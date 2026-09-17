@@ -76,12 +76,16 @@ or searchable, but it is not access-controlled either.
 > (`iam.disableServiceAccountKeyCreation`). If step 4 is blocked and you are not
 > the org admin, use Option A.
 
-Either way, keep these two set:
+Either way, keep this set:
 
 ```
 GOOGLE_SHEETS_SPREADSHEET_ID=10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI
-GOOGLE_SHEETS_TARGET_GID=965578947
 ```
+
+You can paste the whole sheet URL instead of the id. By default the app reads
+the **first tab**. If your meal table sits on a different tab, open that tab and
+set `GOOGLE_SHEETS_TARGET_GID` to the `gid=` number from the address bar (the
+full URL works there too).
 
 If Google is unreachable the app keeps working: it serves the last meal library
 it successfully loaded and shows a short Polish notice instead of failing.
@@ -118,8 +122,8 @@ git push -u origin main
    | `SESSION_SECRET` | recommended | `openssl rand -base64 32` |
    | `NEXT_PUBLIC_SUPABASE_URL` | yes | from step 1 |
    | `SUPABASE_SERVICE_ROLE_KEY` | yes | from step 1 |
-   | `GOOGLE_SHEETS_SPREADSHEET_ID` | yes | the id above |
-   | `GOOGLE_SHEETS_TARGET_GID` | yes | `965578947` |
+   | `GOOGLE_SHEETS_SPREADSHEET_ID` | yes | the id above, or the sheet URL |
+   | `GOOGLE_SHEETS_TARGET_GID` | optional | empty reads the first tab |
    | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | option B only | from step 2 |
    | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | option B only | from step 2, one line with `\n` |
    | `ANTHROPIC_API_KEY` | optional | enables food estimation from a description |
