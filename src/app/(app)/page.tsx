@@ -1,45 +1,74 @@
-import { Check, Clock } from "lucide-react";
+import { listPlannedMeals } from "@/lib/db/day-plans";
+import { listAllDefaultDayMeals } from "@/lib/db/default-day";
+import { listAvailablePortions } from "@/lib/db/prep";
+import { getSettings, getTargets } from "@/lib/db/settings";
+import { addDays, longDateLabel, todayIso } from "@/lib/date";
+import { getMealLibrary } from "@/lib/meals/library";
+import { resolveDayType } from "@/lib/meals/plan";
+import { findMealVariant } from "@/lib/meals/types";
+import type { TodayMeal } from "@/lib/meals/today-view-types";
+import { TodayView } from "./today-view";
 
-import { PageHeader } from "@/components/shell/page-header";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Rendered per request so the date is never frozen at build time.
+// Day state must always be read fresh from Supabase.
 export const dynamic = "force-dynamic";
 
-function todayLabel() {
-  return new Intl.DateTimeFormat("pl-PL", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
-}
+export default async function TodayPage() {
+  const settings = await getSettings();
+  const date = todayIso(settings.timezone);
+  const tomorrowDate = addDays(date, 1);
 
-export default function TodayPage() {
+  const [targets, today, tomorrow, plannedMeals, tomorrowMeals, templates, portions] = await Promise.all([
+    getTargets(),
+    resolveDayType(date),
+    resolveDayType(tomorrowDate),
+    listPlannedMeals(date),
+    listPlannedMeals(tomorrowDate),
+    listAllDefaultDayMeals(),
+    listAvailablePortions(),
+  ]);
+
+  // A meal counts as prepared when an available fridge/freezer portion matches it.
+  const preparedKeys = new Set(portions.map((portion) => portion.batch.meal_key).filter(Boolean));
+
+  const meals: TodayMeal[] = plannedMeals.map((meal) => ({
+    id: meal.id,
+    slot: meal.slot,
+    position: meal.position,
+    status: meal.status,
+    mealKey: meal.meal_key,
+    mealName: meal.meal_name,
+    variant: meal.variant,
+    portions: meal.portions,
+    kcal: meal.kcal,
+    protein_g: meal.protein_g,
+    fat_g: meal.fat_g,
+    carbs_g: meal.carbs_g,
+    eatenAt: meal.eaten_at,
+    prepared: meal.meal_key !== null && preparedKeys.has(meal.meal_key),
+  }));
+
+  // Tomorrow's preview needs meal names, which live in the sheet, not Supabase.
+  const tomorrowTemplate = templates[tomorrow.dayType];
+  const { library } = tomorrowTemplate.length > 0 ? await getMealLibrary() : { library: { meals: [] } };
+  const tomorrowNames = tomorrowTemplate
+    .map((entry) => findMealVariant(library.meals, entry.meal_key, entry.variant)?.name)
+    .filter((name): name is string => Boolean(name));
+
   return (
-    <>
-      <PageHeader title="Dziś" subtitle={todayLabel()} />
-
-      <Card className="gap-6 border-primary/20 bg-gradient-to-br from-card to-primary/5 p-6">
-        <CardHeader>
-          <CardDescription className="flex items-center gap-1.5 font-semibold uppercase tracking-wide text-primary">
-            <Clock className="size-4" />
-            Następny posiłek
-          </CardDescription>
-          <CardTitle className="text-2xl">Brak zaplanowanego posiłku</CardTitle>
-          <CardDescription>Plan dnia pojawi się tutaj po wdrożeniu planowania.</CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button size="lg" className="w-full" disabled>
-            <Check />
-            Zjedzone
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Później</CardTitle>
-          <CardDescription>Kolejne posiłki i pozostałe makro będą widoczne w tym miejscu.</CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">Jeszcze nic do pokazania.</CardContent>
-      </Card>
-    </>
+    <TodayView
+      date={date}
+      dateLabel={longDateLabel(date)}
+      dayType={today.dayType}
+      target={targets[today.dayType]}
+      initialMeals={meals}
+      hasTemplate={templates[today.dayType].length > 0}
+      tomorrow={{
+        date: tomorrowDate,
+        label: longDateLabel(tomorrowDate),
+        dayType: tomorrow.dayType,
+        mealNames: tomorrowNames,
+        alreadyPlanned: tomorrowMeals.length > 0,
+      }}
+    />
   );
 }

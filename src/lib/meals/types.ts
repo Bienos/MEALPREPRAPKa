@@ -99,3 +99,25 @@ export function pluralMeals(count: number): string {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} posiłki`;
   return `${count} posiłków`;
 }
+
+/** Finds one variant of one meal by the keys stored in Supabase. */
+export function findMealVariant(
+  meals: Meal[],
+  mealKey: string,
+  variant: Variant,
+): MealVariant | undefined {
+  const meal = meals.find((candidate) => candidate.key === mealKey);
+  if (!meal) return undefined;
+  return (
+    meal.variants.find((candidate) => candidate.variant === variant) ??
+    // The sheet may have dropped that variant; fall back to any variant of the dish.
+    meal.variants[0]
+  );
+}
+
+/** Variants usable on a given day: the matching DT/DNT one, plus neutral meals. */
+export function variantsForDayType(meals: Meal[], dayType: "DT" | "DNT"): MealVariant[] {
+  return meals.flatMap((meal) =>
+    meal.variants.filter((variant) => variant.variant === dayType || variant.variant === null),
+  );
+}

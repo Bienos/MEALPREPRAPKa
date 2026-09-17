@@ -22,11 +22,15 @@ const dayPlanSchema = z.object({
 });
 export type DayPlan = z.infer<typeof dayPlanSchema>;
 
+export const mealStatuses = ["planned", "eaten", "skipped", "swapped", "adhoc"] as const;
+export type MealStatus = (typeof mealStatuses)[number];
+
 const plannedMealSchema = macrosSchema.extend({
   id: z.uuid(),
   plan_date: isoDateSchema,
   slot: z.string(),
   position: z.number().int(),
+  status: z.enum(mealStatuses),
   source: z.enum(["sheet", "manual"]),
   meal_key: z.string().nullable(),
   meal_name: z.string(),
@@ -80,6 +84,7 @@ export type NewPlannedMeal = Macros & {
   meal_name: string;
   variant?: DayType | null;
   portions?: number;
+  status?: MealStatus;
 };
 
 /** Adds a meal to a day. Macros are stored as a snapshot for the whole planned amount. */
@@ -88,8 +93,19 @@ export async function addPlannedMeal(input: NewPlannedMeal): Promise<PlannedMeal
   return row(plannedMealSchema, result);
 }
 
+/** Adds several meals at once, e.g. when applying a default day. */
+export async function addPlannedMeals(meals: NewPlannedMeal[]): Promise<void> {
+  if (meals.length === 0) return;
+  ok(await getSupabase().from("planned_meals").insert(meals));
+}
+
 export async function removePlannedMeal(id: string): Promise<void> {
   ok(await getSupabase().from("planned_meals").delete().eq("id", id));
+}
+
+/** Removes every meal planned for a date, leaving the day plan itself. */
+export async function clearPlannedMeals(date: IsoDate): Promise<void> {
+  ok(await getSupabase().from("planned_meals").delete().eq("plan_date", date));
 }
 
 /** ZJEDZONE. Optionally records which fridge portion was eaten. */
@@ -97,11 +113,47 @@ export async function markEaten(id: string, portionId?: string): Promise<void> {
   ok(
     await getSupabase()
       .from("planned_meals")
-      .update({ eaten_at: new Date().toISOString(), portion_id: portionId ?? null })
+      .update({ status: "eaten", eaten_at: new Date().toISOString(), portion_id: portionId ?? null })
       .eq("id", id),
   );
 }
 
+/** Undo for ZJEDZONE. */
 export async function unmarkEaten(id: string): Promise<void> {
-  ok(await getSupabase().from("planned_meals").update({ eaten_at: null, portion_id: null }).eq("id", id));
+  ok(
+    await getSupabase()
+      .from("planned_meals")
+      .update({ status: "planned", eaten_at: null, portion_id: null })
+      .eq("id", id),
+  );
+}
+
+export async function setMealStatus(id: string, status: MealStatus): Promise<void> {
+  ok(await getSupabase().from("planned_meals").update({ status }).eq("id", id));
+}
+
+/**
+ * Changes the portion multiplier and rescales the stored macro snapshot by the
+ * same ratio. The sheet and the meal library are never touched: only this one
+ * day's planned meal changes.
+ */
+export async function updatePlannedMealPortions(id: string, portions: number): Promise<PlannedMeal> {
+  if (!(portions > 0)) throw new Error("portions must be greater than 0");
+  const db = getSupabase();
+  const current = row(plannedMealSchema, await db.from("planned_meals").select("*").eq("id", id).single());
+
+  const ratio = portions / current.portions;
+  const result = await db
+    .from("planned_meals")
+    .update({
+      portions,
+      kcal: Math.round(current.kcal * ratio),
+      protein_g: Math.round(current.protein_g * ratio * 10) / 10,
+      fat_g: Math.round(current.fat_g * ratio * 10) / 10,
+      carbs_g: Math.round(current.carbs_g * ratio * 10) / 10,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  return row(plannedMealSchema, result);
 }

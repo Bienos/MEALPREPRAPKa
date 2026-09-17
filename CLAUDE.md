@@ -73,6 +73,7 @@ Optional and secondary. Never required for the core app. No chatbot as the main 
 - Rows are validated with Zod at the data-access boundary; there are no generated Supabase types.
 - Meal library: `src/lib/google-sheets/` reads the sheet server-only, either via the public CSV export (default, needs only `GOOGLE_SHEETS_SPREADSHEET_ID`/`GID`, sheet shared as link-viewable) or the authenticated Sheets API when a service account is configured. `src/lib/meals/` parses rows by normalized header names, groups DT/DNT rows into one meal, caches, and falls back to the last good copy. Ingredients stay raw text. Fixtures in `src/lib/meals/fixtures.ts` are development-only.
 - UI never calls Google Sheets directly; pages call `getMealLibrary()`.
+- Today: `src/app/(app)/page.tsx` fetches day state server-side and hands it to `today-view.tsx` (client), which keeps optimistic state so ZJEDZONE is instant; the server write follows. `planned_meals.status` is one of planned/eaten/skipped/swapped/adhoc. `default_day_meals` holds the DT/DNT templates as meal_key/variant references only. Portion changes rescale the stored macro snapshot and never touch the sheet.
 - Before each task: `npm run lint && npm run typecheck && npm run build` must pass.
 
 <!-- BEGIN:nextjs-agent-rules -->
