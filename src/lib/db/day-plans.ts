@@ -25,19 +25,25 @@ export type DayPlan = z.infer<typeof dayPlanSchema>;
 export const mealStatuses = ["planned", "eaten", "skipped", "swapped", "adhoc"] as const;
 export type MealStatus = (typeof mealStatuses)[number];
 
+/** Where a logged meal came from. Ad-hoc entries keep their origin for history. */
+export const mealSources = ["sheet", "manual", "saved_meal", "quick_add", "ai_estimate"] as const;
+export type MealSource = (typeof mealSources)[number];
+
 const plannedMealSchema = macrosSchema.extend({
   id: z.uuid(),
   plan_date: isoDateSchema,
   slot: z.string(),
   position: z.number().int(),
   status: z.enum(mealStatuses),
-  source: z.enum(["sheet", "manual"]),
+  source: z.enum(mealSources),
   meal_key: z.string().nullable(),
   meal_name: z.string(),
   variant: dayTypeSchema.nullable(),
   portions: z.coerce.number(),
   portion_id: z.uuid().nullable(),
   eaten_at: z.string().nullable(),
+  /** True when the macros are an estimate, shown in the UI with "~". */
+  approximate: z.boolean(),
 });
 export type PlannedMeal = z.infer<typeof plannedMealSchema>;
 
@@ -84,12 +90,13 @@ export type NewPlannedMeal = Macros & {
   plan_date: IsoDate;
   slot: string;
   position?: number;
-  source?: "sheet" | "manual";
+  source?: MealSource;
   meal_key?: string | null;
   meal_name: string;
   variant?: DayType | null;
   portions?: number;
   status?: MealStatus;
+  approximate?: boolean;
 };
 
 /** Adds a meal to a day. Macros are stored as a snapshot for the whole planned amount. */
@@ -131,6 +138,108 @@ export async function unmarkEaten(id: string): Promise<void> {
       .update({ status: "planned", eaten_at: null, portion_id: null })
       .eq("id", id),
   );
+}
+
+/**
+ * ZAMIEŃ: points a planned meal at a different dish, keeping its slot and
+ * order and taking a fresh macro snapshot. The sheet is never touched.
+ */
+export async function swapPlannedMeal(
+  id: string,
+  replacement: {
+    meal_key: string;
+    meal_name: string;
+    variant: DayType | null;
+    kcal: number;
+    protein_g: number;
+    fat_g: number;
+    carbs_g: number;
+  },
+): Promise<PlannedMeal> {
+  const db = getSupabase();
+  const current = row(plannedMealSchema, await db.from("planned_meals").select("*").eq("id", id).single());
+  if (current.status !== "planned") throw new Error("Only a meal that has not been eaten can be swapped");
+
+  // Macros scale with whatever portion multiplier the meal already had.
+  const factor = current.portions;
+  const result = await db
+    .from("planned_meals")
+    .update({
+      meal_key: replacement.meal_key,
+      meal_name: replacement.meal_name,
+      variant: replacement.variant,
+      source: "sheet",
+      approximate: false,
+      kcal: Math.round(replacement.kcal * factor),
+      protein_g: Math.round(replacement.protein_g * factor * 10) / 10,
+      fat_g: Math.round(replacement.fat_g * factor * 10) / 10,
+      carbs_g: Math.round(replacement.carbs_g * factor * 10) / 10,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  return row(plannedMealSchema, result);
+}
+
+/**
+ * Food eaten outside the plan. Stored in planned_meals so the day's totals,
+ * history and macro snapshots all work the same way as for planned food.
+ */
+export async function logAdhocMeal(input: {
+  plan_date: IsoDate;
+  meal_name: string;
+  source: MealSource;
+  kcal: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  meal_key?: string | null;
+  variant?: DayType | null;
+  approximate?: boolean;
+  slot?: string;
+}): Promise<PlannedMeal> {
+  const db = getSupabase();
+  const existing = await listPlannedMeals(input.plan_date);
+  const result = await db
+    .from("planned_meals")
+    .insert({
+      plan_date: input.plan_date,
+      slot: input.slot ?? "Poza planem",
+      // Ad-hoc food lands at the end of the day's list.
+      position: existing.length > 0 ? Math.max(...existing.map((meal) => meal.position)) + 1 : 0,
+      status: "adhoc",
+      source: input.source,
+      meal_key: input.meal_key ?? null,
+      meal_name: input.meal_name,
+      variant: input.variant ?? null,
+      approximate: input.approximate ?? false,
+      portions: 1,
+      kcal: Math.round(input.kcal),
+      protein_g: Math.round(input.protein_g * 10) / 10,
+      fat_g: Math.round(input.fat_g * 10) / 10,
+      carbs_g: Math.round(input.carbs_g * 10) / 10,
+      eaten_at: new Date().toISOString(),
+    })
+    .select("*")
+    .single();
+  return row(plannedMealSchema, result);
+}
+
+/** How often each sheet meal has been eaten, as a preference signal. */
+export async function mealFrequency(limit = 400): Promise<Record<string, number>> {
+  const result = await getSupabase()
+    .from("planned_meals")
+    .select("meal_key,status")
+    .in("status", ["eaten", "adhoc"])
+    .limit(limit);
+  if (result.error) throw new Error(`Database error: ${result.error.message}`);
+
+  const counts: Record<string, number> = {};
+  for (const item of (result.data ?? []) as { meal_key: string | null }[]) {
+    if (!item.meal_key) continue;
+    counts[item.meal_key] = (counts[item.meal_key] ?? 0) + 1;
+  }
+  return counts;
 }
 
 export async function setMealStatus(id: string, status: MealStatus): Promise<void> {

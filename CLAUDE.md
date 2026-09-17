@@ -75,6 +75,8 @@ Optional and secondary. Never required for the core app. No chatbot as the main 
 - UI never calls Google Sheets directly; pages call `getMealLibrary()`.
 - Today: `src/app/(app)/page.tsx` fetches day state server-side and hands it to `today-view.tsx` (client), which keeps optimistic state so ZJEDZONE is instant; the server write follows. `planned_meals.status` is one of planned/eaten/skipped/swapped/adhoc. `default_day_meals` holds the DT/DNT templates as meal_key/variant references only. Portion changes rescale the stored macro snapshot and never touch the sheet.
 - Prep: `src/lib/meals/prep-plan.ts` generates the plan deterministically (no AI, no solver); `ingredients.ts` is the only place that reads ingredient text; `cooking-steps.ts` turns a plan into kitchen steps. `src/lib/meals/prep.ts` orchestrates session, shopping list and finishing. `prep_sessions`/`prep_session_items` hold the in-progress prep; finishing writes `prep_batches` + `portions`. Marking a meal eaten on Today consumes the earliest-expiring matching portion automatically.
+- Exceptions: all ranking lives in `src/lib/meals/recommend.ts` (swaps and no-cook); `rebalance.ts` holds the day projection, correction blocks and dinner-out maths, all deterministic arithmetic, never AI. `exceptions.ts` orchestrates them. Ad-hoc food is stored in `planned_meals` with status `adhoc`, a `source` of saved_meal/quick_add/ai_estimate/manual, and `approximate` when the macros are estimated.
+- AI is optional and isolated to `src/lib/meals/ai-estimate.ts` (Anthropic SDK, structured output). Without `ANTHROPIC_API_KEY` the option hides and everything else works.
 - Before each task: `npm run lint && npm run typecheck && npm run build` must pass.
 
 <!-- BEGIN:nextjs-agent-rules -->

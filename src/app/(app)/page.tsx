@@ -3,6 +3,7 @@ import { listAllDefaultDayMeals } from "@/lib/db/default-day";
 import { listAvailablePortions } from "@/lib/db/prep";
 import { getSettings, getTargets } from "@/lib/db/settings";
 import { addDays, longDateLabel, todayIso } from "@/lib/date";
+import { hasAnthropicKey } from "@/lib/env";
 import { getMealLibrary } from "@/lib/meals/library";
 import { resolveDayType } from "@/lib/meals/plan";
 import { findMealVariant } from "@/lib/meals/types";
@@ -62,6 +63,7 @@ export default async function TodayPage() {
       target={targets[today.dayType]}
       initialMeals={meals}
       hasTemplate={templates[today.dayType].length > 0}
+      aiEnabled={hasAnthropicKey()}
       tomorrow={{
         date: tomorrowDate,
         label: longDateLabel(tomorrowDate),

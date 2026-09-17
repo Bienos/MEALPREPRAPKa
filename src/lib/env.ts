@@ -78,6 +78,14 @@ export function getSheetsEnv(): SheetsEnv {
   return cachedSheets;
 }
 
+/**
+ * Optional natural-language food estimation. The core app never needs it, so
+ * the feature hides itself when the key is absent.
+ */
+export function hasAnthropicKey(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY);
+}
+
 /** True when a service account is configured, enabling the authenticated (private) path. */
 export function hasServiceAccountEnv(): boolean {
   return Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY);
