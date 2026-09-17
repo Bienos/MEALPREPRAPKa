@@ -25,8 +25,9 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui-style comp
    | Variable              | Purpose                                                                  |
    | --------------------- | ------------------------------------------------------------------------ |
    | `APP_PASSWORD`        | Password for the single-user gate (min. 8 characters).                  |
-   | `SUPABASE_URL`        | Supabase project URL (Project Settings → API).                          |
-   | `SUPABASE_SECRET_KEY` | Server-only Supabase key (`sb_secret_...` or legacy `service_role`).    |
+   | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (Project Settings → API).                      |
+   | `SESSION_SECRET`      | Signs the session cookie. Optional; falls back to `APP_PASSWORD`.       |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase key (`service_role` or `sb_secret_...`).     |
    | `GOOGLE_SHEETS_SPREADSHEET_ID` | Spreadsheet that holds the meal library.                       |
    | `GOOGLE_SHEETS_TARGET_GID` | The gid of the meal-library tab (default `965578947`).              |
    | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Optional: service account for a private (not link-shared) sheet. |
@@ -110,7 +111,11 @@ sheet immediately. If Google is unreachable the app keeps showing the last succe
 
 ## Deployment
 
-Deploy to Vercel and set the same three environment variables in the project settings.
+See **[DEPLOY.md](./DEPLOY.md)** for the full walkthrough: Supabase, Google Sheets,
+GitHub and Vercel, plus installing it on an iPhone. After the first setup,
+shipping a change is just `git push`.
+
+Health check: `GET /api/health` returns `{"status":"ok"}` and is the only public route.
 
 ## Adding shadcn/ui components
 

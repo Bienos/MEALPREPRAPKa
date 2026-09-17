@@ -31,12 +31,12 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 /**
- * The session token is an HMAC derived from APP_PASSWORD. It cannot be forged
- * without the password and it does not reveal the password. Changing
- * APP_PASSWORD invalidates every existing session.
+ * The session token is an HMAC signed with SESSION_SECRET (or APP_PASSWORD
+ * when no separate secret is set). It cannot be forged without the secret and
+ * it never reveals the password. Rotating the secret logs every device out.
  */
 export async function createSessionToken(): Promise<string> {
-  return hmacHex(getEnv().APP_PASSWORD, SESSION_MESSAGE);
+  return hmacHex(getEnv().SESSION_SECRET, SESSION_MESSAGE);
 }
 
 export async function isValidSessionToken(token: string | undefined): Promise<boolean> {

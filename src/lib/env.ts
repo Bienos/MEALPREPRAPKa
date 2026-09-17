@@ -1,36 +1,57 @@
 import "server-only";
 import { z } from "zod";
 
-/** Core environment. Required for the app to run at all (password gate + database). */
-const coreSchema = z.object({
-  APP_PASSWORD: z.string().min(8, "APP_PASSWORD must be at least 8 characters"),
-  SUPABASE_URL: z.url("SUPABASE_URL must be a valid URL"),
-  SUPABASE_SECRET_KEY: z.string().min(1, "SUPABASE_SECRET_KEY is required"),
-});
+/**
+ * All environment access lives here. Nothing outside this file reads
+ * process.env for configuration, so there is exactly one place to audit.
+ *
+ * Only NEXT_PUBLIC_* values may ever reach the browser. Everything below is
+ * read in server code only, and this module is `server-only` so importing it
+ * from a client component is a build error rather than a silent leak.
+ */
 
 /**
- * Which spreadsheet and tab to read. This alone is enough to read a sheet that
- * is shared as "Anyone with the link — Viewer" (no Google credentials needed).
+ * Vercel stores multi-line values with literal "\n" sequences, and pasting a
+ * PEM often adds wrapping quotes. This is the single place that normalizes
+ * them back into a real key; nothing else parses credentials.
  */
+export function normalizePrivateKey(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/\\n/g, "\n");
+}
+
+/** Reads the first of several names that is set, so old and new names both work. */
+function firstOf(...names: string[]): string | undefined {
+  for (const name of names) {
+    const value = process.env[name];
+    if (value && value.trim() !== "") return value;
+  }
+  return undefined;
+}
+
+/* Core: the app cannot run without these ------------------------------------ */
+
+const coreSchema = z.object({
+  APP_PASSWORD: z.string().min(8, "APP_PASSWORD must be at least 8 characters"),
+  /** Signs the session cookie. Falls back to APP_PASSWORD when unset. */
+  SESSION_SECRET: z.string().min(8, "SESSION_SECRET must be at least 8 characters"),
+  SUPABASE_URL: z.url("Supabase URL must be a valid URL"),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "A Supabase service role / secret key is required"),
+});
+
 const sheetsSchema = z.object({
   GOOGLE_SHEETS_SPREADSHEET_ID: z.string().min(1, "GOOGLE_SHEETS_SPREADSHEET_ID is required"),
   GOOGLE_SHEETS_TARGET_GID: z.coerce.number().int().nonnegative().default(965578947),
 });
 
-/**
- * Optional service-account credentials. When present, the app reads the sheet
- * through the authenticated Sheets API instead of the public CSV export, which
- * also lets it resolve the tab's display name. Validated separately so a
- * missing or misconfigured service account never breaks the password gate or
- * the rest of the app — it just falls back to the public path.
- */
 const serviceAccountSchema = z.object({
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.email("GOOGLE_SERVICE_ACCOUNT_EMAIL must be an email"),
   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: z
     .string()
     .min(1, "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY is required")
-    // .env files and Vercel store the PEM with literal "\n" sequences.
-    .transform((key) => key.replace(/\\n/g, "\n").replace(/^"|"$/g, "")),
+    .transform(normalizePrivateKey),
 });
 
 export type Env = z.infer<typeof coreSchema>;
@@ -43,7 +64,7 @@ function parse<S extends z.ZodTypeAny>(schema: S, values: Record<string, unknown
     const issues = parsed.error.issues
       .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
       .join("\n");
-    throw new Error(`Invalid environment variables:\n${issues}\nSee .env.example.`);
+    throw new Error(`Invalid environment variables:\n${issues}\nSee .env.example and DEPLOY.md.`);
   }
   return parsed.data;
 }
@@ -59,15 +80,18 @@ let cachedServiceAccount: ServiceAccountEnv | undefined;
 export function getEnv(): Env {
   cachedCore ??= parse(coreSchema, {
     APP_PASSWORD: process.env.APP_PASSWORD,
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    // A dedicated secret is better, but falling back keeps one-variable setups working.
+    SESSION_SECRET: firstOf("SESSION_SECRET", "APP_PASSWORD"),
+    // The project URL is not a secret, so the NEXT_PUBLIC_ name is the canonical one.
+    SUPABASE_URL: firstOf("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"),
+    SUPABASE_SERVICE_ROLE_KEY: firstOf("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"),
   });
   return cachedCore;
 }
 
 /** True when enough is configured to attempt reading the meal library at all. */
 export function hasSheetsEnv(): boolean {
-  return Boolean(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+  return Boolean(firstOf("GOOGLE_SHEETS_SPREADSHEET_ID"));
 }
 
 export function getSheetsEnv(): SheetsEnv {
@@ -78,17 +102,11 @@ export function getSheetsEnv(): SheetsEnv {
   return cachedSheets;
 }
 
-/**
- * Optional natural-language food estimation. The core app never needs it, so
- * the feature hides itself when the key is absent.
- */
-export function hasAnthropicKey(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
-}
-
 /** True when a service account is configured, enabling the authenticated (private) path. */
 export function hasServiceAccountEnv(): boolean {
-  return Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY);
+  return Boolean(
+    firstOf("GOOGLE_SERVICE_ACCOUNT_EMAIL") && firstOf("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"),
+  );
 }
 
 export function getServiceAccountEnv(): ServiceAccountEnv {
@@ -97,4 +115,12 @@ export function getServiceAccountEnv(): ServiceAccountEnv {
     GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
   });
   return cachedServiceAccount;
+}
+
+/**
+ * Optional natural-language food estimation. The core app never needs it, so
+ * the feature hides itself when the key is absent.
+ */
+export function hasAnthropicKey(): boolean {
+  return Boolean(firstOf("ANTHROPIC_API_KEY"));
 }

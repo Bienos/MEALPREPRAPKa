@@ -34,6 +34,14 @@ yarn-error.log*
 .env*
 !.env.example
 
+# local credentials — the Google service-account JSON downloads under names like these
+*credentials*.json
+*service-account*.json
+*-key.json
+gha-creds-*.json
+*.p12
+*.key
+
 # vercel
 .vercel
 

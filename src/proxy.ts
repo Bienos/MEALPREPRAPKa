@@ -21,5 +21,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|icon.svg|manifest.webmanifest).*)"],
+  // Everything is behind the gate except Next's own assets, the PWA files the
+  // browser fetches before login, and the public health check.
+  matcher: [
+    "/((?!_next/static|_next/image|api/health|icon.svg|apple-icon.png|icon-192.png|icon-512.png|icon-maskable-512.png|manifest.webmanifest|favicon.ico).*)",
+  ],
 };
