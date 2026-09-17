@@ -71,7 +71,7 @@ Optional and secondary. Never required for the core app. No chatbot as the main 
 - Server secrets (`src/lib/env.ts`, `src/lib/supabase/server.ts`) are `server-only`; never import them from client components. There is no browser Supabase client by design.
 - Schema lives in `supabase/migrations/` (one file per change, never edit an applied file). All queries live in `src/lib/db/*`; UI and server actions call those functions, never Supabase directly.
 - Rows are validated with Zod at the data-access boundary; there are no generated Supabase types.
-- Meal library: `src/lib/google-sheets/` talks to the Sheets API (service account, server-only); `src/lib/meals/` parses rows by normalized header names, groups DT/DNT rows into one meal, caches, and falls back to the last good copy. Ingredients stay raw text. Fixtures in `src/lib/meals/fixtures.ts` are development-only.
+- Meal library: `src/lib/google-sheets/` reads the sheet server-only, either via the public CSV export (default, needs only `GOOGLE_SHEETS_SPREADSHEET_ID`/`GID`, sheet shared as link-viewable) or the authenticated Sheets API when a service account is configured. `src/lib/meals/` parses rows by normalized header names, groups DT/DNT rows into one meal, caches, and falls back to the last good copy. Ingredients stay raw text. Fixtures in `src/lib/meals/fixtures.ts` are development-only.
 - UI never calls Google Sheets directly; pages call `getMealLibrary()`.
 - Before each task: `npm run lint && npm run typecheck && npm run build` must pass.
 

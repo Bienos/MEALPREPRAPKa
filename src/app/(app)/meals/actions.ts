@@ -14,7 +14,9 @@ export async function syncMeals(): Promise<SyncState> {
     refresh();
     return {
       status: "ok",
-      message: `Pobrano ${snapshot.library.meals.length} posiłków z zakładki „${snapshot.sheetTitle}”.`,
+      message: snapshot.sheetTitle
+        ? `Pobrano ${snapshot.library.meals.length} posiłków z zakładki „${snapshot.sheetTitle}”.`
+        : `Pobrano ${snapshot.library.meals.length} posiłków.`,
     };
   }
   return { status: "error", message: snapshot.error ?? "Nie udało się pobrać arkusza." };

@@ -29,11 +29,12 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui-style comp
    | `SUPABASE_SECRET_KEY` | Server-only Supabase key (`sb_secret_...` or legacy `service_role`).    |
    | `GOOGLE_SHEETS_SPREADSHEET_ID` | Spreadsheet that holds the meal library.                       |
    | `GOOGLE_SHEETS_TARGET_GID` | The gid of the meal-library tab (default `965578947`).              |
-   | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account that reads the sheet.                          |
-   | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Its private key, one line with `\n` sequences.           |
+   | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Optional: service account for a private (not link-shared) sheet. |
+   | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Optional: its private key, one line with `\n` sequences.  |
 
-   The `GOOGLE_*` variables are optional in development: without them the Meals screen shows a
-   small built-in fixture dataset. In production they are required for the meal library.
+   `GOOGLE_SHEETS_SPREADSHEET_ID` is optional in development: without it the Meals screen shows
+   a small built-in fixture dataset. In production it is required for the meal library. The
+   `GOOGLE_SERVICE_ACCOUNT_*` variables are always optional — see below.
 
 3. Start the dev server:
 
@@ -74,18 +75,35 @@ All database access goes through `src/lib/db/*` (server-only). UI code never cal
 
 ## Google Sheets (meal library)
 
-Google Sheets is the source of truth for meals. The app reads one tab, resolved from its gid at
-runtime, so renaming the tab is safe. Columns are matched by header name (`Typ`, `Danie`, `Wersja`,
-`Składniki i gramatura`, `Kcal`, `B (g)`, `T (g)`, `W (g)`, `Czas`, `Batch`, `Lodówka`, `Mrożenie`),
-so column order does not matter.
+Google Sheets is the source of truth for meals. Columns are matched by header name (`Typ`, `Danie`,
+`Wersja`, `Składniki i gramatura`, `Kcal`, `B (g)`, `T (g)`, `W (g)`, `Czas`, `Batch`, `Lodówka`,
+`Mrożenie`), so column order does not matter.
 
-One-time setup:
+There are two ways to connect it, in order of preference:
 
-1. In Google Cloud Console create a project (or reuse one) and enable the **Google Sheets API**.
-2. Create a **service account** and download a JSON key for it.
+**Default: a link-shared spreadsheet, no Google Cloud project needed.**
+
+1. Open the spreadsheet, click **Share**, and set general access to **Anyone with the link — Viewer**.
+2. Set `GOOGLE_SHEETS_SPREADSHEET_ID` and `GOOGLE_SHEETS_TARGET_GID`. That's the whole setup.
+
+The app reads the tab via Google's public CSV export for that gid. This needs no Google Cloud
+project, no service account, and no billing account — it's a plain HTTP GET. The tradeoff: anyone
+who has the exact link can view the sheet (it is not searchable or indexed, but it is not
+access-controlled either). In this mode the app cannot resolve the tab's display name from its gid
+alone, so the Meals screen just doesn't show one; the data itself is unaffected.
+
+**Alternative: a service account, for a spreadsheet that must stay private.**
+
+1. In Google Cloud Console, enable the **Google Sheets API** for a project.
+2. Create a **service account** and download a JSON key for it. Some Google accounts have an
+   organization policy (`iam.disableServiceAccountKeyCreation`) that blocks this step entirely —
+   if so, use the link-shared method above instead.
 3. Open the spreadsheet, click **Share**, and add the service account's `client_email` as **Viewer**.
-4. Put `client_email` in `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `private_key` in
-   `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` (one line, keep the `\n` sequences, quotes are fine).
+4. Set `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` (one line, keep the
+   `\n` sequences, quotes are fine) alongside the two variables above.
+
+When both service-account variables are set, the app uses the authenticated Sheets API instead of
+the public export, and can also resolve the tab's real name from its gid.
 
 The library is cached server-side for an hour. **Synchronizuj** on the Meals screen re-reads the
 sheet immediately. If Google is unreachable the app keeps showing the last successful copy.

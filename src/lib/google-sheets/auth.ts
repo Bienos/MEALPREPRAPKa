@@ -1,7 +1,7 @@
 import "server-only";
 import { createSign } from "node:crypto";
 
-import { getGoogleEnv } from "@/lib/env";
+import { getServiceAccountEnv } from "@/lib/env";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -23,7 +23,7 @@ export async function getAccessToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   if (cached && cached.expiresAt > now + 60) return cached.token;
 
-  const env = getGoogleEnv();
+  const env = getServiceAccountEnv();
   const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = base64url(
     JSON.stringify({

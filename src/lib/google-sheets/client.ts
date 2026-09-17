@@ -1,7 +1,8 @@
 import "server-only";
 
-import { getGoogleEnv } from "@/lib/env";
+import { getServiceAccountEnv, getSheetsEnv, hasServiceAccountEnv } from "@/lib/env";
 import { getAccessToken } from "./auth";
+import { parseCsv } from "./csv";
 
 const API = "https://sheets.googleapis.com/v4/spreadsheets";
 
@@ -18,31 +19,62 @@ async function sheetsGet<T>(path: string): Promise<T> {
 }
 
 /** Resolves the tab title for a gid from spreadsheet metadata, so tab renames do not break us. */
-export async function resolveSheetTitle(gid: number): Promise<string> {
-  const { GOOGLE_SHEETS_SPREADSHEET_ID: id } = getGoogleEnv();
+async function resolveSheetTitle(spreadsheetId: string, gid: number): Promise<string> {
   const data = await sheetsGet<{ sheets?: { properties?: { sheetId?: number; title?: string } }[] }>(
-    `${id}?fields=sheets(properties(sheetId,title))`,
+    `${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
   );
   const title = data.sheets?.find((sheet) => sheet.properties?.sheetId === gid)?.properties?.title;
   if (!title) {
     const available = data.sheets?.map((s) => `${s.properties?.title} (gid ${s.properties?.sheetId})`).join(", ");
-    throw new Error(`No tab with gid ${gid} in spreadsheet ${id}. Available: ${available ?? "none"}`);
+    throw new Error(`No tab with gid ${gid} in spreadsheet ${spreadsheetId}. Available: ${available ?? "none"}`);
   }
   return title;
 }
 
-/** All rows of one tab as strings. Empty trailing cells are omitted by the API. */
-export async function readSheetRows(title: string): Promise<string[][]> {
-  const { GOOGLE_SHEETS_SPREADSHEET_ID: id } = getGoogleEnv();
+/** All rows of one tab as strings, via the authenticated Sheets API. */
+async function readRowsAuthenticated(spreadsheetId: string, title: string): Promise<string[][]> {
   const range = encodeURIComponent(`'${title.replace(/'/g, "''")}'`);
   const data = await sheetsGet<{ values?: unknown[][] }>(
-    `${id}/values/${range}?valueRenderOption=UNFORMATTED_VALUE`,
+    `${spreadsheetId}/values/${range}?valueRenderOption=UNFORMATTED_VALUE`,
   );
   return (data.values ?? []).map((row) => row.map((cell) => (cell == null ? "" : String(cell))));
 }
 
-/** The configured meal-library tab: its resolved title and raw rows. */
-export async function fetchMealSheet(): Promise<{ title: string; rows: string[][] }> {
-  const title = await resolveSheetTitle(getGoogleEnv().GOOGLE_SHEETS_TARGET_GID);
-  return { title, rows: await readSheetRows(title) };
+/**
+ * All rows of one tab via the public CSV export, no credentials required.
+ * Works only when the spreadsheet is shared as "Anyone with the link — Viewer"
+ * (or fully public). If it is not, Google returns an HTML sign-in page instead
+ * of CSV, which is detected and reported clearly rather than mis-parsed.
+ */
+async function readRowsPublic(spreadsheetId: string, gid: number): Promise<string[][]> {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
+  const response = await fetch(url, { cache: "no-store" });
+  const text = await response.text();
+  const looksLikeHtml = /^\s*<(!doctype|html)/i.test(text);
+  if (!response.ok || looksLikeHtml) {
+    throw new Error(
+      `Nie udało się pobrać arkusza bez logowania (status ${response.status}). ` +
+        `Upewnij się, że arkusz jest udostępniony jako „Każda osoba mająca link — Przeglądający”.`,
+    );
+  }
+  return parseCsv(text);
+}
+
+/**
+ * The configured meal-library tab: its rows, and its display title when known.
+ *
+ * Uses the authenticated Sheets API when a service account is configured
+ * (also resolving the tab's real name from the gid), otherwise falls back to
+ * the public CSV export, which needs no credentials but cannot report a title.
+ */
+export async function fetchMealSheet(): Promise<{ title: string | null; rows: string[][] }> {
+  const { GOOGLE_SHEETS_SPREADSHEET_ID: id, GOOGLE_SHEETS_TARGET_GID: gid } = getSheetsEnv();
+
+  if (hasServiceAccountEnv()) {
+    getServiceAccountEnv(); // validates early, before the network round-trip
+    const title = await resolveSheetTitle(id, gid);
+    return { title, rows: await readRowsAuthenticated(id, title) };
+  }
+
+  return { title: null, rows: await readRowsPublic(id, gid) };
 }
