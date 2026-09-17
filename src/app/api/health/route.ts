@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { hasDatabaseEnv, hasSheetsEnv } from "@/lib/env";
+
 /**
  * GET /api/health — deliberately says almost nothing.
  *
@@ -11,21 +13,16 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  // Booleans only. Never the values themselves.
+  // Booleans only. Never the values themselves. The checks live in env.ts so
+  // that a variable set to an empty string counts as unset here exactly as it
+  // does everywhere else.
   const configured = {
-    database: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL),
-    sheet: Boolean(process.env.GOOGLE_SHEETS_SPREADSHEET_ID),
+    database: hasDatabaseEnv(),
+    sheet: hasSheetsEnv(),
   };
 
-  // TEMPORARY DIAGNOSTIC — remove. Booleans only, never values.
-  const nonEmpty: Record<string, boolean> = {};
-  for (const k of Object.keys(process.env).sort()) {
-    if (!/SUPABASE|GOOGLE|ANTHROPIC|APP_PASSWORD|SESSION_SECRET/i.test(k)) continue;
-    nonEmpty[k] = (process.env[k] ?? "").trim() !== "";
-  }
-
   return NextResponse.json(
-    { status: "ok", configured, nonEmpty },
+    { status: "ok", configured },
     { headers: { "cache-control": "no-store" } },
   );
 }

@@ -89,6 +89,17 @@ export function getEnv(): Env {
   return cachedCore;
 }
 
+/**
+ * True when a Supabase project is configured. Checked without parsing so the
+ * health endpoint can report it without throwing on a half-configured deploy.
+ */
+export function hasDatabaseEnv(): boolean {
+  return Boolean(
+    firstOf("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL") &&
+      firstOf("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"),
+  );
+}
+
 /** True when enough is configured to attempt reading the meal library at all. */
 export function hasSheetsEnv(): boolean {
   return Boolean(firstOf("GOOGLE_SHEETS_SPREADSHEET_ID"));
