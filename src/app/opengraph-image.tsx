@@ -77,8 +77,11 @@ export default function Image() {
               />
             </svg>
           </div>
-          <div style={{ display: "flex", fontSize: 52, fontWeight: 800, color: INK }}>
-            MealPrep
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", fontSize: 52, fontWeight: 800, color: INK }}>
+              MealPrep
+            </div>
+            <div style={{ display: "flex", fontSize: 26, color: MUTED }}>meal-prep.pl</div>
           </div>
         </div>
 

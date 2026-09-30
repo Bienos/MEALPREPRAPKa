@@ -8,10 +8,27 @@ const nunito = Nunito({
   subsets: ["latin", "latin-ext"],
 });
 
+const DESCRIPTION = "Prywatna aplikacja do planowania i jedzenia bez zastanawiania się.";
+
+/** The one public address of this app. Crawlers reject a relative og:url. */
+const SITE_URL = "https://www.meal-prep.pl";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "MealPrep",
-  description: "Prywatna aplikacja do planowania i jedzenia bez zastanawiania się.",
+  description: DESCRIPTION,
   appleWebApp: { capable: true, title: "MealPrep", statusBarStyle: "default" },
+  // Link crawlers are stricter than browsers: several ignore a card whose page
+  // declares no canonical url or type. The image itself comes from
+  // opengraph-image.tsx, which Next adds here automatically.
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "MealPrep",
+    locale: "pl_PL",
+    title: "MealPrep",
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {
