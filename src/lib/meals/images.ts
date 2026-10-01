@@ -5,11 +5,11 @@
  * (rice bowl, tomato pasta, oats...) lives in `public/food/`, and a meal gets
  * the first kind its name matches. A meal added to the sheet tomorrow gets a
  * picture without anyone doing anything. To swap the drawings for photos,
- * replace the files and change IMAGE_EXT.
+ * replace the files; IMAGE_EXT is the file type.
  */
 
 const IMAGE_DIR = "/food";
-const IMAGE_EXT = "svg";
+const IMAGE_EXT = "jpg";
 
 export const DISH_IMAGES = [
   "baked-oats", "cheesecake-bowl", "chili", "cottage-bowl", "creamy-pasta", "curry-rice", "eggs-toast",

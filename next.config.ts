@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Food drawings change only with a deploy; let phones keep them for a day.
+        // Food pictures change only with a deploy; let phones keep them for a day.
         source: "/food/:file*",
         headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
       },

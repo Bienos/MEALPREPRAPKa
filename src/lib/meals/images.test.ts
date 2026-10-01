@@ -29,8 +29,8 @@ describe("dishImageFor", () => {
 
   test("every picture the rules can return exists on disk", () => {
     for (const image of DISH_IMAGES) {
-      assert.ok(existsSync(new URL(`../../../public/food/${image}.svg`, import.meta.url)), image);
+      assert.ok(existsSync(new URL(`../../../public/food/${image}.jpg`, import.meta.url)), image);
     }
-    assert.equal(mealImageSrc("Chicken Rice"), "/food/rice-bowl.svg");
+    assert.equal(mealImageSrc("Chicken Rice"), "/food/rice-bowl.jpg");
   });
 });

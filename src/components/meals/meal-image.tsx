@@ -21,7 +21,7 @@ export function MealImage({
 }) {
   return (
     <div className={cn("relative shrink-0 overflow-hidden bg-muted", className)}>
-      {/* SVG drawings need no resizing, so they skip the image optimizer. */}
+      {/* Ready-sized JPEGs in public/food, so they skip the image optimizer. */}
       <Image src={mealImageSrc(name, category)} alt="" fill unoptimized priority={priority} className="object-cover" />
     </div>
   );
