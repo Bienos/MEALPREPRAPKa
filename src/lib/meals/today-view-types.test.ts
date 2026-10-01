@@ -52,6 +52,11 @@ describe("remaining macros", () => {
     });
   });
 
+  test("food logged outside the plan counts as eaten", () => {
+    const meals = [meal({ id: "a", status: "adhoc", kcal: 300, protein_g: 20, fat_g: 10, carbs_g: 30 })];
+    assert.equal(remainingMacros(DT_TARGET, meals).kcal, 2460 - 300);
+  });
+
   test("going over target yields negative values rather than clamping", () => {
     const meals = [meal({ id: "a", status: "eaten", kcal: 3000, protein_g: 250, fat_g: 90, carbs_g: 320 })];
     const remaining = remainingMacros(DT_TARGET, meals);

@@ -6,9 +6,11 @@ import { Clock, Layers, Refrigerator, Snowflake } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { primaryVariant, variantLabel, type Meal } from "@/lib/meals/types";
+import { MealImage } from "./meal-image";
 import { VariantBadge } from "./variant-badge";
 
-export function MealDetail({ meal }: { meal: Meal }) {
+/** `actions` sits right under the numbers: add to today, edit. */
+export function MealDetail({ meal, actions }: { meal: Meal; actions?: React.ReactNode }) {
   const [selectedKey, setSelectedKey] = useState(primaryVariant(meal).key);
   const v = meal.variants.find((variant) => variant.key === selectedKey) ?? meal.variants[0];
   const ingredients = v.ingredients
@@ -24,6 +26,8 @@ export function MealDetail({ meal }: { meal: Meal }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <MealImage name={meal.name} category={meal.category} className="aspect-[4/3] w-full rounded-3xl" priority />
+
       <header className="flex flex-col gap-2">
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{meal.category}</p>
         <h1 className="text-3xl leading-tight font-extrabold tracking-tight">{meal.name}</h1>
@@ -71,6 +75,8 @@ export function MealDetail({ meal }: { meal: Meal }) {
           ))}
         </dl>
       </Card>
+
+      {actions ? <div className="flex items-start gap-2">{actions}</div> : null}
 
       <Card>
         <CardHeader>

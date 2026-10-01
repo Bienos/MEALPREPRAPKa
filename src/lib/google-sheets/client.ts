@@ -19,7 +19,7 @@ async function sheetsGet<T>(path: string): Promise<T> {
 }
 
 /** Resolves the tab title for a gid from spreadsheet metadata, so tab renames do not break us. */
-async function resolveSheetTitle(spreadsheetId: string, gid: number): Promise<string> {
+export async function resolveSheetTitle(spreadsheetId: string, gid: number): Promise<string> {
   const data = await sheetsGet<{ sheets?: { properties?: { sheetId?: number; title?: string } }[] }>(
     `${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
   );
@@ -32,7 +32,7 @@ async function resolveSheetTitle(spreadsheetId: string, gid: number): Promise<st
 }
 
 /** All rows of one tab as strings, via the authenticated Sheets API. */
-async function readRowsAuthenticated(spreadsheetId: string, title: string): Promise<string[][]> {
+export async function readRowsAuthenticated(spreadsheetId: string, title: string): Promise<string[][]> {
   const range = encodeURIComponent(`'${title.replace(/'/g, "''")}'`);
   const data = await sheetsGet<{ values?: unknown[][] }>(
     `${spreadsheetId}/values/${range}?valueRenderOption=UNFORMATTED_VALUE`,

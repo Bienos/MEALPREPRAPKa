@@ -29,6 +29,7 @@ PRE-LOG > POST-LOG · MEAL > INDIVIDUAL INGREDIENTS · BATCH > SINGLE PORTION ·
 - **Google Sheets is the SOURCE OF TRUTH for the meal library** (meal type, name, DT/DNT variant, ingredients + quantities, kcal/macros, prep time, batch size, fridge life, freezable).
   Sheet: https://docs.google.com/spreadsheets/d/10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI/edit?gid=894227705#gid=894227705 (tab gid `894227705`)
 - Never create another manually maintained meal database. Never duplicate editable meal definitions into Supabase.
+- The app edits the sheet only through `src/lib/meals/sheet-edit.ts` (pure plan of exact cells: rows found by name + variant in a fresh read, only known columns, only changed cells, never deletes) and `src/lib/google-sheets/write.ts` (RAW writes, service account with Editor access).
 - **Supabase stores only operational state**: settings, DT/DNT targets, default day templates, day plans, planned meals, eaten state, prep batches, fridge/freezer portions, shopping state, weight history.
 - Historical planned/eaten meals MAY store macro snapshots so past days do not change when the sheet changes.
 
@@ -58,6 +59,7 @@ Prefer simple server-side functions and a small, clean data-access layer.
 - Friendly, modern, warm, calm, minimal, food-oriented, premium but informal.
 - Warm neutral background, dark readable text, small food-inspired accent palette, large rounded cards, large touch targets, generous spacing, subtle borders/shadows, Lucide icons, lightweight SVG/CSS graphics.
 - Avoid: clinical healthcare styling, corporate dashboards, bodybuilding aesthetics, dense tables, excessive charts, gamification, stock photos.
+- Meal pictures: one drawing per kind of dish in `public/food/`, picked from the meal name by `src/lib/meals/images.ts` (keyword rules, category fallback). No picture column in the sheet; new meals get a picture automatically.
 
 ## AI
 
@@ -75,9 +77,10 @@ Optional and secondary. Never required for the core app. No chatbot as the main 
 - UI never calls Google Sheets directly; pages call `getMealLibrary()`.
 - Today: `src/app/(app)/page.tsx` fetches day state server-side and hands it to `today-view.tsx` (client), which keeps optimistic state so ZJEDZONE is instant; the server write follows. `planned_meals.status` is one of planned/eaten/skipped/swapped/adhoc. `default_day_meals` holds the DT/DNT templates as meal_key/variant references only. Portion changes rescale the stored macro snapshot and never touch the sheet.
 - Prep: `src/lib/meals/prep-plan.ts` generates the plan deterministically (no AI, no solver); `ingredients.ts` is the only place that reads ingredient text; `cooking-steps.ts` turns a plan into kitchen steps. A prep targets one slot (`sniadanie`/`obiad`/`kolacja`, stored on `prep_sessions.slot`), matched against the sheet's own category column, so widening a slot means adding rows to the sheet. The generated plan is a starting point, not the only path: `availableDishes()` backs browsing the whole slot and picking dishes by hand. `src/lib/meals/prep.ts` orchestrates session, shopping list and finishing. `prep_sessions`/`prep_session_items` hold the in-progress prep; finishing writes `prep_batches` + `portions`. Marking a meal eaten on Today consumes the earliest-expiring matching portion automatically.
+- Today: totals on top, then the next meal, then the day list; tapping a row opens `meal-sheet.tsx` (portion, macros, eaten, swap, remove). All logging of food outside the plan starts from the one **Dodaj** sheet (`add-sheet.tsx`): search, fridge, frequent, then manual / dinner out / no-cook.
 - Exceptions: all ranking lives in `src/lib/meals/recommend.ts` (swaps and no-cook); `rebalance.ts` holds the day projection, correction blocks and dinner-out maths, all deterministic arithmetic, never AI. `exceptions.ts` orchestrates them. Ad-hoc food is stored in `planned_meals` with status `adhoc`, a `source` of saved_meal/quick_add/ai_estimate/manual, and `approximate` when the macros are estimated.
 - AI is optional and isolated to `src/lib/meals/ai-estimate.ts` (Anthropic SDK, structured output). Without `ANTHROPIC_API_KEY` the option hides and everything else works.
-- Deployment: GitHub → Vercel → Supabase → Google Sheets, documented in `DEPLOY.md`. No Docker, no VPS, no local filesystem writes. All configuration is read in `src/lib/env.ts` and nowhere else; only `NEXT_PUBLIC_*` may reach the browser. `GET /api/health` is the one public route.
+- Deployment: GitHub → Vercel → Supabase → Google Sheets, documented in `DEPLOY.md`. Functions run in `fra1` (`vercel.json`), next to the Supabase database; keep the two in the same region. No Docker, no VPS, no local filesystem writes. All configuration is read in `src/lib/env.ts` and nowhere else; only `NEXT_PUBLIC_*` may reach the browser. `GET /api/health` is the one public route.
 - Before each task: `npm run lint && npm run typecheck && npm run build` must pass.
 
 <!-- BEGIN:nextjs-agent-rules -->

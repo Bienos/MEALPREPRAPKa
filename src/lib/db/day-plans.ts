@@ -215,6 +215,8 @@ export async function logAdhocMeal(input: {
   variant?: DayType | null;
   approximate?: boolean;
   slot?: string;
+  /** The fridge portion this food came out of, so undo can put it back. */
+  portion_id?: string | null;
 }): Promise<PlannedMeal> {
   const db = getSupabase();
   const existing = await listPlannedMeals(input.plan_date);
@@ -237,6 +239,7 @@ export async function logAdhocMeal(input: {
       fat_g: Math.round(input.fat_g * 10) / 10,
       carbs_g: Math.round(input.carbs_g * 10) / 10,
       eaten_at: new Date().toISOString(),
+      portion_id: input.portion_id ?? null,
     })
     .select("*")
     .single();
@@ -283,6 +286,30 @@ export async function updatePlannedMealPortions(id: string, portions: number): P
       protein_g: Math.round(current.protein_g * ratio * 10) / 10,
       fat_g: Math.round(current.fat_g * ratio * 10) / 10,
       carbs_g: Math.round(current.carbs_g * ratio * 10) / 10,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  return row(plannedMealSchema, result);
+}
+
+/**
+ * Hand edit of one day's entry: portion and macros as typed on Today. Only
+ * this planned meal changes; the sheet and the recipe are never touched.
+ */
+export async function updatePlannedMeal(
+  id: string,
+  patch: Macros & { portions: number },
+): Promise<PlannedMeal> {
+  if (!(patch.portions > 0)) throw new Error("portions must be greater than 0");
+  const result = await getSupabase()
+    .from("planned_meals")
+    .update({
+      portions: patch.portions,
+      kcal: Math.round(patch.kcal),
+      protein_g: Math.round(patch.protein_g * 10) / 10,
+      fat_g: Math.round(patch.fat_g * 10) / 10,
+      carbs_g: Math.round(patch.carbs_g * 10) / 10,
     })
     .eq("id", id)
     .select("*")

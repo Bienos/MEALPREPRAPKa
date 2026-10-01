@@ -72,6 +72,23 @@ or searchable, but it is not access-controlled either.
 6. **Share the spreadsheet with that `client_email` address as Viewer.**
    Without this step the app gets a 403 even with a valid key.
 
+### Editing meals from the app
+
+**Posiłki → Edytuj** and **Posiłki → Nowy** write to the sheet, so they need
+Option B with one change: in step 6 share the sheet with the service account
+as **Editor** instead of Viewer. Without it the form shows a notice and saving
+stays off; reading works as before.
+
+What the app writes, and nothing else:
+
+- On an edit, only the cells that changed in that meal's row(s): name and
+  category on every DT/DNT row of the dish, the rest on the edited variant's
+  row. Columns the app does not know (notes, anything you add) are never touched.
+- Rows are found by name and variant in a fresh read of the sheet, never by a
+  remembered row number, so reordering the sheet is safe.
+- A new meal is one new row under the last filled row. Nothing is deleted.
+- Text is written as plain text, never as a formula.
+
 > Some Google accounts block service-account keys with an organisation policy
 > (`iam.disableServiceAccountKeyCreation`). If step 4 is blocked and you are not
 > the org admin, use Option A.

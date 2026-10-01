@@ -28,6 +28,55 @@ export type TodayMeal = Macros & {
   prepared: boolean;
 };
 
+/** Raw planned-meal row, as far as Today needs it. */
+type PlannedMealRow = Macros & {
+  id: string;
+  slot: string;
+  position: number;
+  status: MealStatus;
+  meal_key: string | null;
+  meal_name: string;
+  variant: DayType | null;
+  portions: number;
+  eaten_at: string | null;
+};
+
+export function toTodayMeal(meal: PlannedMealRow, prepared = false): TodayMeal {
+  return {
+    id: meal.id,
+    slot: meal.slot,
+    position: meal.position,
+    status: meal.status,
+    mealKey: meal.meal_key,
+    mealName: meal.meal_name,
+    variant: meal.variant,
+    portions: meal.portions,
+    kcal: meal.kcal,
+    protein_g: meal.protein_g,
+    fat_g: meal.fat_g,
+    carbs_g: meal.carbs_g,
+    eatenAt: meal.eaten_at,
+    prepared,
+  };
+}
+
+/** One meal the "Dodaj" sheet can log in a tap: a sheet dish for today's day type. */
+export type AddOption = Macros & {
+  mealKey: string;
+  name: string;
+  category: string;
+  variant: DayType | null;
+  /** Raw ingredient text, so search finds "Chicken Rice" by typing "kurczak". */
+  ingredients: string;
+  /** Prepared portions waiting in the fridge or freezer. */
+  ready: number;
+};
+
+/** True for food that counts towards today: ticked off, or logged outside the plan. */
+export function isEaten(meal: Pick<TodayMeal, "status">): boolean {
+  return meal.status === "eaten" || meal.status === "adhoc";
+}
+
 export const PORTION_OPTIONS = [0.75, 1, 1.25, 1.5] as const;
 
 /** "1×", "1,25×" — Polish decimal comma, no trailing zeros. */
@@ -50,7 +99,7 @@ export function sumMacros(meals: Macros[]): Macros {
 
 /** Target minus what has actually been eaten. Can go negative on purpose. */
 export function remainingMacros(target: Macros, meals: TodayMeal[]): Macros {
-  const eaten = sumMacros(meals.filter((meal) => meal.status === "eaten"));
+  const eaten = sumMacros(meals.filter(isEaten));
   return {
     kcal: target.kcal - eaten.kcal,
     protein_g: target.protein_g - eaten.protein_g,

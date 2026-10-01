@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, PencilLine } from "lucide-react";
 
 import { MealDetail } from "@/components/meals/meal-detail";
+import { Button } from "@/components/ui/button";
 import { getMealLibrary } from "@/lib/meals/library";
+import { AddToToday } from "./add-to-today";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,20 @@ export default async function MealPage({ params }: { params: Promise<{ key: stri
         <ChevronLeft className="size-5" />
         Posiłki
       </Link>
-      <MealDetail meal={meal} />
+      <MealDetail
+        meal={meal}
+        actions={
+          <>
+            <Button asChild size="lg" variant="outline" className="px-5">
+              <Link href={`/meals/${meal.key}/edytuj`}>
+                <PencilLine />
+                Edytuj
+              </Link>
+            </Button>
+            <AddToToday mealKey={meal.key} />
+          </>
+        }
+      />
     </>
   );
 }

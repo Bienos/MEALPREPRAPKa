@@ -24,16 +24,16 @@ export function SyncButton() {
         size="sm"
         disabled={pending}
         aria-label="Synchronizuj posiłki z Google Sheets"
-        className="justify-self-end"
+        title="Synchronizuj z arkuszem"
+        className="size-10 justify-self-end px-0"
       >
         <RefreshCw className={cn("size-4", pending && "animate-spin")} />
-        {pending ? "Synchronizuję…" : "Synchronizuj"}
       </Button>
       {state.status !== "idle" ? (
         <p
           role="status"
           className={cn(
-            "col-span-2 text-sm break-words",
+            "col-span-full text-sm break-words",
             state.status === "error" ? "text-destructive" : "text-muted-foreground",
           )}
         >

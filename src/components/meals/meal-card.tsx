@@ -1,54 +1,32 @@
 import Link from "next/link";
-import { Clock, Layers, Refrigerator, Snowflake } from "lucide-react";
+import { Snowflake } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
 import { macroSummary, primaryVariant, type Meal } from "@/lib/meals/types";
-import { VariantBadge } from "./variant-badge";
+import { MealImage } from "./meal-image";
 
-export function MealCard({ meal }: { meal: Meal }) {
+/** One tile of the library grid: picture, name, calories and protein. */
+export function MealCard({ meal, ready }: { meal: Meal; ready: number }) {
   const v = primaryVariant(meal);
-  const meta = [
-    v.prepTime && { icon: Clock, text: v.prepTime },
-    v.batch && { icon: Layers, text: `Batch: ${v.batch}` },
-    v.fridgeLife && { icon: Refrigerator, text: `Lodówka: ${v.fridgeLife}` },
-    v.freezable === true && { icon: Snowflake, text: "Do zamrożenia" },
-  ].filter((item): item is { icon: typeof Clock; text: string } => Boolean(item));
 
   return (
     <Link
       href={`/meals/${meal.key}`}
-      className="block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+      className="flex flex-col gap-2 rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.98]"
     >
-      <Card className="gap-3 transition-transform active:scale-[0.99]">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{meal.category}</p>
-            <h2 className="text-lg leading-tight font-bold">{meal.name}</h2>
-          </div>
-          <div className="flex shrink-0 gap-1">
-            {meal.variants.map((variant) => (
-              <VariantBadge key={variant.key} variant={variant.variant} />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-extrabold">{Math.round(v.kcal)}</span>
-          <span className="text-sm text-muted-foreground">kcal</span>
-          <span className="ml-auto text-sm font-semibold text-muted-foreground">{macroSummary(v)}</span>
-        </div>
-
-        {meta.length > 0 ? (
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            {meta.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-1">
-                <Icon className="size-4" />
-                {text}
-              </li>
-            ))}
-          </ul>
+      <div className="relative">
+        <MealImage name={meal.name} category={meal.category} className="aspect-square w-full rounded-2xl" />
+        {ready > 0 ? (
+          <span className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-xs font-bold text-accent shadow-sm">
+            <Snowflake className="size-3" />×{ready}
+          </span>
         ) : null}
-      </Card>
+      </div>
+      <div className="flex flex-col gap-0.5 px-0.5">
+        <h2 className="line-clamp-2 leading-tight font-bold">{meal.name}</h2>
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {Math.round(v.kcal)} kcal · {macroSummary(v)}
+        </p>
+      </div>
     </Link>
   );
 }

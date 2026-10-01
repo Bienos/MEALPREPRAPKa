@@ -3,15 +3,25 @@
 import { refresh } from "next/cache";
 
 import {
+  addPlannedMeal,
   getPlannedMeal,
+  listPlannedMeals,
   logAdhocMeal,
   markEaten,
+  removePlannedMeal,
   swapPlannedMeal,
   unmarkEaten,
+  updatePlannedMeal,
   updatePlannedMealPortions,
   upsertDayPlan,
   type MealSource,
 } from "@/lib/db/day-plans";
+import { getSettings } from "@/lib/db/settings";
+import { todayIso } from "@/lib/date";
+import { getMealLibrary } from "@/lib/meals/library";
+import { resolveDayType } from "@/lib/meals/plan";
+import { findMealVariant } from "@/lib/meals/types";
+import { toTodayMeal, type Macros, type TodayMeal } from "@/lib/meals/today-view-types";
 import { consumeEarliestPortion, restorePortion } from "@/lib/db/prep";
 import { estimateFood, hasAiEstimation, type FoodEstimate } from "@/lib/meals/ai-estimate";
 import {
@@ -72,6 +82,55 @@ export async function setPortionsAction(id: string, portions: number): Promise<v
   await updatePlannedMealPortions(id, portions);
 }
 
+/**
+ * Hand edit from the meal sheet on Today: portion and macros exactly as typed.
+ * Like ZJEDZONE, the screen already shows the result, so there is no refresh.
+ */
+export async function updateMealAction(id: string, patch: Macros & { portions: number }): Promise<void> {
+  await updatePlannedMeal(id, patch);
+}
+
+/** Takes one entry off today's list, putting back any fridge portion it used. */
+export async function removeMealAction(id: string): Promise<void> {
+  const meal = await getPlannedMeal(id);
+  if (meal?.portion_id) await restorePortion(meal.portion_id);
+  await removePlannedMeal(id);
+}
+
+/**
+ * "Dodaj do dziś" from the meal library: plans one portion of the dish for
+ * today, in the variant matching today's day type, after what is already there.
+ */
+export async function addToTodayAction(mealKey: string): Promise<ActionResult> {
+  const settings = await getSettings();
+  const date = todayIso(settings.timezone);
+  const [{ library }, { dayType }, existing] = await Promise.all([
+    getMealLibrary(),
+    resolveDayType(date),
+    listPlannedMeals(date),
+  ]);
+  const variant = findMealVariant(library.meals, mealKey, dayType);
+  if (!variant) return { ok: false, message: "Tego posiłku nie ma już w arkuszu." };
+
+  await upsertDayPlan(date, dayType);
+  await addPlannedMeal({
+    plan_date: date,
+    slot: variant.category,
+    position: existing.length > 0 ? Math.max(...existing.map((meal) => meal.position)) + 1 : 0,
+    source: "sheet",
+    status: "planned",
+    meal_key: variant.mealKey,
+    meal_name: variant.name,
+    variant: variant.variant,
+    portions: 1,
+    kcal: Math.round(variant.kcal),
+    protein_g: variant.protein_g,
+    fat_g: variant.fat_g,
+    carbs_g: variant.carbs_g,
+  });
+  return { ok: true };
+}
+
 
 /* Exception workflows ------------------------------------------------------- */
 
@@ -114,17 +173,21 @@ export type LogOtherInput = {
   mealKey?: string | null;
   variant?: DayType | null;
   approximate?: boolean;
+  /** Take one prepared portion of this meal out of the fridge. */
+  fromFridge?: boolean;
 };
 
 /**
  * Logs food eaten outside the plan. Only calories are required; a missing
  * macro is stored as zero and the entry is flagged as an estimate.
  */
-export async function logOtherAction(input: LogOtherInput): Promise<void> {
+export async function logOtherAction(input: LogOtherInput): Promise<TodayMeal> {
   const incomplete =
     input.protein_g === undefined || input.fat_g === undefined || input.carbs_g === undefined;
+  const portionId =
+    input.fromFridge && input.mealKey ? await consumeEarliestPortion(input.mealKey, input.variant ?? null) : null;
 
-  await logAdhocMeal({
+  const logged = await logAdhocMeal({
     plan_date: input.date,
     meal_name: input.name,
     source: input.source,
@@ -135,8 +198,10 @@ export async function logOtherAction(input: LogOtherInput): Promise<void> {
     fat_g: input.fat_g ?? 0,
     carbs_g: input.carbs_g ?? 0,
     approximate: input.approximate ?? incomplete,
+    portion_id: portionId,
   });
-  refresh();
+  // The screen adds the returned entry itself; no refresh needed.
+  return toTodayMeal(logged);
 }
 
 export type EstimateResult =
