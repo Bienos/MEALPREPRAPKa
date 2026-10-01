@@ -121,9 +121,6 @@ function strawberries(r, pts) {
 function banana(r, pts, s = 17) {
   return pts.map(([x, y]) => `<g filter="url(#sm)"><circle cx="${f(x)}" cy="${f(y)}" r="${s}" fill="#e9c75e"/><circle cx="${f(x)}" cy="${f(y)}" r="${s - 2}" fill="#fbeab0"/><circle cx="${f(x)}" cy="${f(y)}" r="${s * 0.35}" fill="#efd98f"/>${[0, 2.1, 4.2].map((a) => `<circle cx="${f(x + Math.cos(a) * s * 0.34)}" cy="${f(y + Math.sin(a) * s * 0.34)}" r="1.4" fill="#7a5a2a"/>`).join("")}${shine(x - s * 0.3, y - s * 0.4, s * 0.4, s * 0.2, -30, 0.7)}</g>`).join("");
 }
-function apple(r, pts) {
-  return pts.map(([x, y, k]) => `<g transform="rotate(${f(k * 360)} ${f(x)} ${f(y)})" filter="url(#sm)"><path d="M${f(x - 20)} ${f(y)} a20 20 0 0 1 40 0 z" fill="#f7ebc9"/><path d="M${f(x - 20)} ${f(y)} a20 20 0 0 1 40 0" fill="none" stroke="#c9372c" stroke-width="3.5"/><path d="M${f(x - 12)} ${f(y - 3)} a12 12 0 0 1 24 0" fill="none" stroke="#e9d6a4" stroke-width="2"/></g>`).join("");
-}
 function granola(r, pts) {
   return pts.map(([x, y, k]) => `<path d="M${f(x)} ${f(y - 7)} q8 1 7 8 q-2 7 -9 5 q-7 -2 -5 -8 q2 -5 7 -5z" fill="${k > 0.5 ? "#c58d4a" : "#a8733a"}" filter="url(#sm)"/>`).join("");
 }
