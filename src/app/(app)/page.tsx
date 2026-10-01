@@ -1,7 +1,7 @@
 import { longDateLabel, todayIso } from "@/lib/date";
 import { getSettings } from "@/lib/db/settings";
 import { hasAnthropicKey } from "@/lib/env";
-import { loadDayView, loadTomorrowPreview } from "@/lib/meals/day-view";
+import { loadDayStrip, loadDayView } from "@/lib/meals/day-view";
 import { TodayView } from "./today-view";
 
 // Day state must always be read fresh from Supabase.
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function TodayPage() {
   const settings = await getSettings();
   const date = todayIso(settings.timezone);
-  const [day, tomorrow] = await Promise.all([loadDayView(date), loadTomorrowPreview(date)]);
+  const [day, strip] = await Promise.all([loadDayView(date), loadDayStrip(date, date)]);
 
   return (
     <TodayView
@@ -25,7 +25,7 @@ export default async function TodayPage() {
       hasTemplate={day.hasTemplate}
       cooked={day.cooked}
       aiEnabled={hasAnthropicKey()}
-      tomorrow={tomorrow}
+      strip={strip}
     />
   );
 }

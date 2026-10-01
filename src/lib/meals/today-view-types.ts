@@ -60,17 +60,6 @@ export function toTodayMeal(meal: PlannedMealRow, prepared = false): TodayMeal {
   };
 }
 
-/** Tomorrow, as a one-line summary on Today. The full day lives on its own page. */
-export type TomorrowPreview = {
-  date: string;
-  label: string;
-  dayType: DayType;
-  /** Meals already planned for that day. */
-  count: number;
-  kcal: number;
-  names: string[];
-};
-
 /** Today, or a day you are looking at from the calendar. */
 export type DayWhen = "today" | "past" | "future";
 

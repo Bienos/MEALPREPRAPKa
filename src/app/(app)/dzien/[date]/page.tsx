@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { longDateLabel, relativeDayLabel, todayIso } from "@/lib/date";
 import { getSettings } from "@/lib/db/settings";
 import { hasAnthropicKey } from "@/lib/env";
-import { loadDayView } from "@/lib/meals/day-view";
+import { loadDayStrip, loadDayView } from "@/lib/meals/day-view";
 import { TodayView } from "../../today-view";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ export default async function DayPage({ params }: { params: Promise<{ date: stri
   const today = todayIso(settings.timezone);
   if (date === today) redirect("/");
 
-  const day = await loadDayView(date);
+  const [day, strip] = await Promise.all([loadDayView(date), loadDayStrip(date, today)]);
 
   return (
     <TodayView
@@ -36,7 +36,7 @@ export default async function DayPage({ params }: { params: Promise<{ date: stri
       hasTemplate={day.hasTemplate}
       cooked={day.cooked}
       aiEnabled={hasAnthropicKey()}
-      tomorrow={null}
+      strip={strip}
     />
   );
 }

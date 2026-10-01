@@ -23,7 +23,7 @@ export function NextMealCard({
   return (
     <Card className="gap-4 overflow-hidden border-primary/25 p-0">
       <div className="relative">
-        <MealImage name={meal.mealName} category={meal.slot} className="aspect-[16/9] w-full" priority />
+        <MealImage name={meal.mealName} category={meal.slot} className="aspect-[2/1] w-full" priority />
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/45 to-transparent px-4 pt-10 pb-3">
           <p className="text-xs font-extrabold tracking-widest text-white uppercase">
             Teraz · {meal.slot}

@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChefHat, ChevronLeft, Plus, UtensilsCrossed } from "lucide-react";
+import { ChefHat, ChevronLeft, UtensilsCrossed } from "lucide-react";
 
 import { AddSheet, type AddMode } from "@/components/today/add-sheet";
 import { DayDone } from "@/components/today/day-done";
+import { DayStrip } from "@/components/today/day-strip";
 import { DaySummary } from "@/components/today/day-summary";
 import { DayTypeToggle } from "@/components/today/day-type-toggle";
 import { DinnerOutSheet } from "@/components/today/dinner-out-sheet";
@@ -17,7 +18,6 @@ import { NoCookSheet } from "@/components/today/no-cook-sheet";
 import { PlanList } from "@/components/today/plan-list";
 import { RebalanceSheet } from "@/components/today/rebalance-sheet";
 import { SwapSheet } from "@/components/today/swap-sheet";
-import { TomorrowPanel } from "@/components/today/tomorrow-panel";
 import { UndoToast } from "@/components/today/undo-toast";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Suggestion } from "@/lib/meals/rebalance";
@@ -33,8 +33,8 @@ import {
   type DayWhen,
   type Macros,
   type TodayMeal,
-  type TomorrowPreview,
 } from "@/lib/meals/today-view-types";
+import type { DayCell } from "@/lib/meals/calendar";
 import {
   applyDefaultDayAction,
   applySuggestionAction,
@@ -82,7 +82,7 @@ export function TodayView({
   addOptions,
   hasTemplate,
   cooked,
-  tomorrow,
+  strip,
   aiEnabled,
 }: {
   date: string;
@@ -97,8 +97,8 @@ export function TodayView({
   hasTemplate: boolean;
   /** Preps cooked on this day. */
   cooked: string[];
-  /** Only on Today. */
-  tomorrow: TomorrowPreview | null;
+  /** The days around this one, for the strip at the top. */
+  strip: DayCell[];
   aiEnabled: boolean;
 }) {
   // Local source of truth so every tap feels instant; the server write follows.
@@ -132,6 +132,7 @@ export function TodayView({
   const [fridgeUsed, setFridgeUsed] = useState<Record<string, number>>({});
 
   const isToday = when === "today";
+  const tomorrow = strip.find((cell) => cell.date > date) ?? null;
   const next = isToday ? nextPlannedMeal(meals) : undefined;
   const eaten = sumMacros(meals.filter(isEaten));
   // A future day has nothing eaten yet, so its summary adds up what is planned.
@@ -387,18 +388,13 @@ export function TodayView({
         )}
       </header>
 
+      <DayStrip days={strip} selected={date} />
+
       {error ? (
         <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive">
           {error}
         </p>
       ) : null}
-
-      <DaySummary
-        target={target}
-        eaten={shown}
-        kind={isToday ? "left" : when === "past" ? "eaten" : "planned"}
-        onRebalance={when === "past" || meals.length === 0 ? undefined : () => void openRebalance()}
-      />
 
       {meals.length === 0 ? (
         when === "past" ? (
@@ -429,8 +425,16 @@ export function TodayView({
           onSwap={() => void openSwap(next)}
         />
       ) : isToday && tomorrow ? (
-        <DayDone eaten={eaten} target={target} tomorrow={tomorrow} />
+        <DayDone eaten={eaten} target={target} tomorrowDate={tomorrow.date} tomorrowPlanned={tomorrow.hasEntries} />
       ) : null}
+
+      <DaySummary
+        target={target}
+        eaten={shown}
+        kind={isToday ? "left" : when === "past" ? "eaten" : "planned"}
+        onAdd={() => void openAdd()}
+        onRebalance={when === "past" || meals.length === 0 ? undefined : () => void openRebalance()}
+      />
 
       {meals.length > 0 ? (
         <PlanList meals={meals} nextId={next?.id ?? null} onSelect={(meal) => setSelectedId(meal.id)} />
@@ -445,22 +449,6 @@ export function TodayView({
           </div>
         </Card>
       ) : null}
-
-      {tomorrow ? <TomorrowPanel preview={tomorrow} /> : null}
-
-      {/* Room for the floating button, so it never covers the last card. */}
-      <div aria-hidden className="h-10" />
-
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom)+0.75rem)] z-10 mx-auto flex w-full max-w-md justify-end px-4">
-        <button
-          type="button"
-          onClick={() => void openAdd()}
-          className="pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-foreground px-6 text-base font-extrabold text-background shadow-[0_12px_28px_-10px_rgba(42,38,34,0.7)] outline-none active:scale-[0.97] focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <Plus className="size-6" strokeWidth={3} />
-          Dodaj
-        </button>
-      </div>
 
       {notice && meals.length > 0 ? (
         <p role="status" className="text-center text-sm text-muted-foreground">

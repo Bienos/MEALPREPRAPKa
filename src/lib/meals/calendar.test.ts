@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { buildMonth, gridBounds, monthBounds, shiftMonth, toneFor, type CalendarEntry } from "./calendar.ts";
+import { buildDays, buildMonth, gridBounds, monthBounds, shiftMonth, toneFor, type CalendarEntry } from "./calendar.ts";
 
 const TARGETS = {
   DT: { kcal: 2460, protein_g: 200, fat_g: 60, carbs_g: 280 },
@@ -112,5 +112,27 @@ describe("month stats", () => {
 
   test("an empty month averages to zero rather than dividing by it", () => {
     assert.deepEqual(build([]).stats, { loggedDays: 0, avgKcal: 0, avgProtein: 0, onTargetDays: 0 });
+  });
+});
+
+describe("a run of days (the strip on Today)", () => {
+  test("covers exactly the range, and an unplanned day shows the default type", () => {
+    const days = buildDays({
+      from: "2026-10-13",
+      to: "2026-10-19",
+      today: "2026-10-15",
+      entries: [entry("2026-10-14", 2400), entry("2026-10-17", 700, "planned")],
+      dayTypes: { "2026-10-17": "DNT" },
+      cookedOn: new Set(),
+      targets: TARGETS,
+      defaultDayType: "DT",
+    });
+    assert.deepEqual(days.map((d) => d.date.slice(8)), ["13", "14", "15", "16", "17", "18", "19"]);
+    assert.ok(days.every((d) => d.inMonth));
+    assert.equal(days[1].tone, "ok");
+    assert.equal(days[4].effectiveType, "DNT");
+    assert.equal(days[4].hasEntries, true);
+    assert.equal(days[5].effectiveType, "DT");
+    assert.equal(days[5].dayType, null);
   });
 });

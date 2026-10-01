@@ -1,11 +1,12 @@
 import "server-only";
 
-import { addDays, longDateLabel } from "@/lib/date";
-import { listPlannedMeals } from "@/lib/db/day-plans";
+import { addDays } from "@/lib/date";
+import { listDayPlans, listPlannedMeals, listPlannedMealsBetween } from "@/lib/db/day-plans";
 import { listAllDefaultDayMeals } from "@/lib/db/default-day";
 import type { IsoDate } from "@/lib/db/helpers";
 import { listAvailablePortions, listPrepBatchesBetween } from "@/lib/db/prep";
-import { getTargets } from "@/lib/db/settings";
+import { getSettings, getTargets } from "@/lib/db/settings";
+import { buildDays, type DayCell } from "./calendar";
 import { getMealLibrary } from "./library";
 import { resolveDayType } from "./plan";
 import {
@@ -15,7 +16,6 @@ import {
   type DayType,
   type Macros,
   type TodayMeal,
-  type TomorrowPreview,
 } from "./today-view-types";
 import { variantsForDayType } from "./types";
 
@@ -73,16 +73,27 @@ export async function loadDayView(date: IsoDate): Promise<DayView> {
   };
 }
 
-/** The one-line look at tomorrow shown on Today. */
-export async function loadTomorrowPreview(today: IsoDate): Promise<TomorrowPreview> {
-  const date = addDays(today, 1);
-  const [{ dayType }, planned] = await Promise.all([resolveDayType(date), listPlannedMeals(date)]);
-  return {
-    date,
-    label: longDateLabel(date),
-    dayType,
-    count: planned.length,
-    kcal: Math.round(planned.reduce((sum, meal) => sum + meal.kcal, 0)),
-    names: planned.map((meal) => meal.meal_name),
-  };
+/** How many days the strip shows on each side of the day in view. */
+const STRIP_REACH = 3;
+
+/** The strip of days at the top of a day's screen: the day in view in the middle. */
+export async function loadDayStrip(center: IsoDate, today: IsoDate): Promise<DayCell[]> {
+  const from = addDays(center, -STRIP_REACH);
+  const to = addDays(center, STRIP_REACH);
+  const [settings, targets, plans, entries] = await Promise.all([
+    getSettings(),
+    getTargets(),
+    listDayPlans(from, to),
+    listPlannedMealsBetween(from, to),
+  ]);
+  return buildDays({
+    from,
+    to,
+    today,
+    entries,
+    dayTypes: Object.fromEntries(plans.map((plan) => [plan.date, plan.day_type])) as Record<string, DayType>,
+    cookedOn: new Set(),
+    targets,
+    defaultDayType: settings.default_day_type,
+  });
 }

@@ -1,4 +1,6 @@
-import { Calculator } from "lucide-react";
+import { Calculator, Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -26,8 +28,11 @@ export function DaySummary({
   target,
   eaten,
   kind,
+  onAdd,
   onRebalance,
 }: {
+  /** Opens the one way food goes in: Dodaj. */
+  onAdd: () => void;
   target: Macros;
   /** Eaten food for today and past days, everything planned for a future day. */
   eaten: Macros;
@@ -73,16 +78,23 @@ export function DaySummary({
         ))}
       </dl>
 
-      {onRebalance ? (
-        <button
-          type="button"
-          onClick={onRebalance}
-          className="-mb-1 flex items-center gap-1.5 self-start rounded-full py-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
-        >
-          <Calculator className="size-4" />
-          {kind === "left" ? "Przelicz resztę dnia" : "Sprawdź, czy się zgadza"}
-        </button>
-      ) : null}
+      <div className="flex gap-2">
+        <Button variant="secondary" className="h-11 flex-1" onClick={onAdd}>
+          <Plus strokeWidth={3} />
+          Dodaj jedzenie
+        </Button>
+        {onRebalance ? (
+          <Button
+            variant="outline"
+            className="h-11 px-4"
+            onClick={onRebalance}
+            aria-label={kind === "left" ? "Przelicz resztę dnia" : "Sprawdź, czy plan się zgadza"}
+          >
+            <Calculator />
+            Przelicz
+          </Button>
+        ) : null}
+      </div>
     </Card>
   );
 }

@@ -27,7 +27,7 @@ export function UndoToast({
   return (
     <div
       role="status"
-      className="fixed inset-x-0 bottom-[calc(8.75rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4"
+      className="fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4"
     >
       <div className="flex w-full max-w-md items-center gap-3 rounded-full bg-foreground px-5 py-3 text-background shadow-lg">
         <p className="min-w-0 flex-1 truncate text-sm font-semibold">{message}</p>

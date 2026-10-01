@@ -87,16 +87,7 @@ export function shiftMonth(month: string, by: number): string {
   return shifted.toISOString().slice(0, 7);
 }
 
-export function buildMonth({
-  month,
-  today,
-  entries,
-  dayTypes,
-  cookedOn,
-  targets,
-  defaultDayType,
-}: {
-  month: string;
+type DayInputs = {
   today: string;
   entries: CalendarEntry[];
   /** Day type per date, from the saved day plans. */
@@ -105,47 +96,75 @@ export function buildMonth({
   cookedOn: Set<string>;
   targets: Record<DayType, Macros>;
   defaultDayType: DayType;
-}): Month {
-  const { from, to } = gridBounds(month);
+};
 
+export type DayCell = CalendarCell & {
+  /** The saved type, or the default the day would get. */
+  effectiveType: DayType;
+  protein: number;
+  targetKcal: number;
+};
+
+/**
+ * One cell per day from `from` to `to`, inclusive. The calendar grid and the
+ * strip of days on Today are both built from this. `month`, when given,
+ * marks which days belong to it.
+ */
+export function buildDays({
+  from,
+  to,
+  month,
+  today,
+  entries,
+  dayTypes,
+  cookedOn,
+  targets,
+  defaultDayType,
+}: DayInputs & { from: string; to: string; month?: string }): DayCell[] {
   const byDate = new Map<string, CalendarEntry[]>();
   for (const entry of entries) byDate.set(entry.plan_date, [...(byDate.get(entry.plan_date) ?? []), entry]);
 
-  const cells: CalendarCell[] = [];
-  const logged: { kcal: number; protein: number; target: number }[] = [];
-
+  const cells: DayCell[] = [];
   for (let date = from; date <= to; date = addDays(date, 1)) {
     const day = byDate.get(date) ?? [];
     const isFuture = date > today;
     const isToday = date === today;
     const dayType = dayTypes[date] ?? null;
-    const target = targets[dayType ?? defaultDayType];
+    const effectiveType = dayType ?? defaultDayType;
+    const target = targets[effectiveType];
 
     const counted = isFuture ? day.filter((e) => e.status !== "skipped") : day.filter((e) => EATEN.has(e.status));
     const kcal = Math.round(counted.reduce((sum, e) => sum + e.kcal, 0));
-    const protein = counted.reduce((sum, e) => sum + e.protein_g, 0);
-
     const finished = !isFuture && !isToday && kcal > 0;
-    if (finished && date.startsWith(month)) logged.push({ kcal, protein, target: target.kcal });
 
     cells.push({
       date,
       day: Number(date.slice(8)),
-      inMonth: date.startsWith(month),
+      inMonth: month ? date.startsWith(month) : true,
       isToday,
       isFuture,
       dayType,
+      effectiveType,
       kcal,
+      protein: counted.reduce((sum, e) => sum + e.protein_g, 0),
+      targetKcal: target.kcal,
       fill: Math.min(kcal / target.kcal, 1.3),
       tone: finished ? toneFor(kcal, target.kcal) : null,
       hasEntries: day.length > 0,
       cooked: cookedOn.has(date),
     });
   }
+  return cells;
+}
+
+export function buildMonth({ month, ...inputs }: DayInputs & { month: string }): Month {
+  const cells = buildDays({ ...gridBounds(month), month, ...inputs });
 
   const weeks: CalendarCell[][] = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
+  // Finished days of this month with anything eaten; a verdict (tone) means exactly that.
+  const logged = cells.filter((cell) => cell.inMonth && cell.tone !== null);
   const count = logged.length;
   return {
     weeks,
@@ -153,8 +172,7 @@ export function buildMonth({
       loggedDays: count,
       avgKcal: count ? Math.round(logged.reduce((sum, d) => sum + d.kcal, 0) / count) : 0,
       avgProtein: count ? Math.round(logged.reduce((sum, d) => sum + d.protein, 0) / count) : 0,
-      onTargetDays: logged.filter((d) => Math.abs(d.kcal / d.target - 1) <= 0.1).length,
+      onTargetDays: logged.filter((d) => Math.abs(d.kcal / d.targetKcal - 1) <= 0.1).length,
     },
   };
 }
-

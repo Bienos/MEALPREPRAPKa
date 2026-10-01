@@ -3,7 +3,7 @@ import { ArrowRight, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { Macros, TomorrowPreview } from "@/lib/meals/today-view-types";
+import type { Macros } from "@/lib/meals/today-view-types";
 
 /** How the day went, in a sentence, using only the numbers on screen. */
 function verdict(eaten: Macros, target: Macros): string {
@@ -18,11 +18,13 @@ function verdict(eaten: Macros, target: Macros): string {
 export function DayDone({
   eaten,
   target,
-  tomorrow,
+  tomorrowDate,
+  tomorrowPlanned,
 }: {
   eaten: Macros;
   target: Macros;
-  tomorrow: TomorrowPreview;
+  tomorrowDate: string;
+  tomorrowPlanned: boolean;
 }) {
   return (
     <Card className="gap-4 border-accent/30 bg-accent/5 p-5">
@@ -36,8 +38,8 @@ export function DayDone({
         </div>
       </div>
       <Button size="lg" asChild>
-        <Link href={`/dzien/${tomorrow.date}`}>
-          {tomorrow.count > 0 ? "Zobacz jutro" : "Zaplanuj jutro"}
+        <Link href={`/dzien/${tomorrowDate}`}>
+          {tomorrowPlanned ? "Zobacz jutro" : "Zaplanuj jutro"}
           <ArrowRight />
         </Link>
       </Button>
