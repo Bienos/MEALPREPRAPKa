@@ -6,6 +6,7 @@ import {
   nextPlannedMeal,
   portionLabel,
   remainingMacros,
+  sortDay,
   rescaleMacros,
   sumMacros,
   type TodayMeal,
@@ -62,6 +63,31 @@ describe("remaining macros", () => {
     const remaining = remainingMacros(DT_TARGET, meals);
     assert.equal(remaining.kcal, -540);
     assert.ok(remaining.protein_g < 0);
+  });
+});
+
+describe("sortDay", () => {
+  test("puts a breakfast added later back where breakfast belongs", () => {
+    const sorted = sortDay([
+      meal({ id: "lunch", slot: "Posiłek 2", position: 1 }),
+      meal({ id: "dinner", slot: "Kolacja", position: 3 }),
+      meal({ id: "breakfast", slot: "Śniadanie", position: 4 }),
+    ]);
+    assert.deepEqual(sorted.map((m) => m.id), ["breakfast", "lunch", "dinner"]);
+  });
+
+  test("a library meal's own slot name lands among the default ones, logged food goes last", () => {
+    const sorted = sortDay([
+      meal({ id: "extra", slot: "Poza planem", status: "adhoc", position: 1 }),
+      meal({ id: "dinner", slot: "Kolacja", position: 2 }),
+      meal({ id: "lunch", slot: "Obiad", position: 3 }),
+    ]);
+    assert.deepEqual(sorted.map((m) => m.id), ["lunch", "dinner", "extra"]);
+  });
+
+  test("meals in the same slot keep the order they were added", () => {
+    const sorted = sortDay([meal({ id: "b", slot: "Kolacja", position: 5 }), meal({ id: "a", slot: "Kolacja", position: 2 })]);
+    assert.deepEqual(sorted.map((m) => m.id), ["a", "b"]);
   });
 });
 

@@ -48,3 +48,21 @@ export function shortDateLabel(isoDate: string): string {
     timeZone: "UTC",
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
+
+/** Whole days from `from` to `to`; negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  const [fy, fm, fd] = from.split("-").map(Number);
+  const [ty, tm, td] = to.split("-").map(Number);
+  return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / 86_400_000);
+}
+
+/** How far a day is from today, in words: "Jutro", "Wczoraj", "Za 4 dni", "6 dni temu". */
+export function relativeDayLabel(isoDate: string, today: string): string {
+  const diff = daysBetween(today, isoDate);
+  if (diff === 0) return "Dziś";
+  if (diff === 1) return "Jutro";
+  if (diff === 2) return "Pojutrze";
+  if (diff === -1) return "Wczoraj";
+  if (diff === -2) return "Przedwczoraj";
+  return diff > 0 ? `Za ${diff} dni` : `${-diff} dni temu`;
+}

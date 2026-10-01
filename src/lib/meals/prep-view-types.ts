@@ -56,12 +56,21 @@ export type FridgeGroup = {
   daysLeft: number | null;
 };
 
+export type ExpiryTone = "urgent" | "soon" | "fresh" | "none";
+
+/** How hurried a portion is: today or overdue, tomorrow, later, or undated. */
+export function expiryTone(daysLeft: number | null): ExpiryTone {
+  if (daysLeft === null) return "none";
+  if (daysLeft <= 0) return "urgent";
+  return daysLeft === 1 ? "soon" : "fresh";
+}
+
 export function expiryLabel(daysLeft: number | null): string {
   if (daysLeft === null) return "Bez daty";
   if (daysLeft < 0) return "Po terminie";
   if (daysLeft === 0) return "Zjedz dziś";
   if (daysLeft === 1) return "Zjedz jutro";
-  return `Świeże jeszcze ${daysLeft} dni`;
+  return `Jeszcze ${daysLeft} dni`;
 }
 
 export function isUrgent(daysLeft: number | null): boolean {

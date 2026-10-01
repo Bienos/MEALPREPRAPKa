@@ -3,19 +3,14 @@ import { ChevronLeft } from "lucide-react";
 
 import { Fridge } from "@/components/prep/fridge";
 import { PageHeader } from "@/components/shell/page-header";
-import { todayIso } from "@/lib/date";
+import { daysBetween, todayIso } from "@/lib/date";
 import { listAvailablePortions } from "@/lib/db/prep";
 import { getSettings } from "@/lib/db/settings";
 import type { FridgeGroup } from "@/lib/meals/prep-view-types";
+import { addToTodayAction } from "../../actions";
 import { discardPortionAction, freezePortionAction } from "../actions";
 
 export const dynamic = "force-dynamic";
-
-function daysBetween(from: string, to: string): number {
-  const start = Date.UTC(...(from.split("-").map(Number) as [number, number, number]));
-  const end = Date.UTC(...(to.split("-").map(Number) as [number, number, number]));
-  return Math.round((end - start) / 86_400_000);
-}
 
 export default async function FridgePage() {
   const [settings, portions] = await Promise.all([getSettings(), listAvailablePortions()]);
@@ -66,8 +61,8 @@ export default async function FridgePage() {
         <ChevronLeft className="size-5" />
         Prep
       </Link>
-      <PageHeader title="Lodówka" subtitle="Tylko gotowe porcje" />
-      <Fridge groups={sorted} onFreeze={freezePortionAction} onDiscard={discardPortionAction} />
+      <PageHeader title="Lodówka" />
+      <Fridge groups={sorted} onFreeze={freezePortionAction} onDiscard={discardPortionAction} onPlan={addToTodayAction} />
     </>
   );
 }

@@ -6,7 +6,7 @@ import type { DayType } from "@/lib/db/helpers";
 import { deletePrepSession, getActivePrepSession, updatePrepSession } from "@/lib/db/prep-sessions";
 import { consumePortion, freezePortion } from "@/lib/db/prep";
 import { setStapleInStock } from "@/lib/db/pantry";
-import { setShoppingItemChecked, setShoppingItemOwned } from "@/lib/db/shopping";
+import { clearCheckedShoppingItems, setShoppingItemChecked, setShoppingItemOwned } from "@/lib/db/shopping";
 import {
   addDishToPrep,
   alternativesFor,
@@ -113,6 +113,11 @@ export async function discardPrepAction(): Promise<void> {
 
 export async function checkShoppingItemAction(id: string, checked: boolean): Promise<void> {
   await setShoppingItemChecked(id, checked);
+}
+
+/** Takes everything already in the basket off the list. */
+export async function clearCheckedAction(): Promise<void> {
+  await clearCheckedShoppingItems();
 }
 
 /** "Mam to w domu" */

@@ -3,7 +3,6 @@
 import { refresh } from "next/cache";
 
 import {
-  addPlannedMeal,
   getPlannedMeal,
   listPlannedMeals,
   logAdhocMeal,
@@ -19,8 +18,8 @@ import {
 import { getSettings } from "@/lib/db/settings";
 import { todayIso } from "@/lib/date";
 import { getMealLibrary } from "@/lib/meals/library";
-import { resolveDayType } from "@/lib/meals/plan";
-import { findMealVariant } from "@/lib/meals/types";
+import { planVariantSwitch } from "@/lib/meals/day-type";
+import { planSheetMeal } from "@/lib/meals/plan";
 import { toTodayMeal, type Macros, type TodayMeal } from "@/lib/meals/today-view-types";
 import { consumeEarliestPortion, restorePortion } from "@/lib/db/prep";
 import { estimateFood, hasAiEstimation, type FoodEstimate } from "@/lib/meals/ai-estimate";
@@ -38,9 +37,42 @@ import { applyDefaultDay, type ApplyDefaultDayResult } from "@/lib/meals/plan";
 
 export type ActionResult = { ok: boolean; message?: string };
 
-/** One-tap DT/DNT switch for a date. Existing planned meals are left untouched. */
+/**
+ * One-tap DT/DNT switch for a date. Meals still to eat follow the day: a
+ * planned DT dish becomes its DNT version, same portion size. Eaten and
+ * hand-logged food is history and stays as it was.
+ */
 export async function setDayTypeAction(date: string, dayType: DayType): Promise<void> {
   await upsertDayPlan(date, dayType);
+  const [planned, { library }] = await Promise.all([listPlannedMeals(date), getMealLibrary()]);
+
+  const switches = planVariantSwitch(
+    planned.map((meal) => ({
+      id: meal.id,
+      status: meal.status,
+      source: meal.source,
+      mealKey: meal.meal_key,
+      variant: meal.variant,
+      portions: meal.portions,
+    })),
+    dayType,
+    (mealKey) => library.meals.find((meal) => meal.key === mealKey)?.variants ?? [],
+  );
+  const byId = new Map(planned.map((meal) => [meal.id, meal]));
+  await Promise.all(
+    switches.map((change) => {
+      const meal = byId.get(change.id)!;
+      return swapPlannedMeal(change.id, {
+        meal_key: meal.meal_key!,
+        meal_name: meal.meal_name,
+        variant: change.variant,
+        kcal: change.kcal,
+        protein_g: change.protein_g,
+        fat_g: change.fat_g,
+        carbs_g: change.carbs_g,
+      });
+    }),
+  );
   refresh();
 }
 
@@ -97,38 +129,24 @@ export async function removeMealAction(id: string): Promise<void> {
   await removePlannedMeal(id);
 }
 
+export type PlanResult = { ok: true; meal: TodayMeal } | { ok: false; message: string };
+
+const GONE_FROM_SHEET = "Tego posiłku nie ma już w arkuszu.";
+
 /**
- * "Dodaj do dziś" from the meal library: plans one portion of the dish for
- * today, in the variant matching today's day type, after what is already there.
+ * Plans one portion of a library dish for a day, in that day's DT/DNT
+ * version. The screen adds the returned entry itself, so no refresh.
  */
+export async function planMealAction(date: string, mealKey: string): Promise<PlanResult> {
+  const planned = await planSheetMeal(date, mealKey);
+  return planned ? { ok: true, meal: toTodayMeal(planned) } : { ok: false, message: GONE_FROM_SHEET };
+}
+
+/** "Dodaj do dziś" on a meal's page in the library. */
 export async function addToTodayAction(mealKey: string): Promise<ActionResult> {
   const settings = await getSettings();
-  const date = todayIso(settings.timezone);
-  const [{ library }, { dayType }, existing] = await Promise.all([
-    getMealLibrary(),
-    resolveDayType(date),
-    listPlannedMeals(date),
-  ]);
-  const variant = findMealVariant(library.meals, mealKey, dayType);
-  if (!variant) return { ok: false, message: "Tego posiłku nie ma już w arkuszu." };
-
-  await upsertDayPlan(date, dayType);
-  await addPlannedMeal({
-    plan_date: date,
-    slot: variant.category,
-    position: existing.length > 0 ? Math.max(...existing.map((meal) => meal.position)) + 1 : 0,
-    source: "sheet",
-    status: "planned",
-    meal_key: variant.mealKey,
-    meal_name: variant.name,
-    variant: variant.variant,
-    portions: 1,
-    kcal: Math.round(variant.kcal),
-    protein_g: variant.protein_g,
-    fat_g: variant.fat_g,
-    carbs_g: variant.carbs_g,
-  });
-  return { ok: true };
+  const planned = await planSheetMeal(todayIso(settings.timezone), mealKey);
+  return planned ? { ok: true } : { ok: false, message: GONE_FROM_SHEET };
 }
 
 
@@ -144,7 +162,10 @@ export async function swapOptionsAction(
 }
 
 /** Applies a swap, keeping the meal's slot, order and portion multiplier. */
-export async function applySwapAction(mealId: string, candidate: Candidate): Promise<void> {
+export async function applySwapAction(
+  mealId: string,
+  candidate: Pick<Candidate, "mealKey" | "mealName" | "variant" | "kcal" | "protein_g" | "fat_g" | "carbs_g">,
+): Promise<void> {
   await swapPlannedMeal(mealId, {
     meal_key: candidate.mealKey,
     meal_name: candidate.mealName,

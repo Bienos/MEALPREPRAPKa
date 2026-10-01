@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, UtensilsCrossed } from "lucide-react";
+import Link from "next/link";
+import { ChefHat, ChevronLeft, Plus, UtensilsCrossed } from "lucide-react";
 
-import { AddSheet } from "@/components/today/add-sheet";
+import { AddSheet, type AddMode } from "@/components/today/add-sheet";
+import { DayDone } from "@/components/today/day-done";
 import { DaySummary } from "@/components/today/day-summary";
 import { DayTypeToggle } from "@/components/today/day-type-toggle";
 import { DinnerOutSheet } from "@/components/today/dinner-out-sheet";
@@ -15,7 +17,7 @@ import { NoCookSheet } from "@/components/today/no-cook-sheet";
 import { PlanList } from "@/components/today/plan-list";
 import { RebalanceSheet } from "@/components/today/rebalance-sheet";
 import { SwapSheet } from "@/components/today/swap-sheet";
-import { TomorrowPanel, type TomorrowPreview } from "@/components/today/tomorrow-panel";
+import { TomorrowPanel } from "@/components/today/tomorrow-panel";
 import { UndoToast } from "@/components/today/undo-toast";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Suggestion } from "@/lib/meals/rebalance";
@@ -24,11 +26,14 @@ import {
   isEaten,
   nextPlannedMeal,
   rescaleMacros,
+  sortDay,
   sumMacros,
   type AddOption,
   type DayType,
+  type DayWhen,
   type Macros,
   type TodayMeal,
+  type TomorrowPreview,
 } from "@/lib/meals/today-view-types";
 import {
   applyDefaultDayAction,
@@ -39,6 +44,7 @@ import {
   logOtherAction,
   markEatenAction,
   noCookAction,
+  planMealAction,
   rebalanceAction,
   removeMealAction,
   savedMealsAction,
@@ -50,28 +56,49 @@ import {
   type LogOtherInput,
 } from "./actions";
 
-type Toast = { message: string; undo: () => void } | null;
+type Toast = { message: string; actionLabel?: string; action: () => void } | null;
 type SheetName = "none" | "add" | "log" | "rebalance" | "nocook" | "dinner";
 
+/** What "Dodaj" may do on each kind of day. */
+const ADD_MODES: Record<DayWhen, AddMode[]> = {
+  today: ["eat", "plan"],
+  past: ["eat"],
+  future: ["plan"],
+};
+
+/**
+ * One day. Today is the main screen; the same screen opens for any other day
+ * from the calendar, where it shows what was eaten (past) or is planned
+ * (future) and everything can be changed.
+ */
 export function TodayView({
   date,
   dateLabel,
+  relativeLabel,
+  when,
   dayType,
   target,
   initialMeals,
   addOptions,
   hasTemplate,
+  cooked,
   tomorrow,
   aiEnabled,
 }: {
   date: string;
   dateLabel: string;
+  /** "Jutro", "Wczoraj"... for the days that are not today. */
+  relativeLabel: string | null;
+  when: DayWhen;
   dayType: DayType;
   target: Macros;
   initialMeals: TodayMeal[];
   addOptions: AddOption[];
   hasTemplate: boolean;
-  tomorrow: TomorrowPreview;
+  /** Preps cooked on this day. */
+  cooked: string[];
+  /** Only on Today. */
+  tomorrow: TomorrowPreview | null;
   aiEnabled: boolean;
 }) {
   // Local source of truth so every tap feels instant; the server write follows.
@@ -91,6 +118,12 @@ export function TodayView({
   // Exception flows live in bottom sheets so the normal one-tap path stays bare.
   const [swapFor, setSwapFor] = useState<TodayMeal | null>(null);
   const [swapOptions, setSwapOptions] = useState<Candidate[] | null>(null);
+  // Remounting the Dodaj sheet is how it starts fresh, in the mode that was asked for.
+  const [addSession, setAddSession] = useState<{ id: number; mode: AddMode; replacing: TodayMeal | null }>({
+    id: 0,
+    mode: ADD_MODES[when][0],
+    replacing: null,
+  });
   const [frequentKeys, setFrequentKeys] = useState<string[] | null>(null);
   const [savedMeals, setSavedMeals] = useState<Candidate[] | null>(null);
   const [rebalance, setRebalance] = useState<Awaited<ReturnType<typeof rebalanceAction>> | null>(null);
@@ -98,8 +131,11 @@ export function TodayView({
   // Fridge portions taken by "Dodaj" since the page loaded.
   const [fridgeUsed, setFridgeUsed] = useState<Record<string, number>>({});
 
-  const next = nextPlannedMeal(meals);
+  const isToday = when === "today";
+  const next = isToday ? nextPlannedMeal(meals) : undefined;
   const eaten = sumMacros(meals.filter(isEaten));
+  // A future day has nothing eaten yet, so its summary adds up what is planned.
+  const shown = when === "future" ? sumMacros(meals.filter((meal) => meal.status !== "skipped")) : eaten;
   const selected = meals.find((meal) => meal.id === selectedId) ?? null;
   const options = addOptions.map((option) => ({
     ...option,
@@ -112,7 +148,7 @@ export function TodayView({
 
   async function handleEaten(meal: TodayMeal) {
     patchMeal(meal.id, { status: "eaten", eatenAt: new Date().toISOString() });
-    setToast({ message: `Zjedzone: ${meal.mealName}`, undo: () => void handleUndo(meal.id) });
+    setToast({ message: `Zjedzone: ${meal.mealName}`, action: () => void handleUndo(meal.id) });
     try {
       await markEatenAction(meal.id);
     } catch {
@@ -138,9 +174,22 @@ export function TodayView({
     try {
       await removeMealAction(meal.id);
     } catch {
-      setMeals((current) => [...current, meal].sort((a, b) => a.position - b.position));
+      setMeals((current) => sortDay([...current, meal]));
       setError("Nie udało się usunąć. Spróbuj ponownie.");
     }
+  }
+
+  /** "Usuń z dnia": gone, and the toast offers the obvious next step, putting something else there. */
+  async function handleRemoveAndOffer(meal: TodayMeal) {
+    await handleRemove(meal);
+    setToast({
+      message: `Usunięto: ${meal.mealName}`,
+      actionLabel: "Dodaj inny",
+      action: () => {
+        setToast(null);
+        void openAdd("plan");
+      },
+    });
   }
 
   function handleToggleEaten(meal: TodayMeal) {
@@ -172,33 +221,81 @@ export function TodayView({
     }
   }
 
-  /** Every way of logging extra food ends here: save, add to the list, offer undo. */
+  /** Food eaten outside the plan: saved, added to the list, with undo. */
   async function logFood(input: Omit<LogOtherInput, "date">) {
     try {
       const logged = await logOtherAction({ date, ...input });
-      setMeals((current) => [...current, logged]);
+      setMeals((current) => sortDay([...current, logged]));
       if (input.fromFridge && input.mealKey) {
         const key = input.mealKey;
         setFridgeUsed((current) => ({ ...current, [key]: (current[key] ?? 0) + 1 }));
       }
-      setToast({ message: `Dodano: ${logged.mealName}`, undo: () => void handleRemove(logged) });
+      setToast({ message: `Dodano: ${logged.mealName}`, action: () => void handleRemove(logged) });
     } catch {
       setError("Nie udało się dodać. Spróbuj ponownie.");
     }
   }
 
-  async function handleAdd(option: AddOption) {
-    await logFood({
-      name: option.name,
-      source: "saved_meal",
-      kcal: option.kcal,
-      protein_g: option.protein_g,
-      fat_g: option.fat_g,
-      carbs_g: option.carbs_g,
+  /** A library dish put on the day's list to eat later. */
+  async function planFood(option: AddOption) {
+    try {
+      const result = await planMealAction(date, option.mealKey);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      setMeals((current) => sortDay([...current, result.meal]));
+      setToast({ message: `Dodano do planu: ${option.name}`, action: () => void handleRemove(result.meal) });
+    } catch {
+      setError("Nie udało się dodać. Spróbuj ponownie.");
+    }
+  }
+
+  /** A planned meal swapped for any dish from the library. */
+  async function replaceMeal(meal: TodayMeal, option: AddOption) {
+    const before = { ...meal };
+    patchMeal(meal.id, {
       mealKey: option.mealKey,
+      mealName: option.name,
       variant: option.variant,
-      fromFridge: option.ready > 0,
+      kcal: Math.round(option.kcal * meal.portions),
+      protein_g: option.protein_g * meal.portions,
+      fat_g: option.fat_g * meal.portions,
+      carbs_g: option.carbs_g * meal.portions,
+      prepared: option.ready > 0,
     });
+    try {
+      await applySwapAction(meal.id, {
+        mealKey: option.mealKey,
+        mealName: option.name,
+        variant: option.variant,
+        kcal: option.kcal,
+        protein_g: option.protein_g,
+        fat_g: option.fat_g,
+        carbs_g: option.carbs_g,
+      });
+    } catch {
+      patchMeal(meal.id, before);
+      setError("Nie udało się zamienić. Spróbuj ponownie.");
+    }
+  }
+
+  async function handleAdd(option: AddOption, mode: AddMode) {
+    if (addSession.replacing) await replaceMeal(addSession.replacing, option);
+    else if (mode === "plan") await planFood(option);
+    else {
+      await logFood({
+        name: option.name,
+        source: "saved_meal",
+        kcal: option.kcal,
+        protein_g: option.protein_g,
+        fat_g: option.fat_g,
+        carbs_g: option.carbs_g,
+        mealKey: option.mealKey,
+        variant: option.variant,
+        fromFridge: option.ready > 0,
+      });
+    }
   }
 
   async function handleLogOther(payload: LogPayload) {
@@ -220,7 +317,8 @@ export function TodayView({
   }
 
   /** Opening a sheet fetches its data; the sheets themselves stay presentational. */
-  async function openAdd() {
+  async function openAdd(mode?: AddMode, replacing: TodayMeal | null = null) {
+    setAddSession((current) => ({ id: current.id + 1, mode: mode ?? ADD_MODES[when][0], replacing }));
     setSheet("add");
     if (frequentKeys === null) {
       try {
@@ -260,12 +358,33 @@ export function TodayView({
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-3xl font-extrabold tracking-tight">Dziś</h1>
-          <p className="text-muted-foreground first-letter:uppercase">{dateLabel}</p>
-        </div>
-        <DayTypeToggle dayType={dayType} onChange={(value) => setDayTypeAction(date, value)} />
+      <header className="flex flex-col gap-2">
+        {isToday ? null : (
+          <Link
+            href="/kalendarz"
+            className="-ml-1 flex h-9 w-fit items-center gap-1 pr-2 font-semibold text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="size-5" />
+            Kalendarz
+          </Link>
+        )}
+        {isToday ? (
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-extrabold tracking-tight">Dziś</h1>
+              <p className="text-muted-foreground first-letter:uppercase">{dateLabel}</p>
+            </div>
+            <DayTypeToggle dayType={dayType} onChange={(value) => setDayTypeAction(date, value)} />
+          </div>
+        ) : (
+          <>
+            <h1 className="text-2xl leading-tight font-extrabold tracking-tight first-letter:uppercase">{dateLabel}</h1>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-muted-foreground">{relativeLabel}</p>
+              <DayTypeToggle dayType={dayType} onChange={(value) => setDayTypeAction(date, value)} />
+            </div>
+          </>
+        )}
       </header>
 
       {error ? (
@@ -274,18 +393,34 @@ export function TodayView({
         </p>
       ) : null}
 
-      <DaySummary target={target} eaten={eaten} onRebalance={() => void openRebalance()} />
+      <DaySummary
+        target={target}
+        eaten={shown}
+        kind={isToday ? "left" : when === "past" ? "eaten" : "planned"}
+        onRebalance={when === "past" || meals.length === 0 ? undefined : () => void openRebalance()}
+      />
 
       {meals.length === 0 ? (
-        <EmptyDay
-          dayType={dayType}
-          hasTemplate={hasTemplate}
-          error={notice}
-          onUseDefault={async () => {
-            const result = await applyDefaultDayAction(date, dayType);
-            setNotice(result.ok ? null : (result.message ?? "Nie udało się utworzyć planu."));
-          }}
-        />
+        when === "past" ? (
+          <Card className="items-center gap-2 py-8 text-center">
+            <UtensilsCrossed className="size-9 text-muted-foreground" />
+            <CardHeader className="items-center">
+              <CardTitle>Nic nie zapisano tego dnia</CardTitle>
+              <CardDescription>Jeśli coś jadłeś, dodaj to przyciskiem Dodaj.</CardDescription>
+            </CardHeader>
+          </Card>
+        ) : (
+          <EmptyDay
+            dayType={dayType}
+            hasTemplate={hasTemplate}
+            error={notice}
+            forTomorrow={!isToday}
+            onUseDefault={async () => {
+              const result = await applyDefaultDayAction(date, dayType);
+              setNotice(result.ok ? null : (result.message ?? "Nie udało się utworzyć planu."));
+            }}
+          />
+        )
       ) : next ? (
         <NextMealCard
           meal={next}
@@ -293,26 +428,25 @@ export function TodayView({
           onPortions={(portions) => handlePortions(next, portions)}
           onSwap={() => void openSwap(next)}
         />
-      ) : (
-        <Card className="items-center gap-2 border-accent/30 bg-accent/5 py-8 text-center">
-          <UtensilsCrossed className="size-9 text-accent" />
-          <CardHeader className="items-center">
-            <CardTitle>Wszystko zjedzone</CardTitle>
-            <CardDescription>Plan na dziś jest zamknięty. Coś jeszcze? Dodaj niżej.</CardDescription>
-          </CardHeader>
-        </Card>
-      )}
+      ) : isToday && tomorrow ? (
+        <DayDone eaten={eaten} target={target} tomorrow={tomorrow} />
+      ) : null}
 
       {meals.length > 0 ? (
         <PlanList meals={meals} nextId={next?.id ?? null} onSelect={(meal) => setSelectedId(meal.id)} />
       ) : null}
 
-      <TomorrowPanel
-        preview={tomorrow}
-        onUse={async () => {
-          await applyDefaultDayAction(tomorrow.date, tomorrow.dayType);
-        }}
-      />
+      {cooked.length > 0 ? (
+        <Card className="flex-row items-start gap-3 p-4">
+          <ChefHat className="mt-0.5 size-5 shrink-0 text-accent" />
+          <div className="min-w-0">
+            <p className="font-semibold">Ugotowane tego dnia</p>
+            <p className="text-sm text-muted-foreground">{cooked.join(" · ")}</p>
+          </div>
+        </Card>
+      ) : null}
+
+      {tomorrow ? <TomorrowPanel preview={tomorrow} /> : null}
 
       {/* Room for the floating button, so it never covers the last card. */}
       <div aria-hidden className="h-10" />
@@ -338,17 +472,22 @@ export function TodayView({
         <MealSheet
           key={selected.id}
           meal={selected}
+          canEat={when !== "future"}
           onClose={() => setSelectedId(null)}
           onSave={(patch) => handleSave(selected, patch)}
           onToggleEaten={() => handleToggleEaten(selected)}
           onSwap={() => void openSwap(selected)}
-          onRemove={() => handleRemove(selected)}
+          onRemove={() => handleRemoveAndOffer(selected)}
         />
       ) : null}
 
       <AddSheet
+        key={addSession.id}
         open={sheet === "add"}
         onClose={() => setSheet("none")}
+        modes={ADD_MODES[when]}
+        startMode={addSession.mode}
+        replacing={addSession.replacing ? { name: addSession.replacing.mealName } : null}
         options={options}
         frequentKeys={frequentKeys}
         onAdd={handleAdd}
@@ -361,6 +500,7 @@ export function TodayView({
       <SwapSheet
         open={swapFor !== null}
         onClose={() => setSwapFor(null)}
+        onSearch={() => swapFor && void openAdd("plan", swapFor)}
         mealName={swapFor?.mealName ?? ""}
         options={swapOptions}
         onUse={async (candidate) => {
@@ -410,7 +550,14 @@ export function TodayView({
         onAccept={handleAccept}
       />
 
-      {toast ? <UndoToast message={toast.message} onUndo={toast.undo} onDismiss={() => setToast(null)} /> : null}
+      {toast ? (
+        <UndoToast
+          message={toast.message}
+          actionLabel={toast.actionLabel}
+          onAction={toast.action}
+          onDismiss={() => setToast(null)}
+        />
+      ) : null}
     </div>
   );
 }

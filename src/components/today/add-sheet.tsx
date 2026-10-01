@@ -5,7 +5,11 @@ import { HelpCircle, PencilLine, Plus, Search, Snowflake, Wine } from "lucide-re
 
 import { MealImage } from "@/components/meals/meal-image";
 import { Sheet } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import type { AddOption } from "@/lib/meals/today-view-types";
+
+/** "eat": it is eaten and counts now. "plan": it goes on the day's list for later. */
+export type AddMode = "eat" | "plan";
 
 const MAX_RESULTS = 25;
 
@@ -66,6 +70,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function AddSheet({
   open,
   onClose,
+  modes,
+  startMode,
+  replacing,
   options,
   frequentKeys,
   onAdd,
@@ -76,17 +83,26 @@ export function AddSheet({
 }: {
   open: boolean;
   onClose: () => void;
+  /** What this day allows: today both, a past day only "eat", a future day only "plan". */
+  modes: AddMode[];
+  /** The choice the sheet opens on; the parent remounts the sheet to apply a new one. */
+  startMode?: AddMode;
+  /** Set when choosing a replacement for a planned meal: tapping a dish swaps it in. */
+  replacing: { name: string } | null;
   options: AddOption[];
   /** Most eaten dishes, loaded when the sheet opens; null while loading. */
   frequentKeys: string[] | null;
-  onAdd: (option: AddOption) => Promise<void>;
+  onAdd: (option: AddOption, mode: AddMode) => Promise<void>;
   onQuickKcal: (kcal: number) => Promise<void>;
   onManual: () => void;
   onDinnerOut: () => void;
   onNoCook: () => void;
 }) {
   const [query, setQuery] = useState("");
+  const [chosen, setChosen] = useState<AddMode>(startMode ?? modes[0]);
   const [pending, startTransition] = useTransition();
+  // Replacing is always planning; otherwise the choice is limited to what the day allows.
+  const mode: AddMode = replacing ? "plan" : modes.includes(chosen) ? chosen : modes[0];
 
   const results = useMemo(() => {
     const needle = normalize(query);
@@ -103,7 +119,7 @@ export function AddSheet({
   const frequent = (frequentKeys ?? [])
     .map((key) => options.find((option) => option.mealKey === key))
     .filter((option): option is AddOption => Boolean(option) && !ready.includes(option as AddOption));
-  const quickKcal = kcalFrom(query);
+  const quickKcal = mode === "eat" && !replacing ? kcalFrom(query) : null;
 
   function close() {
     setQuery("");
@@ -118,15 +134,41 @@ export function AddSheet({
   }
 
   return (
-    <Sheet open={open} onClose={close} title="Dodaj jedzenie">
+    <Sheet open={open} onClose={close} title={replacing ? "Zamień na…" : "Dodaj jedzenie"}>
       <div className="flex flex-col gap-5" aria-busy={pending}>
+        {replacing ? (
+          <p className="-mt-2 text-sm text-muted-foreground">Zamiast: {replacing.name}</p>
+        ) : modes.length > 1 ? (
+          <div role="group" aria-label="Co robisz" className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">
+            {(
+              [
+                ["eat", "Zjadłem"],
+                ["plan", "Dodaj do planu"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={mode === value}
+                onClick={() => setChosen(value)}
+                className={cn(
+                  "h-11 rounded-full text-sm font-bold transition-colors",
+                  mode === value ? "bg-card shadow-sm" : "text-muted-foreground",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <label className="flex h-12 items-center gap-2 rounded-2xl border-2 border-primary/60 bg-card px-3 focus-within:border-primary">
           <Search className="size-5 shrink-0 text-muted-foreground" />
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Szukaj posiłku albo wpisz kcal"
+            placeholder={mode === "eat" && !replacing ? "Szukaj posiłku albo wpisz kcal" : "Szukaj posiłku"}
             className="h-full min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
             enterKeyHint="search"
           />
@@ -148,12 +190,14 @@ export function AddSheet({
           results.length > 0 ? (
             <ul className="flex flex-col gap-2">
               {results.map((option) => (
-                <OptionRow key={option.mealKey} option={option} onAdd={() => add(() => onAdd(option))} />
+                <OptionRow key={option.mealKey} option={option} onAdd={() => add(() => onAdd(option, mode))} />
               ))}
             </ul>
           ) : quickKcal === null ? (
             <p className="text-sm text-muted-foreground">
-              Nic takiego w arkuszu. Wpisz same kalorie albo użyj „Wpisz ręcznie” niżej.
+              {mode === "eat" && !replacing
+                ? "Nic takiego w arkuszu. Wpisz same kalorie albo użyj „Wpisz ręcznie” niżej."
+                : "Nic takiego w arkuszu. Spróbuj innego słowa."}
             </p>
           ) : null
         ) : (
@@ -162,7 +206,7 @@ export function AddSheet({
               <Section title="Gotowe w lodówce">
                 <ul className="flex flex-col gap-2">
                   {ready.map((option) => (
-                    <OptionRow key={option.mealKey} option={option} onAdd={() => add(() => onAdd(option))} />
+                    <OptionRow key={option.mealKey} option={option} onAdd={() => add(() => onAdd(option, mode))} />
                   ))}
                 </ul>
               </Section>
@@ -174,7 +218,7 @@ export function AddSheet({
               ) : frequent.length > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {frequent.slice(0, 5).map((option) => (
-                    <OptionRow key={option.mealKey} option={option} onAdd={() => add(() => onAdd(option))} />
+                    <OptionRow key={option.mealKey} option={option} onAdd={() => add(() => onAdd(option, mode))} />
                   ))}
                 </ul>
               ) : (
@@ -184,28 +228,31 @@ export function AddSheet({
           </>
         )}
 
-        <Section title="Inaczej">
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { icon: PencilLine, label: "Wpisz ręcznie", onClick: onManual },
-              { icon: Wine, label: "Na mieście", onClick: onDinnerOut },
-              { icon: HelpCircle, label: "Nie gotuję", onClick: onNoCook },
-            ].map(({ icon: Icon, label, onClick }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => {
-                  close();
-                  onClick();
-                }}
-                className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card px-2 py-3 text-sm font-semibold"
-              >
-                <Icon className="size-5 text-primary" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </Section>
+        {replacing ? null : (
+          <Section title="Inaczej">
+            <div className={cn("grid gap-2", mode === "eat" ? "grid-cols-3" : "grid-cols-1")}>
+              {[
+                // Typing in food and "no cooking" are about what you ate; dinner out is also a plan.
+                ...(mode === "eat" ? [{ icon: PencilLine, label: "Wpisz ręcznie", onClick: onManual }] : []),
+                { icon: Wine, label: "Na mieście", onClick: onDinnerOut },
+                ...(mode === "eat" ? [{ icon: HelpCircle, label: "Nie gotuję", onClick: onNoCook }] : []),
+              ].map(({ icon: Icon, label, onClick }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    close();
+                    onClick();
+                  }}
+                  className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card px-2 py-3 text-sm font-semibold"
+                >
+                  <Icon className="size-5 text-primary" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </Section>
+        )}
       </div>
     </Sheet>
   );

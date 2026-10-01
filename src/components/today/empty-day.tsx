@@ -14,7 +14,10 @@ export function EmptyDay({
   hasTemplate,
   onUseDefault,
   error,
+  forTomorrow = false,
 }: {
+  /** Wording only: "plan na dziś" or "plan na ten dzień". */
+  forTomorrow?: boolean;
   dayType: DayType;
   hasTemplate: boolean;
   onUseDefault: () => Promise<void>;
@@ -43,7 +46,7 @@ export function EmptyDay({
     <Card className="gap-4 border-primary/25 bg-gradient-to-br from-card to-primary/5 p-6 text-center">
       <CardHeader className="items-center">
         <CalendarPlus className="size-9 text-primary" />
-        <CardTitle className="mt-2">Nie masz jeszcze planu na dziś</CardTitle>
+        <CardTitle className="mt-2">{forTomorrow ? "Ten dzień jest jeszcze pusty" : "Nie masz jeszcze planu na dziś"}</CardTitle>
         <CardDescription>Wstaw swój domyślny dzień {dayType} jednym kliknięciem.</CardDescription>
       </CardHeader>
       <Button

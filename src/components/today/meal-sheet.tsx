@@ -51,6 +51,7 @@ function read(value: string): number | null {
  */
 export function MealSheet({
   meal,
+  canEat,
   onClose,
   onSave,
   onToggleEaten,
@@ -58,6 +59,8 @@ export function MealSheet({
   onRemove,
 }: {
   meal: TodayMeal;
+  /** False on a day that has not happened yet: nothing there can be eaten. */
+  canEat: boolean;
   onClose: () => void;
   onSave: (patch: Macros & { portions: number }) => Promise<void>;
   onToggleEaten: () => void;
@@ -162,17 +165,19 @@ export function MealSheet({
           Zapisz
         </Button>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              onToggleEaten();
-              onClose();
-            }}
-          >
-            {eaten ? <Undo2 /> : <Check />}
-            {eaten ? "Nie zjedzone" : "Zjedzone"}
-          </Button>
+        <div className={cn("grid gap-2", canEat ? "grid-cols-2" : "grid-cols-1")}>
+          {canEat ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onToggleEaten();
+                onClose();
+              }}
+            >
+              {eaten ? <Undo2 /> : <Check />}
+              {eaten ? "Nie zjedzone" : "Zjedzone"}
+            </Button>
+          ) : null}
           {eaten ? (
             <Button variant="outline" disabled>
               <Repeat />

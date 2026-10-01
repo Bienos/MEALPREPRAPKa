@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    // History became the calendar; old links and the installed app's shortcut still work.
+    return [{ source: "/historia", destination: "/kalendarz", permanent: true }];
+  },
   async headers() {
     return [
       {

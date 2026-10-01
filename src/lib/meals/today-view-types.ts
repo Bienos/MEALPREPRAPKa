@@ -60,6 +60,20 @@ export function toTodayMeal(meal: PlannedMealRow, prepared = false): TodayMeal {
   };
 }
 
+/** Tomorrow, as a one-line summary on Today. The full day lives on its own page. */
+export type TomorrowPreview = {
+  date: string;
+  label: string;
+  dayType: DayType;
+  /** Meals already planned for that day. */
+  count: number;
+  kcal: number;
+  names: string[];
+};
+
+/** Today, or a day you are looking at from the calendar. */
+export type DayWhen = "today" | "past" | "future";
+
 /** One meal the "Dodaj" sheet can log in a tap: a sheet dish for today's day type. */
 export type AddOption = Macros & {
   mealKey: string;
@@ -106,6 +120,27 @@ export function remainingMacros(target: Macros, meals: TodayMeal[]): Macros {
     fat_g: target.fat_g - eaten.fat_g,
     carbs_g: target.carbs_g - eaten.carbs_g,
   };
+}
+
+/**
+ * Where a slot falls in the day. Slots are free text (the default day's
+ * "Posiłek 2", a library meal's "Obiad"), so this reads the name. Unknown
+ * slots go after everything known, and food logged outside the plan last.
+ */
+function slotRank(meal: Pick<TodayMeal, "slot" | "status">): number {
+  if (meal.status === "adhoc") return 9;
+  const slot = meal.slot.toLowerCase();
+  if (slot.startsWith("śniadanie")) return 0;
+  if (slot === "posiłek 2" || slot.startsWith("obiad")) return 1;
+  if (slot === "posiłek 3" || slot.startsWith("przekąska")) return 2;
+  if (slot.startsWith("kolacja")) return 3;
+  if (slot.startsWith("białko")) return 4;
+  return 5;
+}
+
+/** The day in the order you eat it. Within a slot, the order they were added. */
+export function sortDay<T extends Pick<TodayMeal, "slot" | "status" | "position">>(meals: T[]): T[] {
+  return [...meals].sort((a, b) => slotRank(a) - slotRank(b) || a.position - b.position);
 }
 
 export function nextPlannedMeal(meals: TodayMeal[]): TodayMeal | undefined {

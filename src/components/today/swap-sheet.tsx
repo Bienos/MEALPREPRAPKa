@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Snowflake } from "lucide-react";
+import { Search, Snowflake } from "lucide-react";
 
 import { Sheet } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -19,9 +19,12 @@ export function SwapSheet({
   mealName,
   options,
   onUse,
+  onSearch,
 }: {
   open: boolean;
   onClose: () => void;
+  /** Opens a search over the whole library, for when none of the suggestions fit. */
+  onSearch: () => void;
   mealName: string;
   /** null while the alternatives are still being fetched. */
   options: Candidate[] | null;
@@ -74,6 +77,18 @@ export function SwapSheet({
           ))}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={() => {
+          onClose();
+          onSearch();
+        }}
+        className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border bg-card font-semibold hover:bg-muted"
+      >
+        <Search className="size-5 text-primary" />
+        Szukaj w całej bazie
+      </button>
     </Sheet>
   );
 }

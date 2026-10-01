@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  addPlannedMeal,
   addPlannedMeals,
   getDayPlan,
   listPlannedMeals,
@@ -12,6 +13,7 @@ import { listDefaultDayMeals } from "@/lib/db/default-day";
 import { getSettings } from "@/lib/db/settings";
 import type { DayType, IsoDate } from "@/lib/db/helpers";
 import { getMealLibrary } from "./library";
+import { slotNameForCategory } from "./slots";
 import { findMealVariant } from "./types";
 
 /**
@@ -72,6 +74,38 @@ export async function applyDefaultDay(date: IsoDate, dayType: DayType): Promise<
   await upsertDayPlan(date, dayType);
   await addPlannedMeals(meals);
   return { ok: true, created: meals.length };
+}
+
+/**
+ * Plans one portion of a library dish for a day, in that day's DT/DNT version,
+ * after what is already there. Returns null when the dish is gone from the sheet.
+ */
+export async function planSheetMeal(date: IsoDate, mealKey: string): Promise<PlannedMeal | null> {
+  const [{ library }, { dayType }, existing] = await Promise.all([
+    getMealLibrary(),
+    resolveDayType(date),
+    listPlannedMeals(date),
+  ]);
+  const variant = findMealVariant(library.meals, mealKey, dayType);
+  if (!variant) return null;
+
+  // Saving the plan pins the day type, so it does not drift if the default changes.
+  await upsertDayPlan(date, dayType);
+  return addPlannedMeal({
+    plan_date: date,
+    slot: slotNameForCategory(variant.category),
+    position: existing.length > 0 ? Math.max(...existing.map((meal) => meal.position)) + 1 : 0,
+    source: "sheet",
+    status: "planned",
+    meal_key: variant.mealKey,
+    meal_name: variant.name,
+    variant: variant.variant,
+    portions: 1,
+    kcal: Math.round(variant.kcal),
+    protein_g: variant.protein_g,
+    fat_g: variant.fat_g,
+    carbs_g: variant.carbs_g,
+  });
 }
 
 /** Meals counted towards "eaten today". */

@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { listPantryStaples } from "@/lib/db/pantry";
 import { listShoppingItems } from "@/lib/db/shopping";
 import type { ShoppingCategory } from "@/lib/meals/ingredients";
-import { checkShoppingItemAction, ownShoppingItemAction, setStapleStockAction } from "../actions";
+import { checkShoppingItemAction, clearCheckedAction, ownShoppingItemAction, setStapleStockAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +37,14 @@ export default async function ShoppingPage() {
         <ChevronLeft className="size-5" />
         Prep
       </Link>
-      <PageHeader title="Zakupy" subtitle="Z aktualnego prepu, bez duplikatów" />
+      <PageHeader title="Zakupy" subtitle="Z Twojego prepu, bez duplikatów" />
       <ShoppingList
         items={rows}
         staples={stapleRows}
         onCheck={checkShoppingItemAction}
         onOwn={ownShoppingItemAction}
         onStaple={setStapleStockAction}
+        onClearChecked={clearCheckedAction}
       />
     </>
   );

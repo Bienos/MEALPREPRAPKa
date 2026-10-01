@@ -13,21 +13,30 @@ function Bar({ value, target, className }: { value: number; target: number; clas
   );
 }
 
+export type SummaryKind = "left" | "eaten" | "planned";
+
+const LABEL: Record<SummaryKind, string> = { left: "Zostało", eaten: "Zjedzone", planned: "Zaplanowano" };
+
 /**
- * Top of Today: calories left in large type, then protein, carbs and fat as
- * thin bars. Eaten food only, so it answers "how much can I still eat".
+ * Top of a day: calories in large type, then protein, carbs and fat as thin
+ * bars. Today answers "how much can I still eat"; a past day shows what was
+ * eaten and a future day what is planned.
  */
 export function DaySummary({
   target,
   eaten,
+  kind,
   onRebalance,
 }: {
   target: Macros;
+  /** Eaten food for today and past days, everything planned for a future day. */
   eaten: Macros;
-  onRebalance: () => void;
+  kind: SummaryKind;
+  onRebalance?: () => void;
 }) {
   const left = Math.round(target.kcal - eaten.kcal);
   const over = left < 0;
+  const shown = kind === "left" ? Math.abs(left) : Math.round(eaten.kcal);
   const macros: [string, number, number, string][] = [
     ["Białko", eaten.protein_g, target.protein_g, "bg-accent"],
     ["Węgle", eaten.carbs_g, target.carbs_g, "bg-primary"],
@@ -38,16 +47,16 @@ export function DaySummary({
     <Card className="gap-3 p-4">
       <div className="flex items-baseline gap-2">
         <span className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
-          {over ? "Ponad plan" : "Zostało"}
+          {kind === "left" && over ? "Ponad plan" : LABEL[kind]}
         </span>
-        <span className={cn("ml-auto text-3xl font-extrabold tabular-nums", over && "text-destructive")}>
-          {Math.abs(left).toLocaleString("pl-PL")}
+        <span className={cn("ml-auto text-3xl font-extrabold tabular-nums", kind === "left" && over && "text-destructive")}>
+          {shown.toLocaleString("pl-PL")}
         </span>
         <span className="text-sm font-semibold text-muted-foreground tabular-nums">
           / {Math.round(target.kcal).toLocaleString("pl-PL")} kcal
         </span>
       </div>
-      <Bar value={eaten.kcal} target={target.kcal} className={over ? "bg-destructive" : "bg-primary"} />
+      <Bar value={eaten.kcal} target={target.kcal} className={over && kind !== "eaten" ? "bg-destructive" : "bg-primary"} />
 
       <dl className="grid grid-cols-3 gap-3">
         {macros.map(([label, value, goal, color]) => (
@@ -64,14 +73,16 @@ export function DaySummary({
         ))}
       </dl>
 
-      <button
-        type="button"
-        onClick={onRebalance}
-        className="-mb-1 flex items-center gap-1.5 self-start rounded-full py-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
-      >
-        <Calculator className="size-4" />
-        Przelicz resztę dnia
-      </button>
+      {onRebalance ? (
+        <button
+          type="button"
+          onClick={onRebalance}
+          className="-mb-1 flex items-center gap-1.5 self-start rounded-full py-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
+        >
+          <Calculator className="size-4" />
+          {kind === "left" ? "Przelicz resztę dnia" : "Sprawdź, czy się zgadza"}
+        </button>
+      ) : null}
     </Card>
   );
 }

@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { Undo2 } from "lucide-react";
+import { Plus, Undo2 } from "lucide-react";
 
-/** Small toast after ZJEDZONE. Auto-dismisses; tapping Cofnij reverts the log. */
+/** Small toast after a change. Auto-dismisses; its one button reverts or follows up. */
 export function UndoToast({
   message,
-  onUndo,
+  actionLabel = "Cofnij",
+  onAction,
   onDismiss,
   timeoutMs = 6000,
 }: {
   message: string;
-  onUndo: () => void;
+  actionLabel?: string;
+  onAction: () => void;
   onDismiss: () => void;
   timeoutMs?: number;
 }) {
@@ -19,6 +21,8 @@ export function UndoToast({
     const timer = setTimeout(onDismiss, timeoutMs);
     return () => clearTimeout(timer);
   }, [onDismiss, timeoutMs, message]);
+
+  const Icon = actionLabel === "Cofnij" ? Undo2 : Plus;
 
   return (
     <div
@@ -29,11 +33,11 @@ export function UndoToast({
         <p className="min-w-0 flex-1 truncate text-sm font-semibold">{message}</p>
         <button
           type="button"
-          onClick={onUndo}
+          onClick={onAction}
           className="flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-sm font-bold text-background underline-offset-2 hover:underline"
         >
-          <Undo2 className="size-4" />
-          Cofnij
+          <Icon className="size-4" />
+          {actionLabel}
         </button>
       </div>
     </div>

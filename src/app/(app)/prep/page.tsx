@@ -2,8 +2,9 @@ import Link from "next/link";
 import { Refrigerator, ShoppingBasket } from "lucide-react";
 
 import { PageHeader } from "@/components/shell/page-header";
-import { addDays, longDateLabel, todayIso } from "@/lib/date";
-import { listPrepBatches, listAvailablePortions } from "@/lib/db/prep";
+import { addDays, longDateLabel, relativeDayLabel, todayIso } from "@/lib/date";
+import { listDayPlans } from "@/lib/db/day-plans";
+import { listAvailablePortions } from "@/lib/db/prep";
 import {
   getActivePrepSession,
   getJustCompletedPrepSession,
@@ -22,16 +23,29 @@ export const dynamic = "force-dynamic";
 export default async function PrepPage() {
   const settings = await getSettings();
   const today = todayIso(settings.timezone);
-  const session = await getActivePrepSession();
+  const horizon = addDays(today, 3);
+  const [session, plans, portions, shopping] = await Promise.all([
+    getActivePrepSession(),
+    listDayPlans(today, horizon),
+    listAvailablePortions(),
+    listShoppingItems(),
+  ]);
 
   let stage: PrepStage;
 
-  // The next four days, each defaulting to the configured day type. Offered
-  // both on a fresh start and right after a finished prep, so there is never
-  // a screen with no way to plan the next one.
+  // The next four days with the type each already has. A day you have not
+  // planned yet falls back to the default. Offered both on a fresh start and
+  // right after a finished prep, so there is never a screen with no way to
+  // plan the next one.
+  const plannedTypes = new Map(plans.map((plan) => [plan.date, plan.day_type]));
   const nextDays: PrepDayView[] = Array.from({ length: 4 }, (_, index) => {
     const date = addDays(today, index);
-    return { date, label: longDateLabel(date), dayType: settings.default_day_type };
+    const long = longDateLabel(date);
+    return {
+      date,
+      label: index <= 2 ? `${relativeDayLabel(date, today)} · ${long}` : long,
+      dayType: plannedTypes.get(date) ?? settings.default_day_type,
+    };
   });
 
   // A prep finished moments ago still gets its summary screen.
@@ -60,7 +74,6 @@ export default async function PrepPage() {
         currentStep: session.current_step,
       };
     } else {
-      const [shopping, portions] = await Promise.all([listShoppingItems(), listAvailablePortions()]);
       const view: PrepItemView[] = items.map((item) => ({
         id: item.id,
         mealKey: item.meal_key,
@@ -88,8 +101,7 @@ export default async function PrepPage() {
     }
   }
 
-  // Shown as a hint on the fridge link.
-  const recentBatches = session ? [] : await listPrepBatches(1);
+  const toBuy = shopping.filter((item) => !item.owned && !item.checked).length;
 
   return (
     <>
@@ -107,22 +119,33 @@ export default async function PrepPage() {
       <nav className="flex flex-col gap-2">
         <Link
           href="/prep/lodowka"
-          className="flex min-h-14 items-center gap-3 rounded-xl border bg-card px-4 font-semibold hover:bg-muted"
+          className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 hover:bg-muted"
         >
-          <Refrigerator className="size-5 text-accent" />
-          Lodówka
-          {recentBatches.length > 0 ? (
-            <span className="ml-auto text-sm font-normal text-muted-foreground">
-              ostatnio: {recentBatches[0].meal_name}
+          <Refrigerator className="size-5 shrink-0 text-accent" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">Lodówka</span>
+            <span className="block text-sm text-muted-foreground">
+              {portions.length > 0
+                ? `${portions.length} ugotowanych porcji czeka na zjedzenie`
+                : "Tu zobaczysz, co ugotowałeś na zapas"}
             </span>
-          ) : null}
+          </span>
         </Link>
         <Link
           href="/prep/zakupy"
-          className="flex min-h-14 items-center gap-3 rounded-xl border bg-card px-4 font-semibold hover:bg-muted"
+          className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 hover:bg-muted"
         >
-          <ShoppingBasket className="size-5 text-primary" />
-          Zakupy
+          <ShoppingBasket className="size-5 shrink-0 text-primary" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">Zakupy</span>
+            <span className="block text-sm text-muted-foreground">
+              {shopping.length === 0
+                ? "Lista zrobi się sama po zbudowaniu prepu"
+                : toBuy > 0
+                  ? `Zostało do kupienia: ${toBuy}`
+                  : "Wszystko kupione"}
+            </span>
+          </span>
         </Link>
       </nav>
     </>

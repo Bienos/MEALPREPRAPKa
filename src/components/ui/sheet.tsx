@@ -23,8 +23,11 @@ export function Sheet({
   className?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  // What the parent last asked for, so a close we caused ourselves can be told from the person's.
+  const openRef = useRef(open);
 
   useEffect(() => {
+    openRef.current = open;
     const dialog = ref.current;
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
@@ -34,7 +37,13 @@ export function Sheet({
   return (
     <dialog
       ref={ref}
-      onClose={onClose}
+      onClose={() => {
+        // The browser also fires "close" when we closed the dialog ourselves
+        // because `open` went false. Reporting that would undo whatever the
+        // parent did next, such as opening another sheet from this one. Only
+        // a close the person made (Escape, backdrop, X) is reported.
+        if (openRef.current) onClose();
+      }}
       onClick={(event) => {
         // Clicking the backdrop (the dialog itself, not its content) closes.
         if (event.target === ref.current) onClose();
