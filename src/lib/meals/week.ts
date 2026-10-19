@@ -102,7 +102,7 @@ function replaceable(meals: Pick<PlannedMeal, "status">[]): boolean {
  * rebuilds the shopping list. false when the day is past or under way, or a
  * dish is gone from the sheet.
  */
-export async function applyReadyDay(date: IsoDate, key: string, dayType: DayType): Promise<boolean> {
+export async function applyReadyDay(date: IsoDate, key: string, dayType: DayType, rebuild = true): Promise<boolean> {
   const [settings, targets, existing, { library }] = await Promise.all([
     getSettings(),
     getTargets(),
@@ -116,8 +116,23 @@ export async function applyReadyDay(date: IsoDate, key: string, dayType: DayType
   await upsertDayPlan(date, dayType);
   await clearPlannedMeals(date);
   await addPlannedMeals(plannedRows(date, day));
-  await rebuildShoppingList();
+  if (rebuild) await rebuildShoppingList();
   return true;
+}
+
+/**
+ * The same ready day on several days ("to samo przez 2 dni, albo cały
+ * tydzień"). Each day keeps its own DT/DNT, so the dish is rebuilt with that
+ * day's version and target. Days that are past or under way are skipped.
+ * The shopping list is rebuilt once. Returns how many days were set.
+ */
+export async function applyReadyDayToDays(days: { date: IsoDate; dayType: DayType }[], key: string): Promise<number> {
+  let applied = 0;
+  for (const { date, dayType } of days) {
+    if (await applyReadyDay(date, key, dayType, false)) applied++;
+  }
+  if (applied > 0) await rebuildShoppingList();
+  return applied;
 }
 
 /**
