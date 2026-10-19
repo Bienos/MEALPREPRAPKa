@@ -4,7 +4,7 @@
  * input. Pure functions only, so it is unit-testable and safe on the client.
  */
 
-import type { Meal, MealVariant, Variant } from "./types.ts";
+import { findMealVariant, type Meal, type MealVariant, type Variant } from "./types.ts";
 
 export type DayType = "DT" | "DNT";
 
@@ -103,6 +103,38 @@ export function matchesSlot(category: string, slot: PrepSlot): boolean {
   return folded.startsWith(slot);
 }
 
+/** Two meal-prep portions a day, but one breakfast and one supper. */
+export function mealsPerDayFor(slot: PrepSlot): number {
+  return slot === "obiad" ? PREP_MEALS_PER_DAY : 1;
+}
+
+/**
+ * Whether a cooked batch lasts the whole prep. Cooked on the first day, the
+ * last portion is eaten `spanDays - 1` days later, which is also the expiry
+ * finishing a prep writes. Food that freezes always lasts.
+ */
+function keepsFor(variant: MealVariant, spanDays: number): boolean {
+  return parseFridgeDays(variant.fridgeLife) >= spanDays - 1 || variant.freezable === true;
+}
+
+/**
+ * The longest prep this slot's dishes allow, from the sheet's fridge life.
+ * Suppers keep a day or two, so a supper prep longer than that would come
+ * back empty. Infinity when something freezes, 0 when nothing batch-cooks.
+ */
+export function maxPrepDays(meals: Meal[], slot: PrepSlot): number {
+  let longest = 0;
+  for (const meal of meals) {
+    if (!matchesSlot(meal.category, slot)) continue;
+    for (const variant of meal.variants) {
+      if (parseBatchMax(variant.batch) <= 1) continue;
+      const days = variant.freezable === true ? Infinity : parseFridgeDays(variant.fridgeLife) + 1;
+      longest = Math.max(longest, days);
+    }
+  }
+  return longest;
+}
+
 /** Target kcal for one prepped portion on a given day type. */
 export function portionTarget(dayTargetKcal: number): number {
   return (dayTargetKcal * PREP_SHARE_OF_DAY) / PREP_MEALS_PER_DAY;
@@ -135,7 +167,7 @@ function candidatesFor(
         .filter((variant) => variant.variant === dayType || variant.variant === null)
         .filter((variant) => parseBatchMax(variant.batch) > 1)
         // The food has to survive the span, unless it can be frozen.
-        .filter((variant) => parseFridgeDays(variant.fridgeLife) >= spanDays || variant.freezable === true)
+        .filter((variant) => keepsFor(variant, spanDays))
         .map((variant) => ({ meal, variant, score: fitScore(variant, targetKcal, targetProtein) })),
     )
     .sort((a, b) => a.score - b.score || a.meal.key.localeCompare(b.meal.key));
@@ -309,5 +341,48 @@ export function availableDishes({
     items.push(toItem(candidate, parseBatchMax(candidate.variant.batch)));
   }
 
+  return items;
+}
+
+/** One planned entry on the days being prepped. */
+export type PlannedPortion = { mealKey: string; variant: Variant; portions: number };
+
+/**
+ * When the days being prepped already have this slot's dishes on them (picked
+ * on the week screen), the prep cooks exactly those instead of suggesting
+ * others, so it matches what was bought. Portions waiting in the fridge are
+ * taken off first. Dishes gone from the sheet are skipped.
+ */
+export function prepFromPlanned({
+  planned,
+  meals,
+  fridge = {},
+}: {
+  planned: PlannedPortion[];
+  meals: Meal[];
+  /** Available portions per meal key. */
+  fridge?: Record<string, number>;
+}): PrepItem[] {
+  const totals = new Map<string, { mealKey: string; variant: Variant; portions: number }>();
+  for (const entry of planned) {
+    const key = `${entry.mealKey}|${entry.variant ?? ""}`;
+    const total = totals.get(key) ?? { mealKey: entry.mealKey, variant: entry.variant, portions: 0 };
+    total.portions += entry.portions;
+    totals.set(key, total);
+  }
+
+  const inFridge = { ...fridge };
+  const items: PrepItem[] = [];
+  for (const total of totals.values()) {
+    const meal = meals.find((candidate) => candidate.key === total.mealKey);
+    const variant = findMealVariant(meals, total.mealKey, total.variant);
+    if (!meal || !variant) continue;
+
+    const ready = Math.min(inFridge[total.mealKey] ?? 0, Math.floor(total.portions));
+    inFridge[total.mealKey] = (inFridge[total.mealKey] ?? 0) - ready;
+    // A 1.25× portion still means cooking a whole one.
+    const portions = Math.ceil(total.portions - ready - 1e-9);
+    if (portions > 0) items.push(toItem({ meal, variant, score: 0 }, portions));
+  }
   return items;
 }

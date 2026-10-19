@@ -6,10 +6,13 @@ import {
   availableDishes,
   isMealPrepCategory,
   matchesSlot,
+  maxPrepDays,
+  mealsPerDayFor,
   parseBatchMax,
   parseFridgeDays,
   parsePrepMinutes,
   portionTarget,
+  prepFromPlanned,
   swapAlternatives,
 } from "./prep-plan.ts";
 import type { Meal, MealVariant } from "./types.ts";
@@ -296,5 +299,82 @@ describe("prep slots", () => {
       exclude: ["a"],
     });
     assert.deepEqual(rest.map((item) => item.mealKey), ["b"]);
+  });
+});
+
+describe("how long a prep can be", () => {
+  const supper = (key: string, fridgeLife: string) =>
+    meal(key, { category: "Kolacja", batch: "1–2", fridgeLife, freezable: false });
+
+  test("food cooked on day one is eaten on the last day span − 1 days later", () => {
+    // Keeps 1 day: fine for a 2-day prep (today and tomorrow), not for 3.
+    const twoDays = buildPrepPlan({
+      days: [
+        { date: "2026-10-19", dayType: "DT" },
+        { date: "2026-10-20", dayType: "DT" },
+      ],
+      meals: [supper("wrap", "1–2 dni")],
+      targets: TARGETS,
+      slot: "kolacja",
+      mealsPerDay: 1,
+    });
+    assert.equal(twoDays.short, false);
+    assert.equal(twoDays.items[0].portions, 2);
+  });
+
+  test("suppers that keep a day or two allow a two-day prep, freezable dishes any length", () => {
+    assert.equal(maxPrepDays([supper("wrap", "1–2 dni")], "kolacja"), 2);
+    assert.equal(maxPrepDays([meal("rice")], "obiad"), Infinity);
+    assert.equal(maxPrepDays([supper("fresh", "—")].map((m) => ({ ...m, variants: m.variants.map((v) => ({ ...v, batch: "1" })) })), "kolacja"), 0);
+  });
+
+  test("one breakfast and one supper a day, two meal-prep portions", () => {
+    assert.equal(mealsPerDayFor("sniadanie"), 1);
+    assert.equal(mealsPerDayFor("kolacja"), 1);
+    assert.equal(mealsPerDayFor("obiad"), 2);
+  });
+});
+
+describe("cooking what the week planned", () => {
+  const meals = [meal("rice"), meal("pasta")];
+
+  test("cooks the planned dishes, per variant, in the order planned", () => {
+    const items = prepFromPlanned({
+      planned: [
+        { mealKey: "pasta", variant: "DT", portions: 1 },
+        { mealKey: "rice", variant: "DT", portions: 1 },
+        { mealKey: "pasta", variant: "DT", portions: 1 },
+        { mealKey: "pasta", variant: "DNT", portions: 1 },
+      ],
+      meals,
+    });
+    assert.deepEqual(
+      items.map((item) => [item.mealKey, item.variant, item.portions]),
+      [["pasta", "DT", 2], ["rice", "DT", 1], ["pasta", "DNT", 1]],
+    );
+  });
+
+  test("portions already in the fridge are not cooked again", () => {
+    const items = prepFromPlanned({
+      planned: [
+        { mealKey: "rice", variant: "DT", portions: 1 },
+        { mealKey: "rice", variant: "DT", portions: 1 },
+        { mealKey: "rice", variant: "DNT", portions: 1 },
+      ],
+      meals,
+      fridge: { rice: 2 },
+    });
+    assert.deepEqual(items.map((item) => [item.variant, item.portions]), [["DNT", 1]]);
+  });
+
+  test("a bigger portion still means cooking whole ones, and gone dishes are skipped", () => {
+    const items = prepFromPlanned({
+      planned: [
+        { mealKey: "rice", variant: "DT", portions: 1.25 },
+        { mealKey: "gone", variant: "DT", portions: 1 },
+      ],
+      meals,
+    });
+    assert.deepEqual(items.map((item) => [item.mealKey, item.portions]), [["rice", 2]]);
   });
 });

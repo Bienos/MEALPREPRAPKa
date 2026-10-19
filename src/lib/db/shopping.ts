@@ -26,6 +26,8 @@ export type NewShoppingItem = {
   unit?: string | null;
   source?: "prep" | "manual";
   category?: ShoppingCategoryValue;
+  checked?: boolean;
+  owned?: boolean;
 };
 
 export async function listShoppingItems(): Promise<ShoppingItem[]> {

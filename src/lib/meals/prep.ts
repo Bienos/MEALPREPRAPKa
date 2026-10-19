@@ -13,16 +13,23 @@ import {
   type PrepSession,
   type PrepSessionItem,
 } from "@/lib/db/prep-sessions";
+import { listPlannedMealsBetween, type PlannedMeal } from "@/lib/db/day-plans";
 import { createPrepBatch, listAvailablePortions } from "@/lib/db/prep";
-import { getTargets } from "@/lib/db/settings";
+import { getSettings, getTargets } from "@/lib/db/settings";
 import type { DayType } from "@/lib/db/helpers";
-import { replacePrepShoppingItems } from "@/lib/db/shopping";
+import { listShoppingItems, replacePrepShoppingItems } from "@/lib/db/shopping";
 import { addDays, todayIso } from "@/lib/date";
 import { aggregateIngredients } from "./ingredients";
 import { getMealLibrary } from "./library";
+import { keepTicks } from "./shopping-text";
+import { findMealVariant, type Meal } from "./types";
+import { portionsToBuy } from "./week-plan";
 import {
   availableDishes,
   buildPrepPlan,
+  matchesSlot,
+  mealsPerDayFor,
+  prepFromPlanned,
   swapAlternatives,
   type PrepItem,
   type PrepSlot,
@@ -96,26 +103,66 @@ async function fridgeStock() {
 }
 
 /**
- * [ BUILD PREP ]: generates the plan for the chosen days, stores it as the
- * active session and regenerates the shopping list.
+ * Food of this slot already planned on the prep's days, not yet eaten. When
+ * there is some, the prep cooks it, and the shopping list already has it.
+ */
+async function plannedForPrep(days: { date: string }[], slot: PrepSlot, meals: Meal[]): Promise<PlannedMeal[]> {
+  const dates = days.map((day) => day.date).sort();
+  if (dates.length === 0) return [];
+  const inSlot = new Set(meals.filter((meal) => matchesSlot(meal.category, slot)).map((meal) => meal.key));
+  const entries = await listPlannedMealsBetween(dates[0], dates[dates.length - 1]);
+  return entries.filter(
+    (entry) =>
+      entry.status === "planned" && entry.meal_key !== null && inSlot.has(entry.meal_key) && dates.includes(entry.plan_date),
+  );
+}
+
+/**
+ * [ BUILD PREP ]: cooks what is planned for the chosen days, or generates a
+ * plan when nothing is, stores it as the active session and rebuilds the
+ * shopping list.
  */
 export async function buildPrep(
   days: { date: string; day_type: DayType }[],
   slot: PrepSlot = "obiad",
 ): Promise<PrepSession> {
-  const [{ library }, targets, fridge] = await Promise.all([getMealLibrary(), getTargets(), fridgeStock()]);
+  const [{ library }, targets, fridge, portions] = await Promise.all([
+    getMealLibrary(),
+    getTargets(),
+    fridgeStock(),
+    listAvailablePortions(),
+  ]);
 
-  const plan = buildPrepPlan({
-    days: days.map((day) => ({ date: day.date, dayType: day.day_type })),
-    meals: library.meals,
-    targets,
-    slot,
-    fridge,
-  });
+  // Dishes already picked for these days (on the week screen or by hand) win
+  // over suggestions, so the prep cooks what was bought.
+  const planned = await plannedForPrep(days, slot, library.meals);
+
+  let items: PrepItem[];
+  if (planned.length > 0) {
+    const ready: Record<string, number> = {};
+    for (const portion of portions) {
+      const key = portion.batch.meal_key;
+      if (key) ready[key] = (ready[key] ?? 0) + 1;
+    }
+    items = prepFromPlanned({
+      planned: planned.map((entry) => ({ mealKey: entry.meal_key!, variant: entry.variant, portions: entry.portions })),
+      meals: library.meals,
+      fridge: ready,
+    });
+  } else {
+    items = buildPrepPlan({
+      days: days.map((day) => ({ date: day.date, dayType: day.day_type })),
+      meals: library.meals,
+      targets,
+      slot,
+      fridge,
+      mealsPerDay: mealsPerDayFor(slot),
+    }).items;
+  }
 
   const session = await createPrepSession(days, slot);
-  await replacePrepSessionItems(session.id, toRows(plan.items));
-  await regenerateShoppingList(session.id);
+  await replacePrepSessionItems(session.id, toRows(items));
+  await rebuildShoppingList();
   return session;
 }
 
@@ -172,7 +219,7 @@ export async function addDishToPrep(sessionId: string, mealKey: string): Promise
   if (!chosen) return;
 
   await addPrepSessionItem(sessionId, toRows([chosen])[0]);
-  await regenerateShoppingList(sessionId);
+  await rebuildShoppingList();
 }
 
 export async function removeDishFromPrep(sessionId: string, mealKey: string): Promise<void> {
@@ -181,7 +228,7 @@ export async function removeDishFromPrep(sessionId: string, mealKey: string): Pr
   await Promise.all(
     items.filter((item) => item.meal_key === mealKey).map((item) => deletePrepSessionItem(item.id)),
   );
-  await regenerateShoppingList(sessionId);
+  await rebuildShoppingList();
 }
 
 /** Swaps every row of one dish for another, keeping portion counts and variants. */
@@ -211,31 +258,65 @@ export async function swapDish(sessionId: string, itemId: string, newMealKey: st
   });
 
   await replacePrepSessionItems(sessionId, swapped.map(toItemRow));
-  await regenerateShoppingList(sessionId);
+  await rebuildShoppingList();
 }
 
+/** How far ahead the shopping list looks for planned food. */
+const LIST_HORIZON_DAYS = 14;
+
 /**
- * Rebuilds the prep part of the shopping list from the session's items.
- * Staples that are in stock at home are left out.
+ * Rebuilds the generated part of the shopping list. It always means the same
+ * thing, whoever asks (the week, a prep, a staple running out): every sheet
+ * dish planned and not yet eaten from today on, minus portions already in the
+ * fridge, plus the active prep's dishes when it suggested its own instead of
+ * cooking planned ones. Staples at home are left out, hand-added items stay,
+ * and what was ticked in the shop stays ticked.
  */
-export async function regenerateShoppingList(sessionId: string): Promise<void> {
-  const [items, staples] = await Promise.all([listPrepSessionItems(sessionId), listPantryStaples()]);
+export async function rebuildShoppingList(): Promise<number> {
+  const settings = await getSettings();
+  const today = todayIso(settings.timezone);
+  const [{ library }, planned, portions, session, staples, current] = await Promise.all([
+    getMealLibrary(),
+    listPlannedMealsBetween(today, addDays(today, LIST_HORIZON_DAYS)),
+    listAvailablePortions(),
+    getActivePrepSession(),
+    listPantryStaples(),
+    listShoppingItems(),
+  ]);
+
+  const ready: Record<string, number> = {};
+  for (const portion of portions) {
+    const key = portion.batch.meal_key;
+    if (key) ready[key] = (ready[key] ?? 0) + 1;
+  }
+  const toBuy = portionsToBuy(
+    planned.map((meal) => ({
+      date: meal.plan_date,
+      status: meal.status,
+      mealKey: meal.meal_key,
+      variant: meal.variant,
+      portions: meal.portions,
+    })),
+    today,
+    ready,
+  );
+  const dishes = toBuy.flatMap((entry) => {
+    const variant = findMealVariant(library.meals, entry.mealKey, entry.variant);
+    return variant ? [{ text: variant.ingredients, portions: entry.portions }] : [];
+  });
+
+  // A prep of planned dishes is already counted above; one that suggested its own needs them bought too.
+  if (session && (await plannedForPrep(session.days, session.slot, library.meals)).length === 0) {
+    const items = await listPrepSessionItems(session.id);
+    dishes.push(...items.map((item) => ({ text: item.ingredients, portions: item.portions })));
+  }
+
   const atHome = new Set(staples.filter((staple) => staple.in_stock).map((staple) => staple.name.toLowerCase()));
-
-  const totals = aggregateIngredients(
-    items.map((item) => ({ text: item.ingredients, portions: item.portions })),
-  );
-
-  await replacePrepShoppingItems(
-    totals
-      .filter((item) => !atHome.has(item.name))
-      .map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        category: item.category,
-      })),
-  );
+  const lines = aggregateIngredients(dishes)
+    .filter((item) => !atHome.has(item.name))
+    .map((item) => ({ name: item.name, quantity: item.quantity, unit: item.unit, category: item.category }));
+  await replacePrepShoppingItems(keepTicks(lines, current.filter((item) => item.source === "prep")));
+  return lines.length;
 }
 
 export type FinishedPortion = { mealName: string; variant: DayType | null; count: number };

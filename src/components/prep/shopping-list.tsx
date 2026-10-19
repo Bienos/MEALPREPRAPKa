@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Check, ClipboardCopy, Home, PackageOpen, Trash2, Undo2 } from "lucide-react";
 
@@ -78,7 +79,13 @@ export function ShoppingList({
         <Card className="items-center gap-2 py-10 text-center">
           <PackageOpen className="size-9 text-muted-foreground" />
           <p className="font-semibold">Brak listy zakupów</p>
-          <p className="text-sm text-muted-foreground">Zbuduj prep, a lista zrobi się sama.</p>
+          <p className="text-sm text-muted-foreground">
+            Wybierz jedzenie w{" "}
+            <Link href="/prep/tydzien" className="font-semibold text-primary underline-offset-2 hover:underline">
+              planie tygodnia
+            </Link>{" "}
+            albo zbuduj prep, a lista zrobi się sama.
+          </p>
         </Card>
       ) : (
         <Card className={cn("gap-3 p-4", remaining === 0 && "border-accent/30 bg-accent/5")}>
