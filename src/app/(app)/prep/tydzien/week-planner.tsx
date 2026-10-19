@@ -14,7 +14,7 @@ import { fitsTarget, readyDayLabel, type ReadyDay } from "@/lib/meals/ready-days
 import { sumMacros, type DayType, type Macros } from "@/lib/meals/today-view-types";
 import { counts, weekTarget, type WeekEntry } from "@/lib/meals/week-plan";
 import { cn } from "@/lib/utils";
-import { applyReadyDayAction, clearDayAction, fillWeekAction, setWeekDayTypeAction } from "./actions";
+import { applyReadyDayToDaysAction, clearDayAction, fillWeekAction, setWeekDayTypeAction } from "./actions";
 
 const WEEKDAYS = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
 
@@ -79,12 +79,26 @@ export function WeekPlanner({
 
   const dayEntries = (date: string) => entries.filter((entry) => entry.date === date && counts(entry));
   const emptyDays = dates.filter((date) => date >= today && !entries.some((entry) => entry.date === date));
-  const weekGoal = weekTarget(dates.map((date) => dayTypes[date]), targets);
+  const weekGoal = weekTarget(
+    dates.map((date) => dayTypes[date]),
+    targets,
+  );
   const weekTotal = sumMacros(entries.filter(counts));
   const daysOnTarget = dates.filter((date) => {
     const planned = dayEntries(date);
     return planned.length > 0 && fitsTarget(sumMacros(planned), targets[dayTypes[date]]);
   }).length;
+
+  /** The days right after this one, up to the end of the week, that a pick can also cover. */
+  function followingDays(date: string): { date: string; dayType: DayType }[] {
+    const result: { date: string; dayType: DayType }[] = [];
+    for (const next of dates.slice(dates.indexOf(date) + 1)) {
+      const underWay = entries.some((entry) => entry.date === next && entry.status !== "planned");
+      if (next < today || underWay) break;
+      result.push({ date: next, dayType: dayTypes[next] });
+    }
+    return result;
+  }
 
   function flash(message: string) {
     setNotice(message);
@@ -174,7 +188,9 @@ export function WeekPlanner({
                     )}
                   >
                     <span className="flex w-11 shrink-0 flex-col items-center">
-                      <span className={cn("text-sm font-bold", date === today && "text-primary")}>{WEEKDAYS[index]}</span>
+                      <span className={cn("text-sm font-bold", date === today && "text-primary")}>
+                        {WEEKDAYS[index]}
+                      </span>
                       <span className="text-xs text-muted-foreground">{Number(date.slice(8))}</span>
                     </span>
                     <span className="min-w-0 flex-1">
@@ -195,7 +211,9 @@ export function WeekPlanner({
                       </span>
                       <span className={cn("mt-0.5 block text-sm", planned.length === 0 && "text-muted-foreground")}>
                         {planned.length > 0
-                          ? readyDayLabel(planned.map((entry) => ({ mealKey: entry.mealKey ?? entry.id, name: entry.name })))
+                          ? readyDayLabel(
+                              planned.map((entry) => ({ mealKey: entry.mealKey ?? entry.id, name: entry.name })),
+                            )
                           : date < today
                             ? "Nic nie zaplanowano"
                             : "Pusty dzień: wybierz gotowy"}
@@ -247,6 +265,7 @@ export function WeekPlanner({
         dayType={openDate ? dayTypes[openDate] : "DT"}
         target={openDate ? targets[dayTypes[openDate]] : targets.DT}
         entries={openDate ? entries.filter((entry) => entry.date === openDate) : []}
+        following={openDate ? followingDays(openDate) : []}
         proposals={openDate ? proposals[dayTypes[openDate]] : []}
         onDayType={(dayType) => openDate && switchDayType(openDate, dayType)}
         onClose={() => setOpenDate(null)}
@@ -267,6 +286,7 @@ function DaySheet({
   dayType,
   target,
   entries,
+  following,
   proposals,
   onDayType,
   onClose,
@@ -277,6 +297,8 @@ function DaySheet({
   dayType: DayType;
   target: Macros;
   entries: WeekEntry[];
+  /** The days right after this one that a pick can also cover, in order. */
+  following: { date: string; dayType: DayType }[];
   proposals: ReadyDay[];
   onDayType: (dayType: DayType) => void;
   onClose: () => void;
@@ -285,6 +307,8 @@ function DaySheet({
   const [pending, startPending] = useTransition();
   const [chosen, setChosen] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  // How many days the pick covers: this one, and that many minus one after it.
+  const [span, setSpan] = useState(1);
 
   const planned = entries.filter(counts);
   const underWay = entries.some((entry) => entry.status !== "planned");
@@ -296,9 +320,15 @@ function DaySheet({
     setChosen(day.key);
     setFailed(false);
     startPending(async () => {
-      const ok = await applyReadyDayAction(date, day.key, dayType);
-      if (ok) onDone(`${capitalize(longDateLabel(date))}: ${readyDayLabel(day.items)}.`);
-      else setFailed(true);
+      const days = [{ date, dayType }, ...following.slice(0, span - 1)];
+      const applied = await applyReadyDayToDaysAction(days, day.key);
+      if (applied > 0) {
+        const where =
+          applied > 1
+            ? `${capitalize(longDateLabel(date))} i ${daysLabel(applied - 1)} dalej`
+            : capitalize(longDateLabel(date));
+        onDone(`${where}: ${readyDayLabel(day.items)}.`);
+      } else setFailed(true);
     });
   }
 
@@ -371,6 +401,34 @@ function DaySheet({
               <h3 className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
                 Gotowe dni {dayType} · cel {kcal(target.kcal)} kcal, {target.protein_g} B
               </h3>
+              {following.length > 0 ? (
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-sm font-bold">Na ile dni?</p>
+                  <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Na ile dni">
+                    {spanOptions(following.length + 1).map((option) => (
+                      <button
+                        key={option.days}
+                        type="button"
+                        role="radio"
+                        aria-checked={span === option.days}
+                        onClick={() => setSpan(option.days)}
+                        className={cn(
+                          "h-10 rounded-full border px-4 text-sm font-bold",
+                          span === option.days ? "border-primary bg-primary/10 text-primary" : "bg-card",
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                  {span > 3 ? (
+                    <p className="text-xs text-muted-foreground">
+                      Większość dań trzyma się w lodówce ok. 3 dni. Przy dłuższej serii część porcji trzeba będzie
+                      zamrozić.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               {failed ? (
                 <p className="text-sm font-semibold text-destructive">Nie udało się. Odśwież i spróbuj jeszcze raz.</p>
               ) : null}
@@ -396,7 +454,9 @@ function DaySheet({
                       </span>
                       <span className="text-sm text-muted-foreground tabular-nums">{macros(day.total)}</span>
                       <span className="text-sm font-bold text-primary">
-                        {pending && chosen === day.key ? "Wstawiam…" : planned.length > 0 ? "Zamień na ten" : "Wybierz"}
+                        {pending && chosen === day.key
+                          ? "Wstawiam…"
+                          : `${planned.length > 0 ? "Zamień na ten" : "Wybierz"}${span > 1 ? ` · ${daysLabel(span)}` : ""}`}
                       </span>
                     </button>
                   </li>
@@ -408,6 +468,13 @@ function DaySheet({
       ) : null}
     </Sheet>
   );
+}
+
+/** 1, 2, 3 days and "do końca tygodnia"; `max` is how many days are possible from here. */
+function spanOptions(max: number): { days: number; label: string }[] {
+  const options = [1, 2, 3].filter((days) => days <= max).map((days) => ({ days, label: daysLabel(days) }));
+  if (max > 3) options.push({ days: max, label: "do końca tygodnia" });
+  return options;
 }
 
 /** A ready day as the meals of the day: what is breakfast, what is cooked for two meals, what is a snack. */
