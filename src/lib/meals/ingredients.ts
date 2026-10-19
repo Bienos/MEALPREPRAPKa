@@ -100,11 +100,32 @@ const TRAILING_AMOUNT = /^(.+?)\s+(\d+(?:[.,]\d+)?)\s*(kg|g|ml|l|szt\.?)(?![a-z�
 // "3 jajka" — a leading count, common for eggs. Groups: 1 quantity, 2 name.
 const LEADING_COUNT = /^(\d+)\s+([a-ząćęłńóśźż].*)$/i;
 
-/** One fragment of the sheet's ingredient text. */
+/** An egg weighs about 60 g: the sheet's own "3 jajka (~180 g)". */
+const EGG_GRAMS = 60;
+// "2 jajka 120 g": the count is the amount, the grams only a note.
+const COUNTED_EGGS = /^(\d+)\s+jaj(?:ka|ko|ek|a)\b/i;
+const EGGS = /^jaj(?:ka|ko|ek|a)$/i;
+
+/**
+ * One fragment of the sheet's ingredient text. Eggs are always pieces, however
+ * the sheet wrote them ("3 jajka", "2 jajka 120 g", "Jajka 100 g"), so one
+ * list line adds them up.
+ */
 export function parseIngredient(fragment: string): ParsedIngredient {
+  const parsed = parseAmount(fragment);
+  if (parsed.unit === "g" && parsed.quantity !== null && EGGS.test(parsed.name)) {
+    return { ...parsed, quantity: parsed.quantity / EGG_GRAMS, unit: "szt" };
+  }
+  return parsed;
+}
+
+function parseAmount(fragment: string): ParsedIngredient {
   const raw = fragment.trim();
   // Parentheticals are notes like "(~180 g)", never the amount to buy.
   const cleaned = raw.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+
+  const counted = COUNTED_EGGS.exec(cleaned);
+  if (counted) return { name: "jajka", quantity: Number(counted[1]), unit: "szt", raw };
 
   const trailing = TRAILING_AMOUNT.exec(cleaned);
   if (trailing) {
@@ -179,6 +200,11 @@ export function aggregateIngredients(
         existing.quantity += amount;
       }
     }
+  }
+
+  // Pieces come whole: 11,7 eggs means 12.
+  for (const total of totals.values()) {
+    if (total.unit === "szt" && total.quantity !== null) total.quantity = Math.ceil(total.quantity - 1e-9);
   }
 
   return [...totals.values()].sort(
