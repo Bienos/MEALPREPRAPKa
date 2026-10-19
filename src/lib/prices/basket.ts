@@ -124,6 +124,9 @@ export function costOf(item: NeededItem, option: PriceOption): ItemCost | "unit"
   const { promoPrice, regularPrice, multibuyMin } = option.promo;
   const estimated = option.estimate !== undefined;
   const packAssumed = option.estimate?.packAssumed ?? false;
+  if (option.promo.shelf) {
+    return { amount: round(packs * promoPrice), packs, option, onPromo: false, estimated, packAssumed };
+  }
   if (loose || multibuyMin <= 1) {
     return { amount: round(packs * promoPrice), packs, option, onPromo: true, estimated, packAssumed };
   }

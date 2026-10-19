@@ -29,7 +29,7 @@ const one = (offer: Record<string, unknown>) => ({
 });
 
 describe("parseBlixPromos", () => {
-  test("keeps priced offers from the chains priced here; Lidl comes from lidl.pl instead", () => {
+  test("keeps priced offers from the chains priced here, Lidl's leaflet included", () => {
     assert.deepEqual(
       chicken.map((promo) => [promo.shop, promo.promoPrice]),
       [
@@ -39,9 +39,16 @@ describe("parseBlixPromos", () => {
       ],
     );
     // Smaller chains with leaflets (Delikatesy Centrum, SPAR, ABC...) are not priced here.
-    assert.equal(skyr.length, 12);
+    assert.equal(skyr.length, 14);
     assert.ok([...chicken, ...skyr].every((promo) => Object.values(BLIX_SHOPS).includes(promo.shop)));
-    assert.ok(!skyr.some((promo) => /łaciaty$/i.test(promo.name) && promo.shop === "lidl"));
+    // lidl.pl shows only the deals its site features; the leaflet has more of the week.
+    assert.deepEqual(
+      skyr.filter((promo) => promo.shop === "lidl").map((promo) => [promo.name, promo.promoPrice]),
+      [
+        ["Skyr pitny naturalny Łaciaty", 3.99],
+        ["Skyr pitny matcha z nutą prażonych migdałów Łaciaty", 3.99],
+      ],
+    );
   });
 
   test("an offer with no price in the leaflet is left out, never guessed", () => {

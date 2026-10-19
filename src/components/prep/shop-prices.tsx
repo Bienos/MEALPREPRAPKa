@@ -196,7 +196,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       <div>
         <p className="text-lg font-extrabold">Gdzie taniej?</p>
         <p className="text-sm text-muted-foreground">
-          Ceny z promocji Lidla i gazetek {SHOPS.length - 1} sieci, dla tego, co zostało do kupienia
+          Promocje Lidla, gazetki {SHOPS.length - 1} sieci i ceny z półki Biedronki, dla tego, co zostało do kupienia
         </p>
       </div>
 
@@ -322,9 +322,13 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
               {detail.estimated > 0 ? ` · w tym ${detail.estimated} szac.` : ""}
             </p>
             <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
-              {detail.shop === "lidl" ? "Promocje z lidl.pl." : "Promocje z gazetki, przez blix.pl."} Cena z oferty,
-              która wygląda na ten produkt, to szacunek (oznaczony). „Tak” ją potwierdza, „Nie” szuka następnej.
-              Bierzemy zawsze tyle opakowań, żeby wystarczyło.
+              {detail.shop === "lidl"
+                ? "Promocje z lidl.pl."
+                : detail.shop === "biedronka"
+                  ? "Promocje z gazetki (blix.pl) i ceny z półki ze sklepu internetowego Biedronki, które w sklepie mogą się trochę różnić."
+                  : "Promocje z gazetki, przez blix.pl."}{" "}
+              Cena z oferty, która wygląda na ten produkt, to szacunek (oznaczony). „Tak” ją potwierdza, „Nie” szuka
+              następnej. Bierzemy zawsze tyle opakowań, żeby wystarczyło.
             </p>
             <ul className="rounded-xl border bg-card">
               {detailLines.map((line) => (
@@ -491,7 +495,9 @@ function CostDetail({ line, fetched }: { line: BasketLine; fetched: boolean }) {
         {cost.packAssumed ? (
           <Badge tone="muted">zakładam {formatAmount(promo.packQuantity, promo.packUnit)}</Badge>
         ) : null}
-        {cost.onPromo ? (
+        {promo.shelf ? (
+          <Badge tone="muted">cena z półki (sklep online)</Badge>
+        ) : cost.onPromo ? (
           <Badge tone="promo">{promo.multibuy ?? discount}</Badge>
         ) : (
           <Badge tone="muted">promocja od {promo.multibuyMin} opak.</Badge>
@@ -543,6 +549,7 @@ function Suggestion({
     promo.appOnly ? "aplikacja" : null,
   ];
   const leaflet = promo.shop !== "lidl";
+  const linkLabel = promo.shelf ? "sklep" : "gazetka";
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
@@ -563,7 +570,7 @@ function Suggestion({
                   rel="noreferrer"
                   className="inline-flex items-center gap-0.5 font-semibold text-primary"
                 >
-                  gazetka
+                  {linkLabel}
                   <ExternalLink className="size-3" />
                 </a>
               </>

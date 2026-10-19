@@ -3,7 +3,14 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 
-import { deleteShopPrice, findShopPromo, saveProductLink, upsertShopPrice, upsertShopPrices } from "@/lib/db/prices";
+import {
+  deleteShopPrice,
+  findShelfPrice,
+  findShopPromo,
+  saveProductLink,
+  upsertShopPrice,
+  upsertShopPrices,
+} from "@/lib/db/prices";
 import { priceKey } from "@/lib/prices/match";
 import { refreshShopPromos } from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
@@ -71,7 +78,9 @@ export async function answerPromoAction(
   pack: z.input<typeof answerPackSchema> = null,
 ): Promise<void> {
   const parsedShop = shopSchema.parse(shop);
-  const promo = await findShopPromo(parsedShop, z.string().min(1).max(200).parse(productKey));
+  const key = z.string().min(1).max(200).parse(productKey);
+  // A leaflet deal or a shelf price from the shop's catalogue: both can be confirmed.
+  const promo = (await findShopPromo(parsedShop, key)) ?? (await findShelfPrice(parsedShop, key));
   if (!promo) return; // refreshed away in the meantime; nothing to answer
   const yes = z.boolean().parse(matches);
   const given = yes && promo.packQuantity === null ? answerPackSchema.parse(pack) : null;

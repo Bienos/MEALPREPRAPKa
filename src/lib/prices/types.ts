@@ -80,6 +80,8 @@ export type ShopPromo = {
   /** Packs it takes for the promo price to apply. 1 when it is not a multi-buy. */
   multibuyMin: number;
   sourceUrl: string;
+  /** A regular shelf price from the shop's own catalogue, not a deal. */
+  shelf?: boolean;
 };
 
 /** My own price for a shopping item at a shop. */

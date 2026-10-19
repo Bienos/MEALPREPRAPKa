@@ -13,6 +13,7 @@
 
 import type { Unit } from "../meals/ingredients.ts";
 import { packInItemUnit } from "./basket.ts";
+import { parsePack } from "./pack.ts";
 import type { BlixSearch } from "./blix.ts";
 import type { ProductLink, ShopPromo } from "./types.ts";
 
@@ -44,11 +45,15 @@ function either(...patterns: RegExp[]): RegExp {
 
 /** Not the plain ingredient: ready meals, cold cuts, sauces, snacks, drinks. */
 const PROCESSED =
-  /pasztet|parowk|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri/;
+  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri/;
 
 /** A flavoured dairy product, not the plain one the meals use. */
 const FLAVOURED =
-  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem/;
+  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanill|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn/;
+
+/** A fruit named as a flavour ("truskawkowa", "malinowy"), not the fruit itself. */
+const FRUIT_FLAVOUR =
+  /(truskaw|malin|jablk|jablecz|banan|borowk|jagod|wisni|grusz|brzoskwin|morel|sliw)k?ow(a|y|e|ych|ym)\b/;
 
 /**
  * First rule whose item pattern fits wins, so specific items come before
@@ -64,13 +69,13 @@ const RULES: Rule[] = [
     // The meals' "kurczak" is breast: that is what the macros are counted for.
     item: /kurczak|kurczec/,
     product: /^(?=.*kurcz)(?=.*(piers|filet))/,
-    not: either(/kaczk|indyk|indycz|w galarecie|marynowan/, PROCESSED),
+    not: either(/kaczk|indyk|indycz|w galarecie|marynowan|pieczon|szynk|wedzon|gotowan|parzon|grillowan/, PROCESSED),
     search: { sub: "mieso", q: "filet" },
   },
   {
     // Turkey ham is a cold cut: smoked, boiled, roasted or sliced, never the raw breast.
     item: /^(?=.*szynk)(?=.*indyk)/,
-    product: /^(?=.*(szynk|poledwic|wedzon|parzon|pieczon|gotowan|w plastrach))(?=.*(indyk|indycz|drobiow))/,
+    product: /^(?=.*(szynk|poledwica|wedzon|parzon|pieczon|gotowan|w plastrach))(?=.*(indyk|indycz|drobiow))/,
     not: either(/sznycl|mielon|kotlet|klops/, PROCESSED),
     search: { sub: "wedliny", q: "indyk" },
   },
@@ -120,7 +125,7 @@ const RULES: Rule[] = [
   {
     item: /twarog/,
     product: /twarog/,
-    not: either(/sernik|pieczon|pasta|szczypior|ziol|z dodatkiem/, FLAVOURED),
+    not: either(/sernik|pieczon|pasta|serek|puszyst|z dodatkiem/, FLAVOURED),
     search: { sub: "nabial", q: "twaróg" },
   },
   {
@@ -131,7 +136,8 @@ const RULES: Rule[] = [
   },
   {
     item: /jogurt/,
-    product: /\bjogurt\b/,
+    // The meals' yogurt is the plain one: natural or Greek.
+    product: /^(?=.*\bjogurt\b)(?=.*(naturaln|greck))/,
     not: either(/skyr|chleb/, FLAVOURED),
     search: { sub: "nabial", q: "jogurt naturalny" },
   },
@@ -167,7 +173,7 @@ const RULES: Rule[] = [
   {
     item: /platki/,
     product: /platki owsiane|owsian/,
-    not: /baton|ciastk|granola|musli|czekolad/,
+    not: /baton|ciastk|granola|musli|czekolad|smoothie|napoj|owsianka|\d+ ml\b/,
     search: { sub: "platki", q: "owsian" },
   },
   {
@@ -178,7 +184,10 @@ const RULES: Rule[] = [
   {
     item: /\bryz\b/,
     product: /\bryz\b/,
-    not: either(/wafl|chrup|mleko|makaron|napoj|kleik|kaszk|deser|preparowan|sushi/, PROCESSED),
+    not: either(
+      /wafl|chrup|mleko|makaron|napoj|kleik|kaszk|deser|preparowan|sushi|\bmix\b|curry|papryk|fasol|warzyw/,
+      PROCESSED,
+    ),
     search: { sub: "ryz", q: "" },
   },
   {
@@ -249,19 +258,23 @@ const RULES: Rule[] = [
   {
     item: /banan/,
     product: /banan/,
-    not: /chips|suszon|baton/,
+    not: either(/chips|suszon|baton|jogurt|chlebek/, FRUIT_FLAVOUR),
     search: { sub: "owoce", q: "banan" },
   },
   {
     item: /jablk/,
     product: /jablk/,
-    not: /\bsok\b|\bmus\b|suszon|chips|ocet|szarlot/,
+    not: either(/\bsok\b|\bmus\b|suszon|chips|ocet|szarlot/, FRUIT_FLAVOUR),
     search: { sub: "owoce", q: "jabłk" },
   },
   {
     item: /jagod|borowk|malin|truskaw/,
     product: /malin|borowk|jagod|truskaw|owoce lesne/,
-    not: either(/pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|owsiank|ciast|chlebek/, PROCESSED),
+    not: either(
+      /pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|owsiank|ciast|chlebek/,
+      PROCESSED,
+      FRUIT_FLAVOUR,
+    ),
     search: { sub: "", q: "borówk" },
   },
   {
@@ -270,6 +283,7 @@ const RULES: Rule[] = [
     not: either(
       /pomidor|\bsok\b|\bmus\b|suszon|chips|dzem|jogurt|serek|czekolad|baton|ciast|deser|lody|owsiank/,
       PROCESSED,
+      FRUIT_FLAVOUR,
     ),
     search: { sub: "owoce", q: "" },
   },
@@ -338,6 +352,41 @@ export function promoCandidates(itemName: string, itemUnit: Unit | null, promos:
       return packInItemUnit(promo.packQuantity, promo.packUnit, itemUnit) !== null;
     })
     .sort((a, b) => perUnit(a) - perUnit(b));
+}
+
+/** A whole shop's range holds more than food: pet food, cosmetics, baby food. */
+const NOT_FOOD =
+  /felix|whiskas|pedigree|kitekat|purina|sheba|friskies|dla kota|dla psa|karma|durex|\bzel\b|szampon|serum|balsam|krem do|mydl|gerber|bobovita|hipp|nestle nan|kaszka|dla dzieci|smoothie|\bnapoj|\bsok\b|nektar\b|\bmus\b|galaret|kisiel|budyn|o smaku|deserek|strucl|rogal|produkt 100|konfitur|powidl|drazetk|cukierk|zelk|\bguma\b|po \d+ miesia/;
+/** Items that are themselves liquids, so a pack in litres is fine. */
+const LIQUID = /mleko|oliwa|olej|passata|sos/;
+const VOLUME = /\b\d+(?:[.,]\d+)? ?(?:l|ml)\b/;
+
+/**
+ * Catalogue products (a shop's whole range, by name) that could be this item,
+ * plainest first: the shortest names are the plain product, the long ones the
+ * flavoured or special versions. At most `limit`, since each one is a page to read.
+ */
+export function catalogCandidates<T extends { name: string }>(
+  itemName: string,
+  itemUnit: Unit | null,
+  entries: T[],
+  limit: number,
+): T[] {
+  const rule = ruleFor(itemName);
+  if (!rule) return [];
+  const liquid = LIQUID.test(fold(itemName));
+  return entries
+    .filter((entry) => {
+      const name = fold(entry.name);
+      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name)) return false;
+      // A drink is not the fruit, unless the item is itself a liquid.
+      if (!liquid && VOLUME.test(name)) return false;
+      // A pack in pieces can never price an item in grams, and the other way round.
+      const pack = parsePack(entry.name);
+      return !pack || itemUnit === null || packInItemUnit(pack.quantity, pack.unit, itemUnit) !== null;
+    })
+    .sort((a, b) => a.name.length - b.name.length)
+    .slice(0, limit);
 }
 
 function perUnit(promo: ShopPromo): number {
