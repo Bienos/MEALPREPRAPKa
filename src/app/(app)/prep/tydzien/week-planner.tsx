@@ -1,71 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
-import { CalendarPlus, Check, ChevronLeft, ChevronRight, Plus, ShoppingBasket, Sparkles } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Check, ChevronLeft, ChevronRight, PencilLine, ShoppingBasket, Sparkles, Trash2 } from "lucide-react";
 
-import { MealImage } from "@/components/meals/meal-image";
+import { ShopPrices, type ShopPricing } from "@/components/prep/shop-prices";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
+import { longDateLabel } from "@/lib/date";
+import type { NeededItem } from "@/lib/prices/basket";
+import { fitsTarget, readyDayLabel, type ReadyDay } from "@/lib/meals/ready-days";
+import { sumMacros, type DayType, type Macros } from "@/lib/meals/today-view-types";
+import { counts, weekTarget, type WeekEntry } from "@/lib/meals/week-plan";
 import { cn } from "@/lib/utils";
-import type { MealKind } from "@/lib/meals/slots";
-import type { DayType, Macros } from "@/lib/meals/today-view-types";
-import {
-  WEEK_KINDS,
-  WEEK_KIND_LABELS,
-  counts,
-  dayForNewPortion,
-  entryToRemove,
-  topUpPicks,
-  totalOf,
-  weekDishes,
-  weekStatus,
-  weekTarget,
-  type Snack,
-  type WeekDish,
-  type WeekEntry,
-  type WeekOption,
-} from "@/lib/meals/week-plan";
-import { planMealAction, removeMealAction, setDayTypeAction } from "../../actions";
-import { fillWeekAction, topUpWeekAction, weekShoppingListAction } from "./actions";
-import { Stepper } from "./stepper";
-import { WeekAddSheet } from "./week-add-sheet";
+import { applyReadyDayAction, clearDayAction, fillWeekAction, setWeekDayTypeAction } from "./actions";
 
 const WEEKDAYS = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
-
-const ADD_LABELS: Record<MealKind, string> = {
-  sniadanie: "Dodaj śniadanie",
-  obiad: "Dodaj obiad",
-  kolacja: "Dodaj kolację",
-  przekaska: "Dodaj przekąskę",
-  inne: "Dodaj inne",
-};
-
-/** Above this share of the target missing, the week needs meals, not snacks. */
-const SNACK_GAP_LIMIT = 0.15;
 
 function kcal(value: number): string {
   return Math.round(value).toLocaleString("pl-PL");
 }
 
-/** "1 przekąskę", "3 przekąski", "5 przekąsek". */
-function snacksLabel(count: number): string {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (count === 1) return "1 przekąskę";
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} przekąski`;
-  return `${count} przekąsek`;
+function macros(total: Macros): string {
+  return `${kcal(total.kcal)} kcal · ${Math.round(total.protein_g)} B · ${Math.round(total.fat_g)} T · ${Math.round(total.carbs_g)} W`;
 }
 
-/** "2,4k" for the little room a day has. */
-function shortKcal(value: number): string {
-  return value > 0 ? `${(value / 1000).toFixed(1).replace(".", ",")}k` : "–";
+/** "1 dzień", "3 dni". */
+function daysLabel(count: number): string {
+  return count === 1 ? "1 dzień" : `${count} dni`;
 }
 
 /**
- * The week: pick what you will eat over seven days, watch it add up against
- * the DT/DNT targets, then make one shopping list. Every pick lands on a day
- * straight away, so Today shows it and ZJEDZONE works as usual.
+ * The week in one screen: seven days, each a ready day that hits its DT/DNT
+ * target, one tap to fill the empty ones, and below it what the shopping
+ * costs and where. Every day is real planned meals, so Today and the
+ * calendar show the same thing.
  */
 export function WeekPlanner({
   start,
@@ -74,11 +44,12 @@ export function WeekPlanner({
   nextStart,
   today,
   dates,
-  dayTypes: initialDayTypes,
+  dayTypes: savedDayTypes,
   targets,
-  entries: initialEntries,
-  options,
-  hasTemplate,
+  entries,
+  proposals,
+  toBuy,
+  pricing,
 }: {
   start: string;
   rangeLabel: string;
@@ -89,195 +60,48 @@ export function WeekPlanner({
   dayTypes: Record<string, DayType>;
   targets: Record<DayType, Macros>;
   entries: WeekEntry[];
-  options: WeekOption[];
-  hasTemplate: Record<DayType, boolean>;
+  proposals: Record<DayType, ReadyDay[]>;
+  toBuy: NeededItem[];
+  pricing: ShopPricing;
 }) {
-  // Local source of truth so every tap is instant; the server write follows.
-  const [entries, setEntries] = useState(initialEntries);
-  const [dayTypes, setDayTypes] = useState(initialDayTypes);
-  // A refresh from the server (after a day type switch or a top-up) replaces local state.
-  const [synced, setSynced] = useState({ entries: initialEntries, dayTypes: initialDayTypes });
-  if (synced.entries !== initialEntries || synced.dayTypes !== initialDayTypes) {
-    setSynced({ entries: initialEntries, dayTypes: initialDayTypes });
-    setEntries(initialEntries);
-    setDayTypes(initialDayTypes);
+  // A DT/DNT switch shows at once; the server's answer replaces it when it comes.
+  const [typeOverrides, setTypeOverrides] = useState<Record<string, DayType>>({});
+  const [synced, setSynced] = useState(savedDayTypes);
+  if (synced !== savedDayTypes) {
+    setSynced(savedDayTypes);
+    setTypeOverrides({});
   }
+  const dayTypes = { ...savedDayTypes, ...typeOverrides };
 
-  const [sheetKind, setSheetKind] = useState<MealKind | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [openDate, setOpenDate] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [busy, startTransition] = useTransition();
-  // Adds still on their way to the server: temporary id → the real one.
-  const adding = useRef(new Map<string, Promise<string | null>>());
-  const inFlight = useRef(new Set<Promise<unknown>>());
-  const nextTempId = useRef(0);
+  const [filling, startFill] = useTransition();
 
-  const optionsByKey = new Map(options.map((option) => [option.mealKey, option]));
-  const target = weekTarget(dates.map((date) => dayTypes[date]), targets);
-  const total = totalOf(entries);
-  const status = weekStatus(total, target);
-  const gap = target.kcal - total.kcal;
-  const dishes = weekDishes(entries);
-  const openDates = dates.filter((date) => date >= today);
-  const canPlan = openDates.length > 0;
-  const toEat = entries.filter((entry) => entry.status === "planned" && entry.date >= today).length;
-  // The type most of the week has, for the calories shown next to each dish in the picker.
-  const mainType: DayType =
-    dates.filter((date) => dayTypes[date] === "DT").length >= dates.length / 2 ? "DT" : "DNT";
-
-  // What [ DOPEŁNIJ ] would add, worked out here so the button can say it.
-  const snacksFor = (dayType: DayType): Snack[] =>
-    options
-      .filter((option) => option.kind === "przekaska")
-      .map((option) => ({ mealKey: option.mealKey, name: option.name, ...option.forDay[dayType] }));
-  const topUp =
-    status === "under" && gap <= target.kcal * SNACK_GAP_LIMIT
-      ? topUpPicks({ dates, dayTypes, entries, targets, snacks: { DT: snacksFor("DT"), DNT: snacksFor("DNT") }, today })
-      : [];
-
-  const emptyDays = openDates.filter(
-    (date) => hasTemplate[dayTypes[date]] && !entries.some((entry) => entry.date === date && counts(entry)),
-  );
-
-  function track<T>(promise: Promise<T>): Promise<T> {
-    inFlight.current.add(promise);
-    void promise.finally(() => inFlight.current.delete(promise));
-    return promise;
-  }
-
-  /** Waits for every pick still being saved, so a refresh does not lose one. */
-  async function settle() {
-    await Promise.allSettled([...inFlight.current]);
-  }
-
-  function add(option: WeekOption) {
-    const date = dayForNewPortion(dates, entries, option.kind, today);
-    if (!date) {
-      setError("Ten tydzień już minął.");
-      return;
-    }
-    setError(null);
-    const version = option.forDay[dayTypes[date]];
-    const tempId = `new-${(nextTempId.current += 1)}`;
-    setEntries((current) => [
-      ...current,
-      {
-        id: tempId,
-        date,
-        mealKey: option.mealKey,
-        name: option.name,
-        variant: version.variant,
-        status: "planned",
-        kind: option.kind,
-        portions: 1,
-        kcal: version.kcal,
-        protein_g: version.protein_g,
-        fat_g: version.fat_g,
-        carbs_g: version.carbs_g,
-      },
-    ]);
-
-    const saved = track(
-      planMealAction(date, option.mealKey)
-        .then((result) => {
-          if (!result.ok) throw new Error(result.message);
-          const meal = result.meal;
-          setEntries((current) =>
-            current.map((entry) =>
-              entry.id === tempId
-                ? { ...entry, id: meal.id, variant: meal.variant, kcal: meal.kcal, protein_g: meal.protein_g, fat_g: meal.fat_g, carbs_g: meal.carbs_g }
-                : entry,
-            ),
-          );
-          return meal.id;
-        })
-        .catch((reason: unknown) => {
-          setEntries((current) => current.filter((entry) => entry.id !== tempId));
-          setError(reason instanceof Error && reason.message ? reason.message : "Nie udało się zapisać. Spróbuj jeszcze raz.");
-          return null;
-        }),
-    );
-    adding.current.set(tempId, saved);
-  }
-
-  function remove(mealKey: string) {
-    const entry = entryToRemove(entries, mealKey, today);
-    if (!entry) return;
-    setError(null);
-    setEntries((current) => current.filter((candidate) => candidate.id !== entry.id));
-    const pendingAdd = adding.current.get(entry.id);
-    track(
-      (pendingAdd ? pendingAdd.then((id) => (id ? removeMealAction(id) : undefined)) : removeMealAction(entry.id)).catch(
-        () => {
-          setEntries((current) => [...current, entry]);
-          setError("Nie udało się usunąć. Spróbuj jeszcze raz.");
-        },
-      ),
-    );
-  }
-
-  function toggleDay(date: string) {
-    if (date < today) return;
-    const next: DayType = dayTypes[date] === "DT" ? "DNT" : "DT";
-    setDayTypes((current) => ({ ...current, [date]: next }));
-    // Meals still to eat follow the day into its other version, as on Today.
-    setEntries((current) =>
-      current.map((entry) => {
-        const option = entry.mealKey ? optionsByKey.get(entry.mealKey) : undefined;
-        if (entry.date !== date || entry.status !== "planned" || !option) return entry;
-        const version = option.forDay[next];
-        return {
-          ...entry,
-          variant: version.variant,
-          kcal: Math.round(version.kcal * entry.portions),
-          protein_g: version.protein_g * entry.portions,
-          fat_g: version.fat_g * entry.portions,
-          carbs_g: version.carbs_g * entry.portions,
-        };
-      }),
-    );
-    startTransition(async () => {
-      await settle();
-      await setDayTypeAction(date, next);
-    });
-  }
+  const dayEntries = (date: string) => entries.filter((entry) => entry.date === date && counts(entry));
+  const emptyDays = dates.filter((date) => date >= today && !entries.some((entry) => entry.date === date));
+  const weekGoal = weekTarget(dates.map((date) => dayTypes[date]), targets);
+  const weekTotal = sumMacros(entries.filter(counts));
+  const daysOnTarget = dates.filter((date) => {
+    const planned = dayEntries(date);
+    return planned.length > 0 && fitsTarget(sumMacros(planned), targets[dayTypes[date]]);
+  }).length;
 
   function flash(message: string) {
     setNotice(message);
-    setTimeout(() => setNotice(null), 3500);
+    setTimeout(() => setNotice(null), 4000);
   }
 
-  function runTopUp() {
-    startTransition(async () => {
-      await settle();
-      const added = await topUpWeekAction(start);
-      flash(added > 0 ? `Dodałem ${snacksLabel(added)}.` : "Nic nie trzeba dodawać.");
-    });
-  }
-
-  function fillEmptyDays() {
-    startTransition(async () => {
-      await settle();
+  function fillWeek() {
+    startFill(async () => {
       const filled = await fillWeekAction(start);
-      flash(filled > 0 ? `Wstawiłem domyślny dzień na ${filled} ${filled === 1 ? "dzień" : "dni"}.` : "Nie było pustych dni.");
+      flash(filled > 0 ? `Ułożone: ${daysLabel(filled)}. Lista zakupów jest gotowa.` : "Nie udało się ułożyć dni.");
     });
   }
 
-  function makeList() {
-    startTransition(async () => {
-      await settle();
-      await weekShoppingListAction();
-    });
+  function switchDayType(date: string, dayType: DayType) {
+    setTypeOverrides((current) => ({ ...current, [date]: dayType }));
+    void setWeekDayTypeAction(date, dayType);
   }
-
-  const statusLine =
-    status === "empty"
-      ? "Wybierz, co chcesz jeść w tym tygodniu."
-      : status === "ok"
-        ? "Pasuje do Twoich makro."
-        : status === "under"
-          ? `Brakuje ${kcal(gap)} kcal${gap > target.kcal * SNACK_GAP_LIMIT ? ". Dodaj posiłki." : "."}`
-          : `${kcal(-gap)} kcal ponad cel.`;
 
   return (
     <div className="flex flex-col gap-6">
@@ -302,232 +126,318 @@ export function WeekPlanner({
         </Link>
       </header>
 
-      <section className="flex flex-col gap-2">
-        <div role="group" aria-label="Dni treningowe" className="grid grid-cols-7 gap-1">
-          {dates.map((date, index) => {
-            const past = date < today;
-            const dayType = dayTypes[date];
-            const dayKcal = totalOf(entries.filter((entry) => entry.date === date)).kcal;
-            const share = dayKcal / targets[dayType].kcal;
-            return (
-              <button
-                key={date}
-                type="button"
-                disabled={past || busy}
-                onClick={() => toggleDay(date)}
-                aria-label={`${WEEKDAYS[index]} ${Number(date.slice(8))}: ${dayType}, ${kcal(dayKcal)} kcal. Dotknij, żeby zmienić.`}
-                className={cn(
-                  "flex flex-col items-center gap-1 rounded-2xl border bg-card py-2 transition-colors active:scale-[0.96] disabled:active:scale-100",
-                  past && "opacity-50",
-                  date === today && "border-2 border-primary",
-                )}
-              >
-                <span className="text-[0.65rem] font-bold text-muted-foreground">{WEEKDAYS[index]}</span>
-                <span className="text-base leading-none font-extrabold tabular-nums">{Number(date.slice(8))}</span>
-                <span
-                  className={cn(
-                    "rounded-full px-1.5 py-0.5 text-[0.6rem] font-bold",
-                    dayType === "DT" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {dayType}
-                </span>
-                <span
-                  className={cn(
-                    "text-[0.65rem] font-semibold tabular-nums",
-                    dayKcal === 0
-                      ? "text-muted-foreground"
-                      : share < 0.9
-                        ? "text-primary"
-                        : share > 1.1
-                          ? "text-destructive"
-                          : "text-accent",
-                  )}
-                >
-                  {shortKcal(dayKcal)}
-                </span>
-              </button>
-            );
-          })}
+      {emptyDays.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <Button size="lg" className="h-16 w-full text-lg" disabled={filling} onClick={fillWeek}>
+            <Sparkles className="size-5" />
+            {filling
+              ? "Układam…"
+              : emptyDays.length === 7
+                ? "Ułóż cały tydzień"
+                : `Ułóż ${emptyDays.length === 1 ? "pusty dzień" : `${emptyDays.length} puste dni`}`}
+          </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Gotowe dni z Twojego arkusza, każdy w makro. Jedno danie z prepu na 2–3 dni, żeby gotować raz.
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">Dotknij dnia, żeby przełączyć trening (DT) i dzień bez treningu (DNT).</p>
-      </section>
+      ) : null}
 
-      <Card className={cn("gap-3 p-4", status === "ok" && "border-accent/40 bg-accent/5")}>
-        <div className="flex items-baseline gap-2">
-          <span className="text-xs font-bold tracking-widest text-muted-foreground uppercase">Cały tydzień</span>
-          <span className="ml-auto text-3xl font-extrabold tabular-nums">{kcal(total.kcal)}</span>
-          <span className="text-sm font-semibold text-muted-foreground tabular-nums">/ {kcal(target.kcal)} kcal</span>
-        </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-          <div
-            className={cn(
-              "h-full rounded-full transition-[width] duration-500",
-              status === "ok" ? "bg-accent" : status === "over" ? "bg-destructive" : "bg-primary",
-            )}
-            style={{ width: `${Math.min((total.kcal / target.kcal) * 100, 100)}%` }}
-          />
-        </div>
-        <p
-          className={cn(
-            "flex items-center gap-1.5 font-semibold",
-            status === "ok" ? "text-accent" : status === "over" ? "text-destructive" : "text-foreground",
-          )}
-        >
-          {status === "ok" ? <Check className="size-5" strokeWidth={3} /> : null}
-          {statusLine}
-        </p>
-        <div className="grid grid-cols-3 gap-3">
-          {(
-            [
-              ["Białko", total.protein_g, target.protein_g, "bg-accent"],
-              ["Węgle", total.carbs_g, target.carbs_g, "bg-primary"],
-              ["Tłuszcz", total.fat_g, target.fat_g, "bg-primary/60"],
-            ] as const
-          ).map(([label, value, goal, color]) => (
-            <div key={label} className="flex flex-col gap-1">
-              <div className="flex items-baseline justify-between gap-1 text-xs">
-                <span className="text-muted-foreground">{label}</span>
-                <span className="font-bold tabular-nums">
-                  {kcal(value)}
-                  <span className="font-normal text-muted-foreground">/{kcal(goal)}</span>
-                </span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className={cn("h-full rounded-full", color)} style={{ width: `${Math.min((value / goal) * 100, 100)}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {emptyDays.length > 0 || topUp.length > 0 ? (
-          <div className="flex flex-col gap-2 pt-1">
-            {emptyDays.length > 0 ? (
-              <Button variant="outline" disabled={busy} onClick={fillEmptyDays}>
-                <CalendarPlus className="size-5" />
-                Wstaw domyślny dzień na puste ({emptyDays.length})
-              </Button>
-            ) : null}
-            {topUp.length > 0 ? (
-              <Button variant="outline" disabled={busy} onClick={runTopUp}>
-                <Sparkles className="size-5" />
-                Dopełnij: dodaj {snacksLabel(topUp.length)}
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-        {notice ? <p className="text-sm font-semibold text-accent">{notice}</p> : null}
-      </Card>
-
-      {error ? (
-        <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
-          {error}
+      {notice ? (
+        <p role="status" className="rounded-xl bg-accent/10 px-4 py-3 text-sm font-semibold text-accent">
+          {notice}
         </p>
       ) : null}
 
-      {WEEK_KINDS.map((kind) => {
-        const picked = dishes.filter((dish) => dish.kind === kind);
-        // "Inne" is the emergency food; it only shows up once something from it is planned.
-        if (kind === "inne" && picked.length === 0) return null;
-        const portions = picked.reduce((sum, dish) => sum + dish.count, 0);
-        return (
-          <section key={kind} className="flex flex-col gap-2">
-            <h2 className="flex items-baseline justify-between text-xs font-bold tracking-widest text-muted-foreground uppercase">
-              {WEEK_KIND_LABELS[kind]}
-              {portions > 0 ? <span className="tabular-nums">{portions}×</span> : null}
-            </h2>
-            {picked.length > 0 ? (
-              <Card className="gap-0 p-0">
-                <ul>
-                  {picked.map((dish) => (
-                    <DishRow
-                      key={dish.mealKey}
-                      dish={dish}
-                      perPortion={
-                        totalOf(entries.filter((entry) => entry.mealKey === dish.mealKey)).kcal / Math.max(dish.count, 1)
-                      }
-                      category={optionsByKey.get(dish.mealKey)?.category}
-                      canAdd={canPlan && optionsByKey.has(dish.mealKey)}
-                      canRemove={entryToRemove(entries, dish.mealKey, today) !== null}
-                      onAdd={() => {
-                        const option = optionsByKey.get(dish.mealKey);
-                        if (option) add(option);
-                      }}
-                      onRemove={() => remove(dish.mealKey)}
-                    />
-                  ))}
-                </ul>
-              </Card>
-            ) : null}
-            {canPlan ? (
-              <button
-                type="button"
-                onClick={() => setSheetKind(kind)}
-                className="flex h-12 items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 font-semibold text-primary hover:bg-primary/5"
-              >
-                <Plus className="size-5" />
-                {ADD_LABELS[kind]}
-              </button>
-            ) : null}
-          </section>
-        );
-      })}
+      <section className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-xs font-bold tracking-widest text-muted-foreground uppercase">Dni</h2>
+          <p className="text-sm font-semibold text-muted-foreground tabular-nums">
+            {kcal(weekTotal.kcal)} / {kcal(weekGoal.kcal)} kcal · {daysOnTarget} z 7 w makro
+          </p>
+        </div>
+        <Card className="gap-0 p-0">
+          <ul>
+            {dates.map((date, index) => {
+              const planned = dayEntries(date);
+              const total = sumMacros(planned);
+              const target = targets[dayTypes[date]];
+              const onTarget = planned.length > 0 && fitsTarget(total, target);
+              const diff = Math.round(total.kcal - target.kcal);
+              return (
+                <li key={date} className="border-b last:border-0">
+                  <button
+                    type="button"
+                    onClick={() => setOpenDate(date)}
+                    className={cn(
+                      "flex min-h-18 w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/60",
+                      date < today && "opacity-60",
+                    )}
+                  >
+                    <span className="flex w-11 shrink-0 flex-col items-center">
+                      <span className={cn("text-sm font-bold", date === today && "text-primary")}>{WEEKDAYS[index]}</span>
+                      <span className="text-xs text-muted-foreground">{Number(date.slice(8))}</span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[0.65rem] font-extrabold",
+                            dayTypes[date] === "DT" ? "bg-primary/15 text-primary" : "bg-accent/15 text-accent",
+                          )}
+                        >
+                          {dayTypes[date]}
+                        </span>
+                        {planned.length > 0 ? (
+                          <span className="text-xs font-semibold text-muted-foreground tabular-nums">
+                            {kcal(total.kcal)} kcal · {Math.round(total.protein_g)} B
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className={cn("mt-0.5 block text-sm", planned.length === 0 && "text-muted-foreground")}>
+                        {planned.length > 0
+                          ? readyDayLabel(planned.map((entry) => ({ mealKey: entry.mealKey ?? entry.id, name: entry.name })))
+                          : date < today
+                            ? "Nic nie zaplanowano"
+                            : "Pusty dzień: wybierz gotowy"}
+                      </span>
+                    </span>
+                    {planned.length > 0 ? (
+                      onTarget ? (
+                        <span
+                          aria-label="W makro"
+                          className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"
+                        >
+                          <Check className="size-4" strokeWidth={3} />
+                        </span>
+                      ) : (
+                        <span className="shrink-0 text-xs font-bold text-muted-foreground tabular-nums">
+                          {diff > 0 ? "+" : "−"}
+                          {kcal(Math.abs(diff))}
+                        </span>
+                      )
+                    ) : null}
+                    <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      </section>
 
-      <div className="flex flex-col gap-2">
-        <Button size="lg" className="h-16 w-full text-xl" disabled={busy || toEat === 0} onClick={makeList}>
-          <ShoppingBasket className="size-6" />
-          {busy ? "Chwila…" : "LISTA ZAKUPÓW"}
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xs font-bold tracking-widest text-muted-foreground uppercase">Zakupy na te dni</h2>
+        {toBuy.length > 0 ? (
+          <ShopPrices items={toBuy} pricing={pricing} />
+        ) : (
+          <p className="text-sm text-muted-foreground">Ułóż dni, a policzę, co kupić i gdzie najtaniej.</p>
+        )}
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/prep/zakupy">
+            <ShoppingBasket className="size-5" />
+            Lista zakupów{toBuy.length > 0 ? ` · ${toBuy.length}` : ""}
+          </Link>
         </Button>
-        <p className="text-center text-sm text-muted-foreground">
-          Lista ze wszystkiego, co zaplanowane od dziś. Porcje z lodówki i to, co zawsze masz w domu, pomijam.
-        </p>
-      </div>
+      </section>
 
-      <WeekAddSheet
-        open={sheetKind !== null}
-        onClose={() => setSheetKind(null)}
-        title={sheetKind ? WEEK_KIND_LABELS[sheetKind] : ""}
-        options={sheetKind ? options.filter((option) => option.kind === sheetKind) : []}
-        counts={Object.fromEntries(dishes.map((dish) => [dish.mealKey, dish.count]))}
-        removable={(mealKey) => entryToRemove(entries, mealKey, today) !== null}
-        dayType={mainType}
-        total={total.kcal}
-        target={target.kcal}
-        onAdd={add}
-        onRemove={remove}
+      <DaySheet
+        key={openDate ?? "closed"}
+        date={openDate}
+        today={today}
+        dayType={openDate ? dayTypes[openDate] : "DT"}
+        target={openDate ? targets[dayTypes[openDate]] : targets.DT}
+        entries={openDate ? entries.filter((entry) => entry.date === openDate) : []}
+        proposals={openDate ? proposals[dayTypes[openDate]] : []}
+        onDayType={(dayType) => openDate && switchDayType(openDate, dayType)}
+        onClose={() => setOpenDate(null)}
+        onDone={(message) => {
+          setOpenDate(null);
+          flash(message);
+        }}
       />
     </div>
   );
 }
 
-function DishRow({
-  dish,
-  perPortion,
-  category,
-  canAdd,
-  canRemove,
-  onAdd,
-  onRemove,
+/* One day ------------------------------------------------------------------- */
+
+function DaySheet({
+  date,
+  today,
+  dayType,
+  target,
+  entries,
+  proposals,
+  onDayType,
+  onClose,
+  onDone,
 }: {
-  dish: WeekDish;
-  perPortion: number;
-  category: string | undefined;
-  canAdd: boolean;
-  canRemove: boolean;
-  onAdd: () => void;
-  onRemove: () => void;
+  date: string | null;
+  today: string;
+  dayType: DayType;
+  target: Macros;
+  entries: WeekEntry[];
+  proposals: ReadyDay[];
+  onDayType: (dayType: DayType) => void;
+  onClose: () => void;
+  onDone: (message: string) => void;
 }) {
+  const [pending, startPending] = useTransition();
+  const [chosen, setChosen] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const planned = entries.filter(counts);
+  const underWay = entries.some((entry) => entry.status !== "planned");
+  const past = date !== null && date < today;
+  const title = date ? capitalize(longDateLabel(date)) : "";
+
+  function choose(day: ReadyDay) {
+    if (!date) return;
+    setChosen(day.key);
+    setFailed(false);
+    startPending(async () => {
+      const ok = await applyReadyDayAction(date, day.key, dayType);
+      if (ok) onDone(`${capitalize(longDateLabel(date))}: ${readyDayLabel(day.items)}.`);
+      else setFailed(true);
+    });
+  }
+
+  function clear() {
+    if (!date) return;
+    startPending(async () => {
+      const ok = await clearDayAction(date);
+      if (ok) onDone(`${capitalize(longDateLabel(date))} jest pusty.`);
+      else setFailed(true);
+    });
+  }
+
   return (
-    <li className="flex items-center gap-3 border-b px-3 py-2.5 last:border-0">
-      <MealImage name={dish.name} category={category} className="size-12 rounded-xl" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold">{dish.name}</p>
-        <p className="text-xs text-muted-foreground tabular-nums">
-          {kcal(perPortion)} kcal / porcja
-          {dish.eaten > 0 ? ` · ${dish.eaten} zjedzone` : ""}
-        </p>
-      </div>
-      <Stepper count={dish.count} canAdd={canAdd} canRemove={canRemove} onAdd={onAdd} onRemove={onRemove} label={dish.name} />
-    </li>
+    <Sheet open={date !== null} onClose={onClose} title={title}>
+      {date ? (
+        <div className="flex flex-col gap-4">
+          {!past ? (
+            <div className="flex rounded-full bg-muted p-1" role="radiogroup" aria-label="Rodzaj dnia">
+              {(["DT", "DNT"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={dayType === option}
+                  disabled={underWay}
+                  onClick={() => dayType !== option && onDayType(option)}
+                  className={cn(
+                    "h-11 flex-1 rounded-full text-sm font-bold",
+                    dayType === option ? "bg-card shadow-sm" : "text-muted-foreground",
+                  )}
+                >
+                  {option === "DT" ? "Trening (DT)" : "Bez treningu (DNT)"}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          {planned.length > 0 ? (
+            <div className="flex flex-col gap-2 rounded-xl border bg-card p-4">
+              <p className="text-xs font-bold tracking-wide text-muted-foreground uppercase">Teraz</p>
+              <p className="font-semibold">
+                {readyDayLabel(planned.map((entry) => ({ mealKey: entry.mealKey ?? entry.id, name: entry.name })))}
+              </p>
+              <p className="text-sm text-muted-foreground tabular-nums">{macros(sumMacros(planned))}</p>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm" className="flex-1">
+                  <Link href={`/dzien/${date}`}>
+                    <PencilLine className="size-4" />
+                    Edytuj
+                  </Link>
+                </Button>
+                {!past && !underWay ? (
+                  <Button variant="outline" size="sm" className="flex-1" disabled={pending} onClick={clear}>
+                    <Trash2 className="size-4" />
+                    Wyczyść
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          {past ? (
+            <p className="text-sm text-muted-foreground">Ten dzień już minął.</p>
+          ) : underWay ? (
+            <p className="text-sm text-muted-foreground">
+              Część tego dnia jest już zjedzona, więc go nie zamieniam. Zmienisz go w „Edytuj”.
+            </p>
+          ) : (
+            <section className="flex flex-col gap-2">
+              <h3 className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
+                Gotowe dni {dayType} · cel {kcal(target.kcal)} kcal, {target.protein_g} B
+              </h3>
+              {failed ? (
+                <p className="text-sm font-semibold text-destructive">Nie udało się. Odśwież i spróbuj jeszcze raz.</p>
+              ) : null}
+              <ul className="flex flex-col gap-2">
+                {proposals.map((day) => (
+                  <li key={day.key}>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => choose(day)}
+                      className={cn(
+                        "flex w-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left hover:border-primary/50",
+                        pending && chosen === day.key && "border-primary bg-primary/5",
+                      )}
+                    >
+                      <span className="flex items-start gap-2">
+                        <DayLines day={day} />
+                        {day.fits ? (
+                          <span className="shrink-0 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-bold text-accent">
+                            w makro
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="text-sm text-muted-foreground tabular-nums">{macros(day.total)}</span>
+                      <span className="text-sm font-bold text-primary">
+                        {pending && chosen === day.key ? "Wstawiam…" : planned.length > 0 ? "Zamień na ten" : "Wybierz"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      ) : null}
+    </Sheet>
   );
+}
+
+/** A ready day as the meals of the day: what is breakfast, what is cooked for two meals, what is a snack. */
+function DayLines({ day }: { day: ReadyDay }) {
+  const breakfast = day.items.find((item) => item.slot === "Śniadanie");
+  const main = day.items.find((item) => item.slot === "Posiłek 2");
+  const second = day.items.find((item) => item.slot === "Posiłek 3" || item.slot === "Kolacja");
+  const snacks = day.items.filter((item) => item.slot === "Przekąska");
+  const lines: [string, string][] = [
+    ["Śniadanie", breakfast?.name ?? ""],
+    ...(second?.slot === "Posiłek 3"
+      ? ([["Obiad ×2", main?.name ?? ""]] as [string, string][])
+      : ([
+          ["Obiad", main?.name ?? ""],
+          ["Kolacja", second?.name ?? ""],
+        ] as [string, string][])),
+    ...(snacks.length > 0 ? ([["Przekąska", snacks.map((snack) => snack.name).join(", ")]] as [string, string][]) : []),
+  ];
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      {lines.map(([label, name]) => (
+        <span key={label} className="flex gap-2 text-sm">
+          <span className="w-20 shrink-0 text-muted-foreground">{label}</span>
+          <span className="min-w-0 font-semibold">{name}</span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }

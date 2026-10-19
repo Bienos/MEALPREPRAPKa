@@ -26,7 +26,15 @@ function promo(overrides: Partial<ShopPromo> = {}): ShopPromo {
 }
 
 function mine(overrides: Partial<ShopPrice> = {}): ShopPrice {
-  return { itemName: "kurczak", shop: "biedronka", productLabel: "", packQuantity: 1000, packUnit: "g", price: 25, ...overrides };
+  return {
+    itemName: "kurczak",
+    shop: "biedronka",
+    productLabel: "",
+    packQuantity: 1000,
+    packUnit: "g",
+    price: 25,
+    ...overrides,
+  };
 }
 
 const item = (quantity: number | null, unit: NeededItem["unit"] = "g", name = "kurczak"): NeededItem => ({
@@ -49,12 +57,22 @@ describe("costOf", () => {
   });
 
   test("loose produce costs exactly what is taken", () => {
-    const apples = promo({ name: "Jabłka, luzem", loose: true, packQuantity: 1000, promoPrice: 2.49 });
+    const apples = promo({
+      name: "Jabłka, luzem",
+      loose: true,
+      packQuantity: 1000,
+      promoPrice: 2.49,
+    });
     assert.equal(amount(costOf(item(600, "g", "jabłko"), asPromo(apples))), 1.49);
   });
 
   test("a multi-buy counts only when the needed packs reach it", () => {
-    const mince = promo({ promoPrice: 5.49, regularPrice: 10.99, multibuy: "1+1 gratis", multibuyMin: 2 });
+    const mince = promo({
+      promoPrice: 5.49,
+      regularPrice: 10.99,
+      multibuy: "1+1 gratis",
+      multibuyMin: 2,
+    });
     const two = costOf(item(1000), asPromo(mince));
     assert.ok(two && two !== "unit");
     assert.deepEqual([two.packs, two.amount, two.onPromo], [2, 10.98, true]);
@@ -66,7 +84,11 @@ describe("costOf", () => {
   });
 
   test("a multi-buy without a known regular price cannot price the leftover packs", () => {
-    const deal = promo({ regularPrice: null, multibuyMin: 3, multibuy: "-50% przy zakupie 3" });
+    const deal = promo({
+      regularPrice: null,
+      multibuyMin: 3,
+      multibuy: "-50% przy zakupie 3",
+    });
     assert.equal(costOf(item(400), asPromo(deal)), null);
     assert.equal(amount(costOf(item(1500), asPromo(deal))), 30);
   });
@@ -77,7 +99,10 @@ describe("costOf", () => {
 
   test("pieces never mix with grams, grams and millilitres do", () => {
     assert.equal(costOf(item(10, "szt", "jajka"), asPromo(promo())), "unit");
-    assert.equal(amount(costOf(item(700, "g", "passata"), asMine(mine({ packQuantity: 500, packUnit: "ml", price: 4 })))), 8);
+    assert.equal(
+      amount(costOf(item(700, "g", "passata"), asMine(mine({ packQuantity: 500, packUnit: "ml", price: 4 })))),
+      8,
+    );
   });
 });
 
@@ -112,7 +137,7 @@ describe("buildBasket", () => {
     item(null, null, "curry"),
   ];
   // Lidl: kurczak on promo (20), ryż (6), skyr (8). Biedronka: kurczak 25, ryż 5, no skyr. Curry nowhere.
-  const prices: Record<Shop, Record<string, PriceOption[]>> = {
+  const prices: Partial<Record<Shop, Record<string, PriceOption[]>>> = {
     lidl: {
       kurczak: [asPromo(promo())],
       ryż: [asMine(mine({ shop: "lidl", itemName: "ryż", price: 6 }))],
@@ -123,7 +148,7 @@ describe("buildBasket", () => {
       ryż: [asMine(mine({ itemName: "ryż", price: 5 }))],
     },
   };
-  const summary = buildBasket(items, ["lidl", "biedronka"], (needed, shop) => prices[shop][needed.name] ?? []);
+  const summary = buildBasket(items, ["lidl", "biedronka"], (needed, shop) => prices[shop]?.[needed.name] ?? []);
   const [lidl, biedronka] = summary.shops;
 
   test("each shop totals what it can price; unpriced items stay out", () => {
@@ -135,6 +160,7 @@ describe("buildBasket", () => {
 
   test("the cheaper shop is decided on items priced at both", () => {
     assert.equal(summary.compared.count, 2);
+    assert.deepEqual(summary.compared.shops, ["lidl", "biedronka"]);
     assert.deepEqual(summary.compared.totals, { lidl: 26, biedronka: 30 });
     assert.equal(summary.compared.cheapest, "lidl");
   });
@@ -144,8 +170,13 @@ describe("buildBasket", () => {
   });
 
   test("no comparison, pointer or split when no item is priced at both shops", () => {
-    const lonely = buildBasket([items[2]], ["lidl", "biedronka"], (needed, shop) => prices[shop][needed.name] ?? []);
-    assert.deepEqual(lonely.compared, { count: 0, totals: { lidl: 0, biedronka: 0 }, cheapest: null });
+    const lonely = buildBasket([items[2]], ["lidl", "biedronka"], (needed, shop) => prices[shop]?.[needed.name] ?? []);
+    assert.deepEqual(lonely.compared, {
+      shops: [],
+      count: 0,
+      totals: {},
+      cheapest: null,
+    });
     assert.equal(lonely.split, null);
   });
 
@@ -153,5 +184,37 @@ describe("buildBasket", () => {
     const same = buildBasket([items[1]], ["lidl", "biedronka"], () => [asMine(mine({ price: 5 }))]);
     assert.equal(same.compared.cheapest, null);
     assert.equal(same.split, null);
+  });
+
+  test("a shop with only a few leaflet hits does not take part in the comparison", () => {
+    // Kaufland prices one item of four: shown, but not weighed against shops that price most of the list.
+    const withKaufland = buildBasket(items, ["lidl", "biedronka", "kaufland"], (needed, shop) =>
+      shop === "kaufland"
+        ? needed.name === "ryż"
+          ? [
+              asPromo(
+                promo({
+                  shop: "kaufland",
+                  productKey: "blix:ryz",
+                  promoPrice: 3,
+                  packQuantity: 1000,
+                }),
+              ),
+            ]
+          : []
+        : (prices[shop]?.[needed.name] ?? []),
+    );
+    assert.deepEqual(withKaufland.compared.shops, ["lidl", "biedronka"]);
+    assert.equal(withKaufland.compared.cheapest, "lidl");
+    assert.deepEqual(withKaufland.shops[2].priced, 1);
+  });
+
+  test("with fewer than two shops pricing half the list, the two that price the most are compared", () => {
+    const sparse = buildBasket(items, ["lidl", "biedronka", "kaufland"], (needed, shop) =>
+      shop === "kaufland" || needed.name !== "ryż" ? [] : (prices[shop]?.[needed.name] ?? []),
+    );
+    assert.deepEqual(sparse.compared.shops, ["lidl", "biedronka"]);
+    assert.equal(sparse.compared.count, 1);
+    assert.equal(sparse.compared.cheapest, "biedronka");
   });
 });

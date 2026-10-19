@@ -3,12 +3,18 @@ import { ChevronLeft } from "lucide-react";
 
 import { addDays, todayIso } from "@/lib/date";
 import { getSettings } from "@/lib/db/settings";
+import { listShoppingItems } from "@/lib/db/shopping";
 import { weekStart } from "@/lib/meals/calendar";
+import type { Unit } from "@/lib/meals/ingredients";
 import { loadWeek, weekRangeLabel } from "@/lib/meals/week";
 import { defaultWeekStart } from "@/lib/meals/week-plan";
+import { loadPricing } from "@/lib/prices/load";
+import { answerPromoAction, refreshPromosAction, removeShopPriceAction, saveShopPriceAction } from "../zakupy/actions";
 import { WeekPlanner } from "./week-planner";
 
 export const dynamic = "force-dynamic";
+// "Sprawdź promocje" reads Lidl and up to two leaflet pages per item: give it time.
+export const maxDuration = 60;
 
 /** A Monday in the address (?od=2026-10-19), or the week the screen should open on. */
 function chosenStart(od: string | undefined, today: string): string {
@@ -20,7 +26,7 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
   const { od } = await searchParams;
   const settings = await getSettings();
   const start = chosenStart(od, todayIso(settings.timezone));
-  const week = await loadWeek(start);
+  const [week, shopping, pricing] = await Promise.all([loadWeek(start), listShoppingItems(), loadPricing()]);
 
   return (
     <>
@@ -42,8 +48,17 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
         dayTypes={week.dayTypes}
         targets={week.targets}
         entries={week.entries}
-        options={week.options}
-        hasTemplate={week.hasTemplate}
+        proposals={week.proposals}
+        toBuy={shopping
+          .filter((item) => !item.checked && !item.owned)
+          .map((item) => ({ id: item.id, name: item.name, quantity: item.quantity, unit: item.unit as Unit | null }))}
+        pricing={{
+          ...pricing,
+          onRefresh: refreshPromosAction,
+          onSavePrice: saveShopPriceAction,
+          onRemovePrice: removeShopPriceAction,
+          onAnswer: answerPromoAction,
+        }}
       />
     </>
   );

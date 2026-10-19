@@ -68,15 +68,16 @@ export async function findShopPromo(shop: Shop, productKey: string): Promise<Sto
   return row ? toPromo(row) : null;
 }
 
-/** A refresh: the shop's old promos go, this week's take their place. */
-export async function replaceShopPromos(shop: Shop, promos: ShopPromo[], fetchedAt: string): Promise<void> {
+/** A refresh: these shops' old promos go, this week's take their place. */
+export async function replaceShopPromos(shops: Shop[], promos: ShopPromo[], fetchedAt: string): Promise<void> {
   const db = getSupabase();
-  ok(await db.from("shop_promos").delete().eq("shop", shop));
-  if (promos.length === 0) return;
+  ok(await db.from("shop_promos").delete().in("shop", shops));
+  const kept = promos.filter((promo) => shops.includes(promo.shop));
+  if (kept.length === 0) return;
   ok(
     await db.from("shop_promos").insert(
-      promos.map((promo) => ({
-        shop,
+      kept.map((promo) => ({
+        shop: promo.shop,
         product_key: promo.productKey,
         name: promo.name,
         pack_quantity: promo.packQuantity,
@@ -148,15 +149,23 @@ const linkRowSchema = z.object({
   shop: shopSchema,
   product_key: z.string(),
   matches: z.boolean(),
+  pack_quantity: z.coerce.number().nullable(),
+  pack_unit: packUnitSchema.nullable(),
+  pack_loose: z.boolean(),
 });
 
 export async function listProductLinks(): Promise<ProductLink[]> {
-  const result = await getSupabase().from("shop_product_links").select("item_name, shop, product_key, matches");
+  const result = await getSupabase()
+    .from("shop_product_links")
+    .select("item_name, shop, product_key, matches, pack_quantity, pack_unit, pack_loose");
   return rows(linkRowSchema, result).map((row) => ({
     itemName: row.item_name,
     shop: row.shop,
     productKey: row.product_key,
     matches: row.matches,
+    packQuantity: row.pack_quantity,
+    packUnit: row.pack_unit,
+    packLoose: row.pack_loose,
   }));
 }
 
@@ -169,6 +178,9 @@ export async function saveProductLink(link: ProductLink & { productName: string 
         product_key: link.productKey,
         product_name: link.productName,
         matches: link.matches,
+        pack_quantity: link.packQuantity,
+        pack_unit: link.packUnit,
+        pack_loose: link.packLoose,
       },
       { onConflict: "item_name,shop,product_key" },
     ),
