@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { getSupabase } from "@/lib/supabase/server";
 import { SHOPS, type ProductLink, type Shop, type ShopPrice, type ShopPromo } from "@/lib/prices/types";
+import { addDays, toIsoDate } from "@/lib/date";
+import type { ShelfPrice } from "@/lib/prices/biedronka";
 import { isoDateSchema, maybeRow, ok, rows } from "./helpers";
 
 const shopSchema = z.enum(SHOPS);
@@ -68,11 +70,20 @@ export async function findShopPromo(shop: Shop, productKey: string): Promise<Sto
   return row ? toPromo(row) : null;
 }
 
-/** A refresh: these shops' old promos go, this week's take their place. */
-export async function replaceShopPromos(shops: Shop[], promos: ShopPromo[], fetchedAt: string): Promise<void> {
+/**
+ * A refresh: these shops' old promos from this source go, this week's take
+ * their place. A source is its product-key prefix ("lidl:" for lidl.pl,
+ * "blix:" for the leaflets), so Lidl's two sources do not erase each other.
+ */
+export async function replaceShopPromos(
+  shops: Shop[],
+  promos: ShopPromo[],
+  fetchedAt: string,
+  keyPrefix: string,
+): Promise<void> {
   const db = getSupabase();
-  ok(await db.from("shop_promos").delete().in("shop", shops));
-  const kept = promos.filter((promo) => shops.includes(promo.shop));
+  ok(await db.from("shop_promos").delete().in("shop", shops).like("product_key", `${keyPrefix}%`));
+  const kept = promos.filter((promo) => shops.includes(promo.shop) && promo.productKey.startsWith(keyPrefix));
   if (kept.length === 0) return;
   ok(
     await db.from("shop_promos").insert(
@@ -204,5 +215,86 @@ export async function saveProductLink(link: ProductLink & { productName: string 
       },
       { onConflict: "item_name,shop,product_key" },
     ),
+  );
+}
+
+/* Shelf prices from a shop's own catalogue ----------------------------------- */
+
+/** A shelf price counts this long after it was read; then it is read again. */
+export const SHELF_PRICE_DAYS = 30;
+
+const shelfRowSchema = z.object({
+  shop: shopSchema,
+  product_key: z.string(),
+  name: z.string(),
+  pack_quantity: z.coerce.number(),
+  pack_unit: packUnitSchema,
+  loose: z.boolean(),
+  price: z.coerce.number(),
+  source_url: z.string(),
+  fetched_at: z.string(),
+});
+type ShelfRow = z.infer<typeof shelfRowSchema>;
+
+/** A shelf price in the same shape as a promotion, so matching and the basket treat both alike. */
+function shelfToPromo(row: ShelfRow): StoredPromo {
+  const fetched = toIsoDate(new Date(row.fetched_at));
+  return {
+    shop: row.shop,
+    productKey: row.product_key,
+    name: row.name,
+    packQuantity: row.pack_quantity,
+    packUnit: row.pack_unit,
+    loose: row.loose,
+    promoPrice: row.price,
+    regularPrice: null,
+    validFrom: fetched,
+    validTo: addDays(fetched, SHELF_PRICE_DAYS),
+    conditions: "Cena z półki w sklepie internetowym; w sklepie może się trochę różnić.",
+    appOnly: false,
+    multibuy: null,
+    multibuyMin: 1,
+    sourceUrl: row.source_url,
+    shelf: true,
+    fetchedAt: row.fetched_at,
+  };
+}
+
+export async function listShelfPrices(): Promise<StoredPromo[]> {
+  const result = await getSupabase().from("shelf_prices").select("*").order("name");
+  return rows(shelfRowSchema, result).map(shelfToPromo);
+}
+
+export async function findShelfPrice(shop: Shop, productKey: string): Promise<StoredPromo | null> {
+  const result = await getSupabase()
+    .from("shelf_prices")
+    .select("*")
+    .eq("shop", shop)
+    .eq("product_key", productKey)
+    .maybeSingle();
+  const row = maybeRow(shelfRowSchema, result);
+  return row ? shelfToPromo(row) : null;
+}
+
+/** Each price read replaces that product's old one; products not read this time stay. */
+export async function upsertShelfPrices(shop: Shop, prices: ShelfPrice[], fetchedAt: string): Promise<void> {
+  if (prices.length === 0) return;
+  ok(
+    await getSupabase()
+      .from("shelf_prices")
+      .upsert(
+        prices.map((price) => ({
+          shop,
+          product_key: price.productKey,
+          name: price.name,
+          pack_quantity: price.packQuantity,
+          pack_unit: price.packUnit,
+          loose: price.loose,
+          price: price.price,
+          source_url: price.sourceUrl,
+          fetched_at: fetchedAt,
+        })),
+        { onConflict: "shop,product_key" },
+      ),
   );
 }

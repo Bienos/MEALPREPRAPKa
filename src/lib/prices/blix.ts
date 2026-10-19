@@ -24,8 +24,12 @@ import type { Shop, ShopPromo } from "./types.ts";
 
 const ORIGIN = "https://blix.pl";
 
-/** Blix's shop ids for the chains priced here. Lidl comes from lidl.pl, which says more. */
+/**
+ * Blix's shop ids for the chains priced here. Lidl is read here too: lidl.pl
+ * shows only the ~30 deals its site features, the leaflet has the whole week.
+ */
 export const BLIX_SHOPS: Record<number, Shop> = {
+  1: "lidl",
   23: "biedronka",
   46: "kaufland",
   66: "aldi",
