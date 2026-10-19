@@ -10,6 +10,7 @@ import { loadPricing } from "@/lib/prices/load";
 import { checkShoppingItemAction, clearCheckedAction, ownShoppingItemAction, setStapleStockAction } from "../actions";
 import {
   answerPromoAction,
+  refreshFeedsAction,
   refreshPromosAction,
   removeShopPriceAction,
   saveShopPriceAction,
@@ -58,6 +59,7 @@ export default async function ShoppingPage() {
         pricing={{
           ...pricing,
           onRefresh: refreshPromosAction,
+          onRefreshFeeds: refreshFeedsAction,
           onSavePrice: saveShopPriceAction,
           onSavePrices: saveShopPricesAction,
           onRemovePrice: removeShopPriceAction,

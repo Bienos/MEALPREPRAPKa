@@ -2,9 +2,15 @@ import "server-only";
 import { z } from "zod";
 
 import { getSupabase } from "@/lib/supabase/server";
-import { SHOPS, type ProductLink, type Shop, type ShopPrice, type ShopPromo } from "@/lib/prices/types";
+import {
+  SHOPS,
+  type ProductLink,
+  type ShelfPrice,
+  type Shop,
+  type ShopPrice,
+  type ShopPromo,
+} from "@/lib/prices/types";
 import { addDays, toIsoDate } from "@/lib/date";
-import type { ShelfPrice } from "@/lib/prices/biedronka";
 import { isoDateSchema, maybeRow, ok, rows } from "./helpers";
 
 const shopSchema = z.enum(SHOPS);

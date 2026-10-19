@@ -11,6 +11,7 @@ import { defaultWeekStart } from "@/lib/meals/week-plan";
 import { loadPricing } from "@/lib/prices/load";
 import {
   answerPromoAction,
+  refreshFeedsAction,
   refreshPromosAction,
   removeShopPriceAction,
   saveShopPriceAction,
@@ -61,6 +62,7 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
         pricing={{
           ...pricing,
           onRefresh: refreshPromosAction,
+          onRefreshFeeds: refreshFeedsAction,
           onSavePrice: saveShopPriceAction,
           onSavePrices: saveShopPricesAction,
           onRemovePrice: removeShopPriceAction,

@@ -11,11 +11,11 @@ import type { Unit } from "../meals/ingredients.ts";
  */
 export function parsePack(text: string): { quantity: number; unit: Unit } | null {
   const multi = text.match(/(\d+)\s*x\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b/i);
-  const single = text.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|ml|l|szt)\b/i);
+  const single = text.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|ml|l|sztuk|szt)\b/i);
   const [count, amount, unit] = multi
     ? [Number(multi[1]), toNumber(multi[2]), multi[3].toLowerCase()]
     : single
-      ? [1, toNumber(single[1]), single[2].toLowerCase()]
+      ? [1, toNumber(single[1]), single[2].toLowerCase().replace("sztuk", "szt")]
       : [0, 0, ""];
   if (!count || !amount) return null;
   const factor = unit === "kg" || unit === "l" ? 1000 : 1;

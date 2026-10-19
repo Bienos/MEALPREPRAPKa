@@ -84,6 +84,18 @@ export type ShopPromo = {
   shelf?: boolean;
 };
 
+/** One product's regular shelf price from a shop's own catalogue, as stored. */
+export type ShelfPrice = {
+  productKey: string;
+  name: string;
+  /** What the price is for: a pack, or a kilo of something sold by weight. */
+  packQuantity: number;
+  packUnit: Unit;
+  loose: boolean;
+  price: number;
+  sourceUrl: string;
+};
+
 /** My own price for a shopping item at a shop. */
 export type ShopPrice = {
   itemName: string;

@@ -12,7 +12,7 @@ import {
   upsertShopPrices,
 } from "@/lib/db/prices";
 import { priceKey } from "@/lib/prices/match";
-import { refreshShopPromos } from "@/lib/prices/refresh";
+import { refreshShopPromos, refreshStokrotkaPrices } from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
 
 export type RefreshPromosResult = { ok: true; count: number; warnings: string[] } | { ok: false; message: string };
@@ -26,6 +26,20 @@ export async function refreshPromosAction(): Promise<RefreshPromosResult> {
   } catch (error) {
     console.error("[prices] refresh failed:", error);
     return { ok: false, message: error instanceof Error ? error.message : "Nie udało się sprawdzić promocji." };
+  }
+}
+
+export type RefreshFeedsResult = { ok: true; count: number; skipped: boolean } | { ok: false; message: string };
+
+/** The second half of [ Sprawdź promocje ]: Stokrotka's product feed, a request of its own (up to a minute). */
+export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
+  try {
+    const result = await refreshStokrotkaPrices();
+    refresh();
+    return { ok: true, ...result };
+  } catch (error) {
+    console.error("[prices] feed refresh failed:", error);
+    return { ok: false, message: error instanceof Error ? error.message : "Nie udało się pobrać cen Stokrotki." };
   }
 }
 
