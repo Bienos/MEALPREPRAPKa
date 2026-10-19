@@ -24,7 +24,15 @@ describe("Frisco feed", () => {
     assert.deepEqual([rice?.packQuantity, rice?.packUnit, rice?.price], [400, "g", 3.49]);
   });
 
-  test("a product sold by weight is priced per kilo", () => {
+  test("a product sold by weight is priced at its average weight, loose", () => {
+    const ham = toFriscoShelfPrice({
+      ...items[0],
+      name: "Szynka z Indyka (120g-180g)",
+      unit: "Kilogram",
+      grammage: 0.15,
+      price: 6.69,
+    });
+    assert.deepEqual([ham?.packQuantity, ham?.packUnit, ham?.loose, ham?.price], [150, "g", true, 6.69]);
     const turkey = priceOf("Filet z piersi indyka");
     assert.deepEqual([turkey?.packQuantity, turkey?.packUnit, turkey?.loose, turkey?.price], [1000, "g", true, 53.99]);
   });

@@ -71,7 +71,7 @@ export function parseFriscoFeed(json: unknown): FriscoItem[] {
   return items;
 }
 
-/** Fresh produce sold by weight names a range ("(800g-1200g)", "480-720g", "ok. 500 g"): its price is per kilo. */
+/** Fresh produce sold by weight names a range ("(800g-1200g)", "480-720g", "ok. 500 g"); its price is for the average weight. */
 const BY_WEIGHT = /\d+\s?g?\s*-\s*\d+\s?g\b|\bok\.\s*\d/i;
 
 /**
@@ -90,14 +90,16 @@ export function matchName(item: FriscoItem): string {
 }
 
 /**
- * A product as a shelf price: per kilo when sold by weight, else the pack the
+ * A product as a shelf price: loose at its average weight when sold by weight, else the pack the
  * name gives ("10 szt.", "4x100g"), else the pack size the feed gives. null
  * when no pack can be told.
  */
 export function toFriscoShelfPrice(item: FriscoItem): ShelfPrice | null {
   const base = { productKey: item.productKey, name: item.name, price: item.price, sourceUrl: item.url };
-  if (item.unit !== "Piece" && BY_WEIGHT.test(item.name)) {
-    return { ...base, packQuantity: 1000, packUnit: item.unit === "Litre" ? "ml" : "g", loose: true };
+  // The price is for the average weight the feed gives ("(120g-180g)", 0.15 kg); I pay for what I take.
+  if (item.unit !== "Piece" && BY_WEIGHT.test(item.name) && item.grammage !== null) {
+    const packUnit = item.unit === "Litre" ? "ml" : "g";
+    return { ...base, packQuantity: Math.round(item.grammage * 1000), packUnit, loose: true };
   }
   const named = parsePack(item.name);
   if (named) return { ...base, packQuantity: named.quantity, packUnit: named.unit, loose: false };
