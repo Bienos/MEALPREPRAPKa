@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, ClipboardCopy, Home, PackageOpen, Trash2, Undo2 } from "lucide-react";
 
+import { ShopPrices, type ShopPricing } from "@/components/prep/shop-prices";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export function ShoppingList({
   onOwn,
   onStaple,
   onClearChecked,
+  pricing,
 }: {
   items: ShoppingRow[];
   staples: StapleRow[];
@@ -39,6 +41,8 @@ export function ShoppingList({
   onOwn: (id: string, owned: boolean) => Promise<void>;
   onStaple: (id: string, inStock: boolean) => Promise<void>;
   onClearChecked: () => Promise<void>;
+  /** "Gdzie taniej?" card above the list, priced from the rows still to buy. */
+  pricing?: ShopPricing;
 }) {
   const [rows, setRows] = useState(items);
   const [copied, setCopied] = useState<"ok" | "failed" | null>(null);
@@ -63,8 +67,13 @@ export function ShoppingList({
     setTimeout(() => setCopied(null), 2500);
   }
 
+  const toBuy = active
+    .filter((row) => !row.checked)
+    .map((row) => ({ id: row.id, name: row.name, quantity: row.quantity, unit: row.unit as Unit | null }));
+
   return (
     <div className="flex flex-col gap-5">
+      {pricing ? <ShopPrices items={toBuy} pricing={pricing} /> : null}
       {rows.length === 0 ? (
         <Card className="items-center gap-2 py-10 text-center">
           <PackageOpen className="size-9 text-muted-foreground" />
