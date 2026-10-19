@@ -101,6 +101,91 @@ export async function fetchBlixPromos(searches: BlixSearch[], now: Date = new Da
   };
 }
 
+/* Full sweep ---------------------------------------------------------------- */
+
+/** Grocery subcategories of blix.pl, the ones a shopping list needs first. */
+export const SWEEP_SUBS = [
+  "mieso",
+  "nabial",
+  "wedliny",
+  "jajka",
+  "pieczywo",
+  "warzywa",
+  "owoce",
+  "ryz",
+  "platki",
+  "kasza",
+  "makaron",
+  "oleje",
+  "ryby-i-owoce-morza",
+  "maka",
+  "bakalie-i-orzechy",
+  "konserwy",
+  "przyprawy-i-ziola",
+];
+/** Pages in flight at once during a sweep. */
+const SWEEP_PARALLEL = 4;
+
+export type SweepResult = {
+  promos: ShopPromo[];
+  pagesRead: number;
+  pagesTotal: number;
+  /** Every page of every category was read. */
+  complete: boolean;
+};
+
+/**
+ * Reads every grocery offer of the priced chains, category by category: the
+ * first page of each tells how many there are, then the rest, most useful
+ * categories first. Stops at `deadline` (a Date.now() value) and says how far
+ * it got. Throws when nothing could be read.
+ */
+export async function fetchBlixSweep(deadline: number, now: Date = new Date()): Promise<SweepResult> {
+  const promos: ShopPromo[] = [];
+  let pagesRead = 0;
+  let failed = 0;
+  let lastError: unknown = null;
+
+  const readPage = async (sub: string, page: number): Promise<number> => {
+    try {
+      const json = await fetchPage(blixUrl({ sub, q: "" }, page));
+      promos.push(...parseBlixPromos(json, now));
+      pagesRead++;
+      return pageCountOf(json);
+    } catch (error) {
+      failed++;
+      lastError = error;
+      return 1;
+    }
+  };
+
+  // The first page of each category says how many pages it has.
+  const counts = new Map<string, number>();
+  await runPool(
+    SWEEP_SUBS.map((sub) => async () => counts.set(sub, await readPage(sub, 1))),
+    SWEEP_PARALLEL,
+    deadline,
+  );
+  if (pagesRead === 0) throw lastError instanceof Error ? lastError : new Error("Nie udało się pobrać gazetek z Blix.");
+
+  const rest = SWEEP_SUBS.flatMap((sub) =>
+    Array.from({ length: Math.max(0, (counts.get(sub) ?? 1) - 1) }, (_, index) => () => readPage(sub, index + 2)),
+  );
+  await runPool(rest, SWEEP_PARALLEL, deadline);
+
+  const pagesTotal = [...counts.values()].reduce((sum, count) => sum + count, 0);
+  return { promos: dedupe(promos), pagesRead, pagesTotal, complete: pagesRead >= pagesTotal && failed === 0 };
+}
+
+/** Runs the tasks in order, `size` at a time, and starts no new one after the deadline. */
+async function runPool(tasks: (() => Promise<unknown>)[], size: number, deadline: number): Promise<void> {
+  let next = 0;
+  const worker = async () => {
+    while (next < tasks.length && Date.now() < deadline) await tasks[next++]();
+  };
+  await Promise.all(Array.from({ length: Math.min(size, tasks.length) }, worker));
+}
+
 async function fetchSearch(search: BlixSearch, now: Date): Promise<ShopPromo[]> {
   const first = await fetchPage(blixUrl(search, 1));
   const promos = parseBlixPromos(first, now);

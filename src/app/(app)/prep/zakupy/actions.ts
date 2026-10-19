@@ -12,7 +12,7 @@ import {
   upsertShopPrices,
 } from "@/lib/db/prices";
 import { priceKey } from "@/lib/prices/match";
-import { refreshShopPromos, refreshStokrotkaPrices } from "@/lib/prices/refresh";
+import { refreshBlixSweep, refreshShopPromos, refreshStokrotkaPrices } from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
 
 export type RefreshPromosResult = { ok: true; count: number; warnings: string[] } | { ok: false; message: string };
@@ -26,6 +26,22 @@ export async function refreshPromosAction(): Promise<RefreshPromosResult> {
   } catch (error) {
     console.error("[prices] refresh failed:", error);
     return { ok: false, message: error instanceof Error ? error.message : "Nie udało się sprawdzić promocji." };
+  }
+}
+
+export type RefreshSweepResult =
+  | { ok: true; pagesRead: number; pagesTotal: number; complete: boolean; skipped: boolean }
+  | { ok: false; message: string };
+
+/** The second half of [ Sprawdź promocje ]: every grocery offer of every chain from the Blix leaflets (up to a minute). */
+export async function refreshSweepAction(): Promise<RefreshSweepResult> {
+  try {
+    const result = await refreshBlixSweep();
+    refresh();
+    return { ok: true, ...result };
+  } catch (error) {
+    console.error("[prices] sweep failed:", error);
+    return { ok: false, message: error instanceof Error ? error.message : "Nie udało się pobrać wszystkich gazetek." };
   }
 }
 

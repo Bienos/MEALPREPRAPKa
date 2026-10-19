@@ -304,3 +304,52 @@ export async function upsertShelfPrices(shop: Shop, prices: ShelfPrice[], fetche
       ),
   );
 }
+
+/* Leaflet offers added without replacing what is there ------------------------ */
+
+/** Adds these promos, each replacing the same shop's same offer; nothing else is deleted. */
+export async function upsertShopPromos(promos: ShopPromo[], fetchedAt: string): Promise<void> {
+  const db = getSupabase();
+  for (let index = 0; index < promos.length; index += 500) {
+    ok(
+      await db.from("shop_promos").upsert(
+        promos.slice(index, index + 500).map((promo) => ({
+          shop: promo.shop,
+          product_key: promo.productKey,
+          name: promo.name,
+          pack_quantity: promo.packQuantity,
+          pack_unit: promo.packUnit,
+          loose: promo.loose,
+          promo_price: promo.promoPrice,
+          regular_price: promo.regularPrice,
+          valid_from: promo.validFrom,
+          valid_to: promo.validTo,
+          conditions: promo.conditions,
+          app_only: promo.appOnly,
+          multibuy: promo.multibuy,
+          multibuy_min: promo.multibuyMin,
+          source_url: promo.sourceUrl,
+          fetched_at: fetchedAt,
+        })),
+        { onConflict: "shop,product_key" },
+      ),
+    );
+  }
+}
+
+/** Promos that ended before today are of no use and go. */
+export async function deleteExpiredPromos(today: string): Promise<void> {
+  ok(await getSupabase().from("shop_promos").delete().lt("valid_to", today));
+}
+
+/* When a slow source last finished ------------------------------------------- */
+
+export async function getRefreshedAt(source: string): Promise<string | null> {
+  const result = await getSupabase().from("source_refreshes").select("finished_at").eq("source", source).maybeSingle();
+  const row = maybeRow(z.object({ finished_at: z.string() }), result);
+  return row?.finished_at ?? null;
+}
+
+export async function markRefreshed(source: string, at: string): Promise<void> {
+  ok(await getSupabase().from("source_refreshes").upsert({ source, finished_at: at }, { onConflict: "source" }));
+}
