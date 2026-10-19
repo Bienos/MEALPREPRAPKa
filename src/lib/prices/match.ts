@@ -49,7 +49,7 @@ const PROCESSED =
 
 /** A flavoured dairy product, not the plain one the meals use. */
 const FLAVOURED =
-  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanill|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn/;
+  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanil|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn/;
 
 /** A fruit named as a flavour ("truskawkowa", "malinowy"), not the fruit itself. */
 const FRUIT_FLAVOUR =
@@ -376,7 +376,7 @@ export function relevantPromos(
 
 /** A whole shop's range holds more than food: pet food, cosmetics, baby food. */
 const NOT_FOOD =
-  /felix|whiskas|pedigree|kitekat|purina|sheba|friskies|dla kota|dla psa|karma|durex|\bzel\b|szampon|serum|balsam|krem do|mydl|gerber|bobovita|hipp|nestle nan|kaszka|dla dzieci|smoothie|\bnapoj|\bsok\b|nektar\b|\bmus\b|galaret|kisiel|budyn|o smaku|deserek|strucl|rogal|produkt 100|konfitur|powidl|drazetk|cukierk|zelk|\bguma\b|po \d+ miesia/;
+  /felix|whiskas|pedigree|kitekat|purina|sheba|friskies|vitakraft|dogway|bruno banani|perfum|toaletow|dla kota|dla psa|karma|przysmak|bezmies|\bwpc\b|whey|actimel|durex|\bzel\b|szampon|serum|balsam|krem do|mydl|gerber|bobovita|hipp|nestle nan|kaszka|dla dzieci|smoothie|\bnapoj|\bsok\b|nektar\b|\bmus\b|galaret|kisiel|budyn|o smaku|deserek|strucl|rogal|produkt 100|konfitur|powidl|drazetk|cukierk|zelk|\bguma\b|po \d+ miesia/;
 /** Items that are themselves liquids, so a pack in litres is fine. */
 const LIQUID = /mleko|oliwa|olej|passata|sos/;
 const VOLUME = /\b\d+(?:[.,]\d+)? ?(?:l|ml)\b/;

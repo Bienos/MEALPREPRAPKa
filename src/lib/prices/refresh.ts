@@ -12,6 +12,7 @@ import {
 } from "@/lib/db/prices";
 import { listShoppingItems } from "@/lib/db/shopping";
 import type { Unit } from "@/lib/meals/ingredients";
+import { fetchAuchanPrices, fetchAuchanSitemap, MAX_AUCHAN_PAGES } from "./auchan";
 import { fetchBiedronkaSitemap, fetchShelfPrices, MAX_PAGES_PER_REFRESH, type ShelfResult } from "./biedronka";
 import { fetchBlixPromos, fetchBlixSweep } from "./blix";
 import { fetchLidlPromos } from "./lidl";
@@ -47,6 +48,37 @@ async function refreshBiedronkaShelf(
   const result = await fetchShelfPrices(wanted);
   await upsertShelfPrices("biedronka", result.prices, now.toISOString());
   return { ...result, waiting: Math.max(0, wanted.length - MAX_PAGES_PER_REFRESH) };
+}
+
+/**
+ * Auchan's regular prices from its online shop, the same way as Biedronka's:
+ * the sitemap, then the product pages that look like my list and were not
+ * read in the last two weeks (a few dozen per tap; the rest on the next one).
+ */
+export async function refreshAuchanShelf(): Promise<FeedRefresh> {
+  const now = new Date();
+  const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
+  if (items.length === 0) return { count: 0, skipped: false };
+  const [catalogue, stored] = await Promise.all([fetchAuchanSitemap(), listShelfPrices()]);
+  const freshSince = new Date(now.getTime() - SHELF_FRESH_DAYS * 86_400_000).toISOString();
+  const fresh = new Set(
+    stored.filter((price) => price.shop === "auchan" && price.fetchedAt >= freshSince).map((price) => price.productKey),
+  );
+  const wanted = [
+    ...new Map(
+      items
+        .flatMap((item) => catalogCandidates(item.name, item.unit as Unit | null, catalogue, SHELF_CANDIDATES))
+        .map((entry) => [entry.productKey, entry]),
+    ).values(),
+  ].filter((entry) => !fresh.has(entry.productKey));
+  if (wanted.length === 0) return { count: 0, skipped: true };
+  const result = await fetchAuchanPrices(wanted);
+  if (result.failed === result.read) throw new Error("Sklep Auchan nie pokazał żadnej strony produktu.");
+  await upsertShelfPrices("auchan", result.prices, now.toISOString());
+  console.info(
+    `[prices] auchan shelf: ${result.prices.length} prices from ${result.read} pages (${result.failed} failed, ${Math.max(0, wanted.length - MAX_AUCHAN_PAGES)} waiting)`,
+  );
+  return { count: result.prices.length, skipped: false };
 }
 
 export type RefreshResult = {

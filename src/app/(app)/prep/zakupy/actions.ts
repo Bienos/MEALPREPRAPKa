@@ -12,7 +12,13 @@ import {
   upsertShopPrices,
 } from "@/lib/db/prices";
 import { priceKey } from "@/lib/prices/match";
-import { refreshBlixSweep, refreshFriscoPrices, refreshShopPromos, refreshStokrotkaPrices } from "@/lib/prices/refresh";
+import {
+  refreshAuchanShelf,
+  refreshBlixSweep,
+  refreshFriscoPrices,
+  refreshShopPromos,
+  refreshStokrotkaPrices,
+} from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
 
 export type RefreshPromosResult = { ok: true; count: number; warnings: string[] } | { ok: false; message: string };
@@ -47,16 +53,16 @@ export async function refreshSweepAction(): Promise<RefreshSweepResult> {
 
 export type RefreshFeedsResult = { ok: true; count: number; skipped: boolean } | { ok: false; message: string };
 
-/** The second half of [ Sprawdź promocje ]: Stokrotka's and Frisco's product feeds, a request of their own (up to a minute). */
+/** The second half of [ Sprawdź promocje ]: Stokrotka's and Frisco's product feeds and Auchan's shop, a request of their own (up to a minute). */
 export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
   try {
-    // Two feeds, one request each. A failing one is reported, the other is still saved.
-    const [stokrotka, frisco] = await Promise.allSettled([refreshStokrotkaPrices(), refreshFriscoPrices()]);
+    // Two feeds and Auchan's shop, side by side. A failing one is logged, the others are still saved.
+    const sources = await Promise.allSettled([refreshStokrotkaPrices(), refreshFriscoPrices(), refreshAuchanShelf()]);
     refresh();
-    if (stokrotka.status === "rejected" && frisco.status === "rejected") throw stokrotka.reason;
-    const done = [stokrotka, frisco].flatMap((one) => (one.status === "fulfilled" ? [one.value] : []));
-    const failed = [stokrotka, frisco].find((one) => one.status === "rejected");
-    if (failed) console.error("[prices] one feed failed:", failed.reason);
+    const done = sources.flatMap((one) => (one.status === "fulfilled" ? [one.value] : []));
+    const failed = sources.filter((one): one is PromiseRejectedResult => one.status === "rejected");
+    if (done.length === 0) throw failed[0].reason;
+    for (const one of failed) console.error("[prices] one source failed:", one.reason);
     return {
       ok: true,
       count: done.reduce((sum, one) => sum + one.count, 0),
