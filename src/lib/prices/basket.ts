@@ -9,8 +9,10 @@
  * - a promo counts while it is valid today, app-only ones included;
  * - a multi-buy price applies to whole multiples of its pack count, the rest
  *   at the regular price;
+ * - a leaflet offer that only looks like the item counts as an estimate, and
+ *   says so; the cheapest usable option wins, and buying whole packs means
+ *   the amount is always covered (500 g needed, 250 g packs: two of them);
  * - an item with no usable price is "bez ceny" and stays out of the total.
- *   Nothing is guessed.
  */
 
 import type { Unit } from "../meals/ingredients.ts";
@@ -19,8 +21,13 @@ import type { Shop, ShopPrice, ShopPromo } from "./types.ts";
 /** A shopping-list row still to buy. */
 export type NeededItem = { id: string; name: string; quantity: number | null; unit: Unit | null };
 
-/** One way to buy an item at a shop: a confirmed promo, or my own price. */
-export type PriceOption = { kind: "promo"; promo: ShopPromo } | { kind: "mine"; price: ShopPrice };
+/**
+ * One way to buy an item at a shop: a confirmed promo, a leaflet offer the
+ * rules think fits (an estimate), or my own price.
+ */
+export type PriceOption =
+  | { kind: "promo"; promo: ShopPromo; estimate?: { packAssumed: boolean } }
+  | { kind: "mine"; price: ShopPrice };
 
 export type ItemCost = {
   amount: number;
@@ -29,6 +36,10 @@ export type ItemCost = {
   option: PriceOption;
   /** The promo price applied to at least one pack. */
   onPromo: boolean;
+  /** From a leaflet offer not yet confirmed as this item. */
+  estimated: boolean;
+  /** The offer named no pack, so the usual one was assumed. */
+  packAssumed: boolean;
 };
 
 export type BasketLine = {
@@ -45,6 +56,8 @@ export type ShopBasket = {
   total: number;
   priced: number;
   onPromo: number;
+  /** Of the priced items, how many rest on an unconfirmed leaflet offer. */
+  estimated: number;
 };
 
 export type BasketSummary = {
@@ -71,7 +84,11 @@ export function isPromoActive(promo: Pick<ShopPromo, "validFrom" | "validTo">, t
  * A pack's amount in the list's unit. Grams and millilitres count as the same
  * (1 ml ≈ 1 g is close enough for food); pieces never mix with weight.
  */
-export function packInItemUnit(packQuantity: number | null, packUnit: Unit | null, itemUnit: Unit | null): number | null {
+export function packInItemUnit(
+  packQuantity: number | null,
+  packUnit: Unit | null,
+  itemUnit: Unit | null,
+): number | null {
   if (packQuantity === null || packUnit === null) return null;
   if (itemUnit === null || packUnit === itemUnit) return packQuantity;
   const weightOrVolume = (unit: Unit) => unit === "g" || unit === "ml";
@@ -93,16 +110,29 @@ export function costOf(item: NeededItem, option: PriceOption): ItemCost | "unit"
     packs = loose ? exact : Math.ceil(exact - 1e-9);
   }
 
-  if (option.kind === "mine") return { amount: round(packs * option.price.price), packs, option, onPromo: false };
+  if (option.kind === "mine") {
+    return {
+      amount: round(packs * option.price.price),
+      packs,
+      option,
+      onPromo: false,
+      estimated: false,
+      packAssumed: false,
+    };
+  }
 
   const { promoPrice, regularPrice, multibuyMin } = option.promo;
-  if (loose || multibuyMin <= 1) return { amount: round(packs * promoPrice), packs, option, onPromo: true };
+  const estimated = option.estimate !== undefined;
+  const packAssumed = option.estimate?.packAssumed ?? false;
+  if (loose || multibuyMin <= 1) {
+    return { amount: round(packs * promoPrice), packs, option, onPromo: true, estimated, packAssumed };
+  }
 
   const promoPacks = Math.floor(packs / multibuyMin) * multibuyMin;
   const rest = packs - promoPacks;
   if (rest > 0 && regularPrice === null) return null;
   const amount = promoPacks * promoPrice + rest * (regularPrice ?? 0);
-  return { amount: round(amount), packs, option, onPromo: promoPacks > 0 };
+  return { amount: round(amount), packs, option, onPromo: promoPacks > 0, estimated, packAssumed };
 }
 
 /** The cheapest usable option for one item at one shop. */
@@ -131,6 +161,7 @@ export function buildBasket(
       total: round(priced.reduce((sum, line) => sum + (line.cost?.amount ?? 0), 0)),
       priced: priced.length,
       onPromo: priced.filter((line) => line.cost?.onPromo).length,
+      estimated: priced.filter((line) => line.cost?.estimated).length,
     };
   });
 

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { ChevronDown, ChevronRight, ExternalLink, PencilLine, Plus, RefreshCw, Smartphone } from "lucide-react";
 
-import { BulkPrices } from "@/components/prep/bulk-prices";
+import { BulkPrices, SHOP_ORDER } from "@/components/prep/bulk-prices";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,7 @@ export type ShopPricing = {
   ) => Promise<void>;
 };
 
-/** Shop rows shown before "Wszystkie sklepy". */
+/** The shops I go to, shown before "Wszystkie sklepy". */
 const VISIBLE_SHOPS = 4;
 
 /**
@@ -85,7 +85,13 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     prices.find((price) => price.shop === shop && price.itemName === priceKey(item.name)) ?? null;
 
   const summary = buildBasket(items, SHOPS, (item, shop) => {
-    const options: PriceOption[] = matchFor(shop, item).confirmed.map((promo) => ({ kind: "promo", promo }));
+    const match = matchFor(shop, item);
+    const options: PriceOption[] = [
+      ...match.confirmed.map((promo): PriceOption => ({ kind: "promo", promo })),
+      ...match.estimates.map(
+        ({ promo, packAssumed }): PriceOption => ({ kind: "promo", promo, estimate: { packAssumed } }),
+      ),
+    ];
     const mine = priceFor(shop, item);
     if (mine) options.push({ kind: "mine", price: mine });
     return options;
@@ -93,11 +99,13 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
   const { compared, split } = summary;
   const onPromo = items.filter((_, index) => summary.shops.some((basket) => basket.lines[index].cost?.onPromo)).length;
 
-  const asks = items.flatMap((item) =>
-    SHOPS.flatMap((shop) => {
-      const promo = matchFor(shop, item).suggestion;
-      return promo ? [{ item, shop, promo }] : [];
-    }),
+  // The estimates in use, one per item and shop: what "Pasuje?" asks about.
+  const asks = summary.shops.flatMap((basket) =>
+    basket.lines.flatMap((line) =>
+      line.cost?.estimated && line.cost.option.kind === "promo"
+        ? [{ item: line.item, shop: basket.shop, promo: line.cost.option.promo, packAssumed: line.cost.packAssumed }]
+        : [],
+    ),
   );
   const askGroups = items
     .map((item) => ({
@@ -106,22 +114,15 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     }))
     .filter((group) => group.asks.length > 0);
 
-  // Compared shops first, cheapest on top; then the ones with the most from my list.
-  const contenders = new Set(compared.shops);
-  const rows = summary.shops
-    .map((basket) => ({
-      basket,
-      asks: asks.filter((ask) => ask.shop === basket.shop).length,
-    }))
-    .sort((a, b) => {
-      const inA = contenders.has(a.basket.shop);
-      const inB = contenders.has(b.basket.shop);
-      if (inA !== inB) return inA ? -1 : 1;
-      if (inA) return compared.totals[a.basket.shop]! - compared.totals[b.basket.shop]!;
-      return b.basket.priced + b.asks - (a.basket.priced + a.asks);
-    });
-  const useful = rows.filter((row) => row.basket.priced > 0 || row.asks > 0).length;
-  const shown = allShops ? rows : rows.slice(0, Math.max(Math.min(useful, VISIBLE_SHOPS), 2));
+  // The shops I go to first, in their order; the rest by how much of my list they price.
+  const favourites = SHOP_ORDER.slice(0, VISIBLE_SHOPS);
+  const rows = [...summary.shops].sort((a, b) => {
+    const favA = favourites.indexOf(a.shop);
+    const favB = favourites.indexOf(b.shop);
+    if (favA !== favB) return (favA === -1 ? 99 : favA) - (favB === -1 ? 99 : favB);
+    return b.priced - a.priced || a.total - b.total;
+  });
+  const shown = allShops ? rows : rows.slice(0, VISIBLE_SHOPS);
 
   function refresh() {
     setRefreshNote(null);
@@ -184,12 +185,10 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
   }
 
   const detail = openShop ? summary.shops.find((basket) => basket.shop === openShop)! : null;
-  // Priced lines first, then the ones waiting for an answer, then the rest.
-  const detailLines = detail
-    ? [...detail.lines].sort((a, b) => lineOrder(a, detail.shop) - lineOrder(b, detail.shop))
-    : [];
-  function lineOrder(line: BasketLine, shop: Shop): number {
-    return line.cost ? 0 : matchFor(shop, line.item).suggestion ? 1 : 2;
+  // Exact prices first, then estimates, then what has no price.
+  const detailLines = detail ? [...detail.lines].sort((a, b) => lineOrder(a) - lineOrder(b)) : [];
+  function lineOrder(line: BasketLine): number {
+    return line.cost ? (line.cost.estimated ? 1 : 0) : 2;
   }
 
   return (
@@ -197,17 +196,17 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       <div>
         <p className="text-lg font-extrabold">Gdzie taniej?</p>
         <p className="text-sm text-muted-foreground">
-          Promocje z Lidla i gazetek {SHOPS.length - 1} sieci, dla tego, co zostało do kupienia
+          Ceny z promocji Lidla i gazetek {SHOPS.length - 1} sieci, dla tego, co zostało do kupienia
         </p>
       </div>
 
       <ul className="flex flex-col gap-2">
-        {shown.map(({ basket, asks: waiting }) => {
-          const total = compared.totals[basket.shop];
-          const cheaper = compared.cheapest === basket.shop;
+        {shown.map((basket) => {
+          // Only a fair claim when the comparison covers most of the list.
+          const cheaper = compared.cheapest === basket.shop && compared.count >= summary.itemCount * 0.6;
           const facts = [
-            basket.priced > 0 ? `${basket.priced} z ${summary.itemCount} z ceną` : null,
-            basket.onPromo > 0 ? `${basket.onPromo} w promocji` : null,
+            basket.priced > 0 ? `${basket.priced} z ${summary.itemCount} z ceną` : "brak w gazetce",
+            basket.estimated > 0 ? `${basket.estimated} szac.` : null,
           ].filter(Boolean);
           return (
             <li key={basket.shop}>
@@ -221,25 +220,15 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
               >
                 <span className="min-w-0 flex-1">
                   <span className="block font-bold">{SHOP_LABELS[basket.shop]}</span>
-                  <span className="block text-xs font-semibold text-muted-foreground">
-                    {facts.length > 0 ? facts.join(" · ") : "bez cen z listy"}
-                    {waiting > 0 ? (
-                      <span className="text-primary">
-                        {" · "}
-                        {waiting} do sprawdzenia
-                      </span>
-                    ) : null}
-                  </span>
+                  <span className="block text-xs font-semibold text-muted-foreground">{facts.join(" · ")}</span>
                 </span>
                 {cheaper ? (
                   <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-accent-foreground">
                     taniej
                   </span>
                 ) : null}
-                {total !== undefined ? (
-                  <span className="text-lg font-extrabold tabular-nums">{formatTotal(total)}</span>
-                ) : basket.priced > 0 ? (
-                  <span className="font-bold text-muted-foreground tabular-nums">{formatTotal(basket.total)}</span>
+                {basket.priced > 0 ? (
+                  <span className="text-lg font-extrabold tabular-nums">{formatTotal(basket.total)}</span>
                 ) : null}
                 <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
               </button>
@@ -262,9 +251,20 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
         <p className="text-muted-foreground">
           {compared.count > 0
             ? `Porównane ${compared.shops.length === 2 ? "w obu" : `w ${compared.shops.length} sklepach`}: ${compared.count} z ${summary.itemCount}`
-            : "Potwierdź promocje albo dodaj ceny, żeby porównać sklepy"}
+            : pricing.fetchedLabel
+              ? "Za mało cen, żeby porównać sklepy. Dodaj własne albo wpisz ceny z półki"
+              : "Kliknij „Sprawdź promocje”, żeby zobaczyć ceny z gazetek"}
           {onPromo > 0 ? ` · ${onPromo} w promocji` : ""}
         </p>
+        {compared.count > 0 ? (
+          <p className="text-muted-foreground">
+            Na tych {compared.count} pozycjach:{" "}
+            {compared.shops
+              .toSorted((a, b) => compared.totals[a]! - compared.totals[b]!)
+              .map((shop) => `${SHOP_LABELS[shop]} ${formatTotal(compared.totals[shop]!)}`)
+              .join(" · ")}
+          </p>
+        ) : null}
         {split ? (
           <p className="font-semibold">
             Każde tam, gdzie taniej: {formatTotal(split.total)}{" "}
@@ -277,7 +277,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
             onClick={() => setReviewing(true)}
             className="w-fit text-left font-semibold text-primary"
           >
-            Pasuje? {asks.length} {plural(asks.length, "promocja", "promocje", "promocji")} do sprawdzenia
+            Pasuje? Sprawdź {asks.length} {plural(asks.length, "szacunek", "szacunki", "szacunków")}
           </button>
         ) : null}
       </div>
@@ -319,19 +319,19 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
               {detail.priced > 0
                 ? `Razem ${formatPrice(detail.total)} za ${detail.priced} z ${summary.itemCount}`
                 : "Jeszcze nic z listy nie ma tu ceny"}
-              {detail.onPromo > 0 ? ` · ${detail.onPromo} w promocji` : ""}
+              {detail.estimated > 0 ? ` · w tym ${detail.estimated} szac.` : ""}
             </p>
             <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
-              {detail.shop === "lidl"
-                ? "Promocje z lidl.pl. Liczą się te, które potwierdzisz, i Twoje ceny."
-                : "Promocje z gazetki, przez blix.pl. Gazetka często nie podaje wagi: zapytam raz, gdy potwierdzisz."}
+              {detail.shop === "lidl" ? "Promocje z lidl.pl." : "Promocje z gazetki, przez blix.pl."} Cena z oferty,
+              która wygląda na ten produkt, to szacunek (oznaczony). „Tak” ją potwierdza, „Nie” szuka następnej.
+              Bierzemy zawsze tyle opakowań, żeby wystarczyło.
             </p>
             <ul className="rounded-xl border bg-card">
               {detailLines.map((line) => (
                 <LineRow
                   key={line.item.id}
                   line={line}
-                  suggestion={matchFor(detail.shop, line.item).suggestion}
+                  fetched={pricing.fetchedLabel !== null}
                   onAnswer={(promo, isMatch, pack) => answer(detail.shop, line.item, promo, isMatch, pack)}
                   onEdit={() => setEditing({ shop: detail.shop, item: line.item })}
                 />
@@ -344,7 +344,8 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       <Sheet open={reviewing && editing === null} onClose={() => setReviewing(false)} title="Pasuje?">
         <div className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">
-            Potwierdź raz: potem ten produkt liczy się sam, co tydzień, gdy jest w promocji. „Nie” już nie wróci.
+            Te ceny są już policzone jako szacunki. „Tak” robi z nich pewne i zostaje na kolejne tygodnie, „Nie” szuka
+            następnej oferty.
           </p>
           {askGroups.map(({ item, asks: itemAsks }) => (
             <section key={item.id} className="flex flex-col gap-2">
@@ -356,10 +357,11 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
                   </span>
                 ) : null}
               </p>
-              {itemAsks.map(({ shop, promo }) => (
+              {itemAsks.map(({ shop, promo, packAssumed }) => (
                 <Suggestion
                   key={`${shop}|${promo.productKey}`}
                   promo={promo}
+                  packAssumed={packAssumed}
                   item={item}
                   showShop
                   onAnswer={(isMatch, pack) => answer(shop, item, promo, isMatch, pack)}
@@ -395,17 +397,19 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
 
 function LineRow({
   line,
-  suggestion,
+  fetched,
   onAnswer,
   onEdit,
 }: {
   line: BasketLine;
-  suggestion: ShopPromo | null;
+  /** Promotions were fetched at least once, so a missing price means "not in the leaflet". */
+  fetched: boolean;
   onAnswer: (promo: ShopPromo, isMatch: boolean, pack: PackAnswer | null) => void;
   onEdit: () => void;
 }) {
   const { item, cost } = line;
   const amount = formatAmount(item.quantity, item.unit);
+  const estimate = cost?.estimated && cost.option.kind === "promo" ? cost.option.promo : null;
 
   return (
     <li className="flex flex-col gap-2 border-b px-4 py-3 last:border-0">
@@ -414,13 +418,13 @@ function LineRow({
           <p className="font-semibold first-letter:uppercase">
             {item.name} {amount ? <span className="text-sm font-normal text-muted-foreground">{amount}</span> : null}
           </p>
-          <CostDetail line={line} />
+          <CostDetail line={line} fetched={fetched} />
         </div>
         {cost ? (
           <button type="button" onClick={onEdit} className="flex shrink-0 flex-col items-end">
             <span className="font-extrabold tabular-nums">{formatPrice(cost.amount)}</span>
             <span className="text-xs font-semibold text-primary">
-              {cost.option.kind === "mine" ? "Zmień" : "Twoja cena"}
+              {cost.option.kind === "mine" ? "Zmień" : "Wpisz swoją"}
             </span>
           </button>
         ) : (
@@ -430,24 +434,29 @@ function LineRow({
           </Button>
         )}
       </div>
-      {suggestion ? (
+      {estimate ? (
         <Suggestion
-          key={suggestion.productKey}
-          promo={suggestion}
+          key={estimate.productKey}
+          promo={estimate}
+          packAssumed={cost?.packAssumed ?? false}
           item={item}
-          onAnswer={(isMatch, pack) => onAnswer(suggestion, isMatch, pack)}
+          onAnswer={(isMatch, pack) => onAnswer(estimate, isMatch, pack)}
         />
       ) : null}
     </li>
   );
 }
 
-function CostDetail({ line }: { line: BasketLine }) {
+function CostDetail({ line, fetched }: { line: BasketLine; fetched: boolean }) {
   const { cost, item } = line;
   if (!cost) {
     return (
       <p className="text-sm text-muted-foreground">
-        {line.missing === "unit" ? "Cena w innej jednostce niż na liście" : "bez ceny"}
+        {line.missing === "unit"
+          ? "Cena w innej jednostce niż na liście"
+          : fetched
+            ? "brak w gazetce, wpisz cenę z półki"
+            : "promocje jeszcze nie sprawdzone"}
       </p>
     );
   }
@@ -478,6 +487,10 @@ function CostDetail({ line }: { line: BasketLine }) {
           : packsLabel(cost.packs, promo.packQuantity, promo.packUnit)}
       </p>
       <div className="flex flex-wrap gap-1.5">
+        {cost.estimated ? <Badge tone="muted">szacunek</Badge> : null}
+        {cost.packAssumed ? (
+          <Badge tone="muted">zakładam {formatAmount(promo.packQuantity, promo.packUnit)}</Badge>
+        ) : null}
         {cost.onPromo ? (
           <Badge tone="promo">{promo.multibuy ?? discount}</Badge>
         ) : (
@@ -495,30 +508,37 @@ function CostDetail({ line }: { line: BasketLine }) {
 }
 
 /**
- * "Pasuje?" for one offer. An offer that does not say what its price is for
- * (most leaflet ones) asks that with "Tak", so the total never assumes it.
+ * "Pasuje?" for the offer an estimate rests on. "Tak" makes it exact and keeps
+ * the pack the estimate used (when the leaflet named none); "Inne opakowanie"
+ * says what the price is really for.
  */
 function Suggestion({
   promo,
+  packAssumed,
   item,
   showShop = false,
   onAnswer,
 }: {
   promo: ShopPromo;
+  /** The offer named no pack: the one on `promo` was assumed. */
+  packAssumed: boolean;
   item: NeededItem;
   showShop?: boolean;
   onAnswer: (isMatch: boolean, pack: PackAnswer | null) => void;
 }) {
   const [askingPack, setAskingPack] = useState(false);
-  const needsPack = promo.packQuantity === null && item.quantity !== null && item.unit !== null;
+  const assumedPack: PackAnswer | null =
+    packAssumed && promo.packQuantity !== null && promo.packUnit !== null
+      ? { quantity: promo.packQuantity, unit: promo.packUnit, loose: promo.loose }
+      : null;
   const pack = formatAmount(promo.packQuantity, promo.packUnit);
   const price = formatPrice(promo.promoPrice);
   const facts = [
     ...(promo.packQuantity === null
       ? [price, "waga niepodana"]
       : promo.loose
-        ? [`${price} za ${pack}`, "na wagę"]
-        : [pack, price]),
+        ? [`${price} za ${pack}`, packAssumed ? "zakładam: na wagę" : "na wagę"]
+        : [packAssumed ? `zakładam ${pack}` : pack, price]),
     promo.multibuy,
     promo.appOnly ? "aplikacja" : null,
   ];
@@ -552,8 +572,7 @@ function Suggestion({
         </div>
         <button
           type="button"
-          aria-pressed={askingPack}
-          onClick={() => (needsPack ? setAskingPack(true) : onAnswer(true, null))}
+          onClick={() => onAnswer(true, assumedPack)}
           className="h-10 shrink-0 rounded-full bg-accent px-4 text-sm font-bold text-accent-foreground"
         >
           Tak
@@ -566,6 +585,15 @@ function Suggestion({
           Nie
         </button>
       </div>
+      {item.unit && !askingPack ? (
+        <button
+          type="button"
+          onClick={() => setAskingPack(true)}
+          className="w-fit text-left text-sm font-semibold text-primary"
+        >
+          Inne opakowanie
+        </button>
+      ) : null}
       {askingPack && item.unit ? (
         <PackChooser unit={item.unit} price={price} onPick={(answer) => onAnswer(true, answer)} />
       ) : null}

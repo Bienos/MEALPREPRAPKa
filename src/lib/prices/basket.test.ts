@@ -129,6 +129,34 @@ describe("isPromoActive", () => {
   });
 });
 
+describe("estimates from leaflet offers", () => {
+  const estimate = (price: number, packQuantity: number, packAssumed = false): PriceOption => ({
+    kind: "promo",
+    promo: promo({ promoPrice: price, packQuantity, packUnit: "g", shop: "kaufland" }),
+    estimate: { packAssumed },
+  });
+
+  test("they are priced like any promo, and marked as estimates", () => {
+    const cost = costOf(item(500, "g", "skyr"), estimate(4, 450, true));
+    assert.ok(cost && cost !== "unit");
+    assert.deepEqual([cost.amount, cost.packs, cost.estimated, cost.packAssumed], [8, 2, true, true]);
+  });
+
+  test("a pack smaller than needed means more packs; the cheapest way to cover the amount wins", () => {
+    // 600 g needed: 3 x 250 g at 3 = 9, or 2 x 500 g at 5 = 10, or 1 x 1000 g at 11.
+    const line = priceLine(item(600, "g", "kurczak"), [estimate(3, 250), estimate(5, 500), estimate(11, 1000)]);
+    assert.deepEqual([line.cost?.amount, line.cost?.packs], [9, 3]);
+    // 500 g needed in one 500 g pack at 5 beats three 250 g at 9.
+    assert.equal(priceLine(item(500, "g", "kurczak"), [estimate(3, 250), estimate(5, 500)]).cost?.amount, 5);
+  });
+
+  test("an exact price is not marked as an estimate", () => {
+    const cost = costOf(item(500, "g", "ryż"), { kind: "promo", promo: promo({ packQuantity: 500 }) });
+    assert.ok(cost && cost !== "unit");
+    assert.deepEqual([cost.estimated, cost.packAssumed], [false, false]);
+  });
+});
+
 describe("buildBasket", () => {
   const items: NeededItem[] = [
     item(1000, "g", "kurczak"),
