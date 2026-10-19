@@ -12,7 +12,7 @@ import {
   upsertShopPrices,
 } from "@/lib/db/prices";
 import { priceKey } from "@/lib/prices/match";
-import { refreshBlixSweep, refreshShopPromos, refreshStokrotkaPrices } from "@/lib/prices/refresh";
+import { refreshBlixSweep, refreshFriscoPrices, refreshShopPromos, refreshStokrotkaPrices } from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
 
 export type RefreshPromosResult = { ok: true; count: number; warnings: string[] } | { ok: false; message: string };
@@ -47,12 +47,21 @@ export async function refreshSweepAction(): Promise<RefreshSweepResult> {
 
 export type RefreshFeedsResult = { ok: true; count: number; skipped: boolean } | { ok: false; message: string };
 
-/** The second half of [ Sprawdź promocje ]: Stokrotka's product feed, a request of its own (up to a minute). */
+/** The second half of [ Sprawdź promocje ]: Stokrotka's and Frisco's product feeds, a request of their own (up to a minute). */
 export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
   try {
-    const result = await refreshStokrotkaPrices();
+    // Two feeds, one request each. A failing one is reported, the other is still saved.
+    const [stokrotka, frisco] = await Promise.allSettled([refreshStokrotkaPrices(), refreshFriscoPrices()]);
     refresh();
-    return { ok: true, ...result };
+    if (stokrotka.status === "rejected" && frisco.status === "rejected") throw stokrotka.reason;
+    const done = [stokrotka, frisco].flatMap((one) => (one.status === "fulfilled" ? [one.value] : []));
+    const failed = [stokrotka, frisco].find((one) => one.status === "rejected");
+    if (failed) console.error("[prices] one feed failed:", failed.reason);
+    return {
+      ok: true,
+      count: done.reduce((sum, one) => sum + one.count, 0),
+      skipped: done.every((one) => one.skipped),
+    };
   } catch (error) {
     console.error("[prices] feed refresh failed:", error);
     return { ok: false, message: error instanceof Error ? error.message : "Nie udało się pobrać cen Stokrotki." };
