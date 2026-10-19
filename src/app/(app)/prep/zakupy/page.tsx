@@ -8,7 +8,13 @@ import { listShoppingItems } from "@/lib/db/shopping";
 import type { ShoppingCategory } from "@/lib/meals/ingredients";
 import { loadPricing } from "@/lib/prices/load";
 import { checkShoppingItemAction, clearCheckedAction, ownShoppingItemAction, setStapleStockAction } from "../actions";
-import { answerPromoAction, refreshPromosAction, removeShopPriceAction, saveShopPriceAction } from "./actions";
+import {
+  answerPromoAction,
+  refreshPromosAction,
+  removeShopPriceAction,
+  saveShopPriceAction,
+  saveShopPricesAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 // "Sprawdź promocje" reads Lidl and up to two leaflet pages per item: give it time.
@@ -53,6 +59,7 @@ export default async function ShoppingPage() {
           ...pricing,
           onRefresh: refreshPromosAction,
           onSavePrice: saveShopPriceAction,
+          onSavePrices: saveShopPricesAction,
           onRemovePrice: removeShopPriceAction,
           onAnswer: answerPromoAction,
         }}

@@ -138,6 +138,26 @@ export async function upsertShopPrice(price: ShopPrice): Promise<void> {
   );
 }
 
+/** Several prices at once ("Wpisz ceny"): one write, each replacing its item and shop. */
+export async function upsertShopPrices(prices: ShopPrice[]): Promise<void> {
+  if (prices.length === 0) return;
+  ok(
+    await getSupabase()
+      .from("shop_prices")
+      .upsert(
+        prices.map((price) => ({
+          item_name: price.itemName,
+          shop: price.shop,
+          product_label: price.productLabel,
+          pack_quantity: price.packQuantity,
+          pack_unit: price.packUnit,
+          price: price.price,
+        })),
+        { onConflict: "item_name,shop" },
+      ),
+  );
+}
+
 export async function deleteShopPrice(itemName: string, shop: Shop): Promise<void> {
   ok(await getSupabase().from("shop_prices").delete().eq("item_name", itemName).eq("shop", shop));
 }
