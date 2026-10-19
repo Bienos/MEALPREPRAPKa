@@ -13,7 +13,7 @@ import {
   buildPrep,
   dishesToAdd,
   finishPrep,
-  regenerateShoppingList,
+  rebuildShoppingList,
   removeDishFromPrep,
   swapDish,
 } from "@/lib/meals/prep";
@@ -105,7 +105,11 @@ export async function finishPrepAction(): Promise<void> {
 
 export async function discardPrepAction(): Promise<void> {
   const session = await getActivePrepSession();
-  if (session) await deletePrepSession(session.id);
+  if (session) {
+    await deletePrepSession(session.id);
+    // Dishes only this prep suggested come off the shopping list with it.
+    await rebuildShoppingList();
+  }
   refresh();
 }
 
@@ -128,8 +132,7 @@ export async function ownShoppingItemAction(id: string, owned: boolean): Promise
 /** Marking a staple out of stock puts it back on the list. */
 export async function setStapleStockAction(id: string, inStock: boolean): Promise<void> {
   await setStapleInStock(id, inStock);
-  const session = await getActivePrepSession();
-  if (session) await regenerateShoppingList(session.id);
+  await rebuildShoppingList();
   refresh();
 }
 

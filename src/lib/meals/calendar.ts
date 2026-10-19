@@ -59,7 +59,7 @@ export function toneFor(kcal: number, target: number): Tone {
 }
 
 /** The Monday that starts the week containing `date`. */
-function weekStart(date: string): string {
+export function weekStart(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
   const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); // 0 = Sunday
   return addDays(date, -((weekday + 6) % 7));

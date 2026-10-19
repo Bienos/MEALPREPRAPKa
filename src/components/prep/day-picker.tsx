@@ -9,20 +9,29 @@ import { cn } from "@/lib/utils";
 import { PREP_SLOTS, PREP_SLOT_LABELS, type PrepSlot } from "@/lib/meals/prep-plan";
 import type { DayType, PrepDayView } from "@/lib/meals/prep-view-types";
 
+const DAY_COUNTS = [2, 3, 4];
+
 /** PREP start: how many days, then DT/DNT per day, then build. */
 export function DayPicker({
   initialDays,
+  maxDays,
   onBuild,
 }: {
   initialDays: PrepDayView[];
+  /** The longest prep each slot's dishes keep for, from the sheet's fridge life. */
+  maxDays: Record<PrepSlot, number>;
   onBuild: (days: { date: string; day_type: DayType }[], slot: PrepSlot) => Promise<void>;
 }) {
   const [slot, setSlot] = useState<PrepSlot>("obiad");
-  const [count, setCount] = useState(3);
+  const [chosenCount, setCount] = useState(3);
   const [types, setTypes] = useState<Record<string, DayType>>(() =>
     Object.fromEntries(initialDays.map((day) => [day.date, day.dayType])),
   );
   const [pending, startTransition] = useTransition();
+  // Suppers keep a day or two, so longer preps are not offered for them.
+  const counts = DAY_COUNTS.filter((option) => option <= maxDays[slot]);
+  const options = counts.length > 0 ? counts : [1];
+  const count = Math.min(chosenCount, options[options.length - 1]);
   const days = initialDays.slice(0, count);
 
   return (
@@ -52,7 +61,7 @@ export function DayPicker({
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-bold tracking-widest text-muted-foreground uppercase">Na ile dni?</h2>
         <div role="group" aria-label="Liczba dni" className="grid grid-cols-3 gap-2">
-          {[2, 3, 4].map((option) => (
+          {options.map((option) => (
             <button
               key={option}
               type="button"
@@ -69,6 +78,12 @@ export function DayPicker({
             </button>
           ))}
         </div>
+        {options.length < DAY_COUNTS.length ? (
+          <p className="text-sm text-muted-foreground">
+            {PREP_SLOT_LABELS[slot]} z arkusza wytrzymuje w lodówce najwyżej {options[options.length - 1]}{" "}
+            {options[options.length - 1] === 1 ? "dzień" : "dni"}, więc dłuższy prep nie ma sensu.
+          </p>
+        ) : null}
       </section>
 
       <Card className="gap-0 p-0">

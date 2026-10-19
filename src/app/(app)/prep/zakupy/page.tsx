@@ -53,7 +53,7 @@ export default async function ShoppingPage() {
         <ChevronLeft className="size-5" />
         Prep
       </Link>
-      <PageHeader title="Zakupy" subtitle="Z Twojego prepu, bez duplikatów" />
+      <PageHeader title="Zakupy" subtitle="Z planu tygodnia albo prepu, bez duplikatów" />
       <ShoppingList
         items={rows}
         staples={stapleRows}

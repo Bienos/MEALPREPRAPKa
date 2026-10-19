@@ -27,3 +27,23 @@ export function shoppingText(rows: Row[]): string {
   }
   return sections.join("\n\n");
 }
+
+type Line = { name: string; unit: string | null; quantity: number | null };
+
+/**
+ * A rebuilt list must not undo what was ticked in the shop. An item stays
+ * "bought" as long as the new amount is no more than what was there when it
+ * was ticked, and "mam w domu" always stays.
+ */
+export function keepTicks<T extends Line>(
+  next: T[],
+  previous: (Line & { checked: boolean; owned: boolean })[],
+): (T & { checked: boolean; owned: boolean })[] {
+  const key = (line: Line) => `${line.name.toLowerCase()}|${line.unit ?? ""}`;
+  const before = new Map(previous.map((line) => [key(line), line]));
+  return next.map((line) => {
+    const old = before.get(key(line));
+    const notMore = old !== undefined && (line.quantity ?? 0) <= (old.quantity ?? 0);
+    return { ...line, checked: Boolean(old?.checked && notMore), owned: Boolean(old?.owned) };
+  });
+}

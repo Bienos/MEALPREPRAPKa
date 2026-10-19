@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { describe, test } from "node:test";
 
-import { shoppingText } from "./shopping-text.ts";
+import { keepTicks, shoppingText } from "./shopping-text.ts";
 
 const row = (over: Partial<Parameters<typeof shoppingText>[0][number]>) => ({
   name: "ryż",
@@ -29,4 +29,30 @@ test("leaves out what is already bought or at home, and says nothing when all is
 
 test("an item with no readable amount is listed by name alone", () => {
   assert.equal(shoppingText([row({ name: "przyprawa", quantity: null, unit: null })]), "WĘGLOWODANY\n- przyprawa");
+});
+
+describe("rebuilding the list", () => {
+  const line = (name: string, quantity: number | null, unit: string | null = "g") => ({ name, quantity, unit });
+
+  test("keeps what was ticked when the amount did not grow", () => {
+    const [rice, chicken] = keepTicks(
+      [line("ryż", 300), line("kurczak", 900)],
+      [
+        { ...line("ryż", 300), checked: true, owned: false },
+        { ...line("kurczak", 600), checked: true, owned: false },
+      ],
+    );
+    assert.equal(rice.checked, true);
+    // More chicken is needed now than was bought, so it is back on the list.
+    assert.equal(chicken.checked, false);
+  });
+
+  test("keeps 'mam w domu' whatever the amount, and new items start unticked", () => {
+    const [skyr, oats] = keepTicks(
+      [line("Skyr", 1500), line("płatki", 400)],
+      [{ ...line("skyr", 300), checked: false, owned: true }],
+    );
+    assert.equal(skyr.owned, true);
+    assert.deepEqual([oats.checked, oats.owned], [false, false]);
+  });
 });
