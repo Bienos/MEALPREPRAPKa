@@ -3,9 +3,12 @@
  * client-safe.
  *
  * A "yes" I gave once (stored by the shop's product id) matches the product
- * automatically every week it is on promo. Without one, the best keyword
- * candidate is only a suggestion: it shows "pasuje?" and stays out of the
- * total until I answer. A "no" is remembered too, so it is never asked again.
+ * exactly every week it is on promo. Without one, the leaflet offers the rules
+ * accept still price the item, as an estimate (marked as one, and "pasuje?"
+ * can firm it up): the cheapest of them for the amount needed, or the middle
+ * one for a broad item like "warzywa". A leaflet price that names no pack
+ * gets the usual pack of that product. A "no" is remembered, so that offer is
+ * never used for the item again.
  */
 
 import type { Unit } from "../meals/ingredients.ts";
@@ -286,12 +289,31 @@ const RULES: Rule[] = [
   },
 ];
 
-function ruleFor(itemName: string): Rule | undefined {
-  const name = fold(itemName);
-  return RULES.find((candidate) => candidate.item.test(name));
+/** Words too general to look an item up by. */
+const STOP_WORDS = new Set(["light", "gotowy", "mieszanka", "microwave", "chudy", "naturalny", "polski"]);
+
+/** An item no rule knows: its own words are the search, and the offer must say all of them. */
+function genericRule(itemName: string): Rule | undefined {
+  const words = itemName
+    .toLowerCase()
+    .split(/[^\p{L}]+/u)
+    .filter((word) => word.length >= 4 && !STOP_WORDS.has(fold(word)));
+  if (words.length === 0) return undefined;
+  const stems = words.map((word) => fold(word).slice(0, Math.max(4, word.length - 1)));
+  return {
+    item: /./,
+    product: new RegExp(stems.map((stem) => `(?=.*${stem})`).join("")),
+    not: PROCESSED,
+    search: { sub: "", q: words[0] },
+  };
 }
 
-/** Where Blix should look for this shopping item; null when no rule knows it. */
+function ruleFor(itemName: string): Rule | undefined {
+  const name = fold(itemName);
+  return RULES.find((candidate) => candidate.item.test(name)) ?? genericRule(itemName);
+}
+
+/** Where Blix should look for this shopping item; null when nothing can be searched. */
 export function blixSearchFor(itemName: string): BlixSearch | null {
   return ruleFor(itemName)?.search ?? null;
 }
@@ -308,7 +330,7 @@ export function promoCandidates(itemName: string, itemUnit: Unit | null, promos:
     .filter((promo) => {
       const product = fold(promo.name);
       if (!rule.product.test(product) || rule.not?.test(product)) return false;
-      // An offer without a pack size is asked about once ("ile w opakowaniu?"); a known pack must fit the list.
+      // An offer without a pack size gets the usual one below; a known pack must fit the list.
       if (promo.packQuantity === null || itemUnit === null) return true;
       return packInItemUnit(promo.packQuantity, promo.packUnit, itemUnit) !== null;
     })
@@ -319,16 +341,93 @@ function perUnit(promo: ShopPromo): number {
   return promo.packQuantity ? promo.promoPrice / promo.packQuantity : Number.POSITIVE_INFINITY;
 }
 
+/* What a leaflet price without a pack is usually for ------------------------ */
+
+type Pack = { quantity: number; unit: Unit; loose: boolean };
+const pack = (quantity: number, unit: Unit, loose = false): Pack => ({ quantity, unit, loose });
+/** Fresh meat and produce are quoted per kilo and paid for by what is taken. */
+const perKilo = () => pack(1000, "g", true);
+
+/**
+ * First line whose item pattern fits wins. The price helps where the same
+ * product comes small or big ("ryż" 2,49 is a 400 g bag, 5 zł a kilo).
+ */
+const USUAL_PACKS: [RegExp, (price: number) => Pack][] = [
+  [/szynk/, () => pack(150, "g")],
+  [/jagod|borowk|malin|truskaw/, () => pack(250, "g")],
+  [/kurczak|indyk|indycz|wolowin|losos|banan|jablk|owoce|warzyw|batat/, perKilo],
+  [/ziemniak/, (price) => (price >= 6 ? pack(2500, "g") : perKilo())],
+  [/tunczyk/, () => pack(150, "g")],
+  [/jajk|\bjaja\b/, () => pack(10, "szt")],
+  [/skyr/, (price) => (price >= 3.5 ? pack(450, "g") : pack(150, "g"))],
+  [/twarog/, () => pack(250, "g")],
+  [/serek wiejski|cottage/, () => pack(200, "g")],
+  [/jogurt/, (price) => (price >= 1.8 ? pack(400, "g") : pack(150, "g"))],
+  [/mozzarell/, () => pack(125, "g")],
+  [/feta/, () => pack(200, "g")],
+  [/\bser\b/, () => pack(150, "g")],
+  [/mleko kokosowe/, () => pack(400, "ml")],
+  [/\bmleko\b/, () => pack(1000, "ml")],
+  [/platki/, () => pack(500, "g")],
+  [/ryz.*(gotow|microwave|mikrofal)/, () => pack(250, "g")],
+  [/\bryz\b/, (price) => (price >= 3.5 ? pack(1000, "g") : pack(400, "g"))],
+  [/kasz/, () => pack(400, "g")],
+  [/orzo|makaron/, () => pack(500, "g")],
+  [/chleb|pieczywo/, () => pack(500, "g")],
+  [/tortill/, () => pack(8, "szt")],
+  [/fasol|kukurydz/, () => pack(400, "g")],
+  [/passata|pomidor/, () => pack(500, "g")],
+  [/salsa/, () => pack(200, "g")],
+  [/maslo orzechowe|\bpb\b/, () => pack(350, "g")],
+  [/oliwa/, () => pack(750, "ml")],
+  [/miod/, (price) => (price < 10 ? pack(250, "g") : price < 18 ? pack(400, "g") : pack(950, "g"))],
+  [/whey|odzywk|bialko/, () => pack(900, "g")],
+];
+
+/**
+ * The lowest believable price per kilo of fresh meat: a "steak 5,99" is one
+ * steak, not a kilo, so it must not be priced as one.
+ */
+const MIN_PER_KILO: [RegExp, number][] = [
+  [/kurczak/, 8],
+  [/indyk|indycz/, 10],
+  [/wolowin/, 18],
+  [/losos/, 25],
+];
+
+/** An assumed per-kilo price below what that meat costs is a pack price in disguise. */
+function implausible(itemName: string, price: number, usual: Pack): boolean {
+  if (usual.unit !== "g") return false;
+  const name = fold(itemName);
+  const floor = MIN_PER_KILO.find(([item]) => item.test(name))?.[1];
+  return floor !== undefined && price / (usual.quantity / 1000) < floor;
+}
+
+function usualPack(itemName: string, price: number): Pack | null {
+  const name = fold(itemName);
+  return USUAL_PACKS.find(([item]) => item.test(name))?.[1](price) ?? null;
+}
+
+/** An item that means "any of these": priced at the middle offer, not the cheapest lucky one. */
+const BROAD = /warzyw|owoce|\bser\b/;
+
+export type Estimate = {
+  /** The promo with a pack on it: its own, or the usual one. */
+  promo: ShopPromo;
+  /** The offer named no pack, so the usual one was assumed. */
+  packAssumed: boolean;
+};
+
 export type PromoMatch = {
-  /** Products I said are this item, on promo now. These count in the total. */
+  /** Products I said are this item, on promo now. These are exact. */
   confirmed: ShopPromo[];
-  /** The best unanswered candidate, shown as "pasuje?". Never counted. */
-  suggestion: ShopPromo | null;
+  /** Without a confirmed product: the leaflet offers that fit, as estimates, cheapest first. */
+  estimates: Estimate[];
 };
 
 /**
  * Pass one shop's promos that are valid today and that shop's answers.
- * Once a confirmed product is on promo, nothing else is suggested.
+ * Once a confirmed product is on promo, nothing else is used.
  */
 export function matchPromos(
   item: { name: string; unit: Unit | null },
@@ -345,16 +444,27 @@ export function matchPromos(
     const link = yes.get(promo.productKey);
     if (!link) return [];
     if (promo.packQuantity !== null || link.packQuantity === null) return [promo];
-    return [
-      {
-        ...promo,
-        packQuantity: link.packQuantity,
-        packUnit: link.packUnit,
-        loose: link.packLoose,
-      },
-    ];
+    return [{ ...promo, packQuantity: link.packQuantity, packUnit: link.packUnit, loose: link.packLoose }];
   });
-  if (confirmed.length > 0) return { confirmed, suggestion: null };
-  const suggestion = promoCandidates(item.name, item.unit, promos).find((promo) => !answered.has(promo.productKey));
-  return { confirmed: [], suggestion: suggestion ?? null };
+  if (confirmed.length > 0) return { confirmed, estimates: [] };
+
+  const estimates = promoCandidates(item.name, item.unit, promos)
+    .filter((promo) => !answered.has(promo.productKey))
+    .flatMap((promo): Estimate[] => {
+      if (promo.packQuantity !== null) return [{ promo, packAssumed: false }];
+      const usual = usualPack(item.name, promo.promoPrice);
+      if (!usual || packInItemUnit(usual.quantity, usual.unit, item.unit) === null) return [];
+      if (implausible(item.name, promo.promoPrice, usual)) return [];
+      return [
+        {
+          promo: { ...promo, packQuantity: usual.quantity, packUnit: usual.unit, loose: usual.loose },
+          packAssumed: true,
+        },
+      ];
+    });
+
+  if (BROAD.test(fold(item.name)) && estimates.length > 2) {
+    return { confirmed: [], estimates: [estimates[Math.floor(estimates.length / 2)]] };
+  }
+  return { confirmed: [], estimates };
 }

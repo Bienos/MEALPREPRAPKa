@@ -111,7 +111,7 @@ describe("leaflet offers (Blix)", () => {
       sub: "warzywa",
       q: "",
     });
-    assert.equal(blixSearchFor("sos sojowy"), null);
+    assert.equal(blixSearchFor("xyz"), null);
   });
 });
 
@@ -148,19 +148,48 @@ describe("matchPromos", () => {
     );
   });
 
-  test("an unanswered candidate is only a suggestion", () => {
+  test("an unanswered candidate is priced as an estimate, with the pack it names", () => {
     const match = matchPromos({ name: "Jajka", unit: "szt" }, promos, []);
     assert.deepEqual(match.confirmed, []);
-    assert.equal(match.suggestion?.productKey, eggs);
+    assert.deepEqual(
+      match.estimates.map((e) => [e.promo.productKey, e.packAssumed]),
+      [[eggs, false]],
+    );
   });
 
-  test("a confirmed product wins, and nothing more is asked", () => {
+  test("a leaflet price with no pack gets the usual pack of that product, and says so", () => {
+    const biedronka = leaflets.filter((p) => p.shop === "biedronka");
+    const [first] = matchPromos({ name: "kurczak", unit: "g" }, biedronka, []).estimates;
+    // Fresh chicken fillet is quoted per kilo and paid for by weight.
+    assert.deepEqual(
+      [first.promo.packQuantity, first.promo.packUnit, first.promo.loose, first.packAssumed],
+      [1000, "g", true, true],
+    );
+    // Skyr: a cheap one is a small cup, a dearer one a big tub.
+    const skyrOffers = leaflets.filter((p) => /islandzkiego SBA/.test(p.name));
+    const sba = matchPromos({ name: "skyr", unit: "g" }, skyrOffers, []).estimates[0];
+    assert.deepEqual([sba.promo.packQuantity, sba.promo.packUnit], [450, "g"]);
+  });
+
+  test("an item the list counts in grams is never priced from a pack in pieces", () => {
+    const offer = {
+      ...leaflets[0],
+      name: "Jajka kurze M",
+      productKey: "blix:jajka",
+      packQuantity: null,
+      packUnit: null,
+    };
+    assert.deepEqual(matchPromos({ name: "jajka", unit: "g" }, [offer], []).estimates, []);
+    assert.equal(matchPromos({ name: "jajka", unit: "szt" }, [offer], []).estimates[0].promo.packQuantity, 10);
+  });
+
+  test("a confirmed product wins, and no estimates are made", () => {
     const match = matchPromos({ name: "jajka", unit: "szt" }, promos, [link(eggs, true)]);
     assert.deepEqual(
       match.confirmed.map((promo) => promo.productKey),
       [eggs],
     );
-    assert.equal(match.suggestion, null);
+    assert.deepEqual(match.estimates, []);
   });
 
   test("a confirmed link matches even when no keyword rule would", () => {
@@ -168,12 +197,30 @@ describe("matchPromos", () => {
     assert.equal(match.confirmed[0]?.name, "MCENNEDY Deser mleczny o smaku brownie");
   });
 
-  test("a 'no' moves on to the next candidate and is not asked again", () => {
-    const first = matchPromos({ name: "owoce", unit: "g" }, promos, []).suggestion;
-    assert.equal(first?.name, "Polskie jabłka czerwone, luzem");
-    const next = matchPromos({ name: "owoce", unit: "g" }, promos, [link(first!.productKey, false, "owoce")]);
-    assert.equal(next.suggestion?.name, "RYNECZEK LIDLA Winogrona ciemne, luzem");
-    assert.deepEqual(next.confirmed, []);
+  test("a 'no' drops that offer and the next one is used", () => {
+    const biedronka = leaflets.filter((p) => p.shop === "biedronka");
+    const [first, second] = matchPromos({ name: "kurczak", unit: "g" }, biedronka, []).estimates;
+    assert.ok(first && second);
+    const next = matchPromos({ name: "kurczak", unit: "g" }, biedronka, [
+      { ...link(first.promo.productKey, false, "kurczak"), shop: "biedronka" },
+    ]);
+    assert.deepEqual(
+      next.estimates.map((e) => e.promo.productKey),
+      [second.promo.productKey],
+    );
+  });
+
+  test("a broad item is priced at the middle offer, not the luckiest cheap one", () => {
+    const all = matchPromos({ name: "owoce", unit: "g" }, promos, []).estimates;
+    assert.equal(all.length, 1);
+    const sorted = promoCandidates("owoce", "g", promos);
+    assert.equal(all[0].promo.productKey, sorted[Math.floor(sorted.length / 2)].productKey);
+  });
+
+  test("an item no rule knows is looked up by its own words", () => {
+    assert.deepEqual(blixSearchFor("pesto"), { sub: "", q: "pesto" });
+    assert.deepEqual(blixSearchFor("sos sojowy"), { sub: "", q: "sojowy" });
+    assert.equal(blixSearchFor("xyz"), null);
   });
 
   test("answers are stored under the trimmed, lower-case item name", () => {

@@ -12,7 +12,7 @@ import { SHOP_LABELS, SHOPS, type Shop, type ShopPrice } from "@/lib/prices/type
 import { cn } from "@/lib/utils";
 
 /** The shops I actually go to come first. */
-const SHOP_ORDER: Shop[] = [
+export const SHOP_ORDER: Shop[] = [
   "lidl",
   "biedronka",
   "auchan",
