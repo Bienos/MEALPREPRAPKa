@@ -261,13 +261,16 @@ const RULES: Rule[] = [
   {
     item: /jagod|borowk|malin|truskaw/,
     product: /malin|borowk|jagod|truskaw|owoce lesne/,
-    not: either(/pomidor|dzem|jogurt|\bsok\b|czekolad|syrop|herbat/, PROCESSED),
+    not: either(/pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|owsiank|ciast|chlebek/, PROCESSED),
     search: { sub: "", q: "borówk" },
   },
   {
     item: /owoce/,
     product: /jablk|banan|gruszk|winogron|pomarancz|mandaryn|kiwi|malin|borowk|truskaw|pomelo/,
-    not: /pomidor|\bsok\b|\bmus\b|suszon|chips|dzem/,
+    not: either(
+      /pomidor|\bsok\b|\bmus\b|suszon|chips|dzem|jogurt|serek|czekolad|baton|ciast|deser|lody|owsiank/,
+      PROCESSED,
+    ),
     search: { sub: "owoce", q: "" },
   },
   {

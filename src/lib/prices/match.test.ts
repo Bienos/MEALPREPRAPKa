@@ -86,11 +86,15 @@ describe("leaflet offers (Blix)", () => {
       "Mięso mielone z indyka Carrefour",
       "Filet z piersi indyka Stokrotka",
       "Filet z indyka wędzony Kraina Wędlin",
+      "Jogurt Pierot borówkowy",
+      "Owsianka Lubella z bananami i truskawkami",
     ].map((name) => ({ ...leaflets[0], name, productKey: `blix:${name}` }));
     const fits = (itemName: string) => promoCandidates(itemName, "g", offers).map((p) => p.name);
     assert.deepEqual(fits("jogurt 2%"), ["Jogurt naturalny Krasula"]);
     assert.deepEqual(fits("owoce jagodowe"), ["Borówki amerykańskie Kaufland"]);
     assert.deepEqual(fits("feta light"), []);
+    // A fruit yogurt or porridge is not "owoce".
+    assert.deepEqual(fits("owoce"), ["Borówki amerykańskie Kaufland"]);
     assert.deepEqual(fits("indyk"), ["Mięso mielone z indyka Carrefour", "Filet z piersi indyka Stokrotka"]);
     assert.deepEqual(fits("szynka z indyka"), ["Filet z indyka wędzony Kraina Wędlin"]);
   });
