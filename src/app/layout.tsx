@@ -11,7 +11,7 @@ const nunito = Nunito({
 const DESCRIPTION = "Prywatna aplikacja do planowania i jedzenia bez zastanawiania się.";
 
 /** The one public address of this app. Crawlers reject a relative og:url. */
-const SITE_URL = "https://www.meal-prep.pl";
+const SITE_URL = "https://meal-prep.pl";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
