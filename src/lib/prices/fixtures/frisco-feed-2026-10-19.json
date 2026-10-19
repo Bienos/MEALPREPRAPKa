@@ -1,0 +1,148 @@
+{
+ "generatedAt": "2026-10-19T16:00:16+02:00",
+ "categories": [],
+ "products": [
+  {
+   "id": "50399",
+   "name": {
+    "pl": "Ryż biały (4x100g)",
+    "en": "White Rice"
+   },
+   "unitOfMeasure": "Kilogram",
+   "packSize": 12,
+   "grammage": 4.8,
+   "price": {
+    "price": 51.48
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,50399/n,kupiec-ryz-bialy-(4x100g)/stn,product"
+  },
+  {
+   "id": "122037",
+   "name": {
+    "pl": "Filet z piersi indyka (800g-1200g)",
+    "en": "Turkey breast fillet (800g-1200g)"
+   },
+   "unitOfMeasure": "Kilogram",
+   "packSize": 1,
+   "grammage": 1.0,
+   "price": {
+    "price": 53.99
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,122037/n,indykpol-samo-dobro-filet-z-piersi-indyka-(800g-1200g)/stn,product"
+  },
+  {
+   "id": "125923",
+   "name": {
+    "pl": "Mleko 2% UHT",
+    "en": "2% milk UHT"
+   },
+   "unitOfMeasure": "Litre",
+   "packSize": 1,
+   "grammage": 1.0,
+   "price": {
+    "price": 3.69
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,125923/n,polmlek-mleko-2-uht/stn,product"
+  },
+  {
+   "id": "146076",
+   "name": {
+    "pl": "Filet z piersi kurczaka pieczony",
+    "en": "Roasted chicken breast fillet"
+   },
+   "unitOfMeasure": "Kilogram",
+   "packSize": 1,
+   "grammage": 0.2,
+   "price": {
+    "price": 12.19
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,146076/n,drosed-filet-z-piersi-kurczaka-pieczony/stn,product"
+  },
+  {
+   "id": "100977",
+   "name": {
+    "pl": "Jaja kurze z chowu ściółkowego (rozmiar L) - 10 szt.",
+    "en": "Eggs chicken size L"
+   },
+   "unitOfMeasure": "Piece",
+   "packSize": 1,
+   "grammage": 1.0,
+   "price": {
+    "price": 13.19
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,100977/n,wybiegane-kury-jaja-kurze-z-chowu-sciolkowego-(rozmiar-l)---10-szt./stn,product"
+  },
+  {
+   "id": "149257",
+   "name": {
+    "pl": "Jaja kurze z chowu ściółkowego (rozmiar L) - 10 szt.",
+    "en": "Barn hen eggs (size L) - 10 pcs."
+   },
+   "unitOfMeasure": "Piece",
+   "packSize": 1,
+   "grammage": 1.0,
+   "price": {
+    "price": 12.99
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,149257/n,kotlina-natury-jaja-kurze-z-chowu-sciolkowego-(rozmiar-l)---10-szt./stn,product"
+  },
+  {
+   "id": "64237",
+   "name": {
+    "pl": "Ryż biały (4x100g)",
+    "en": "White Rice (4x100g)"
+   },
+   "unitOfMeasure": "Kilogram",
+   "packSize": 12,
+   "grammage": 4.8,
+   "price": {
+    "price": 65.88
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,64237/n,sonko-ryz-bialy-(4x100g)/stn,product"
+  },
+  {
+   "id": "800",
+   "name": {
+    "pl": "Ryż biały (4x100g)",
+    "en": "White Rice"
+   },
+   "unitOfMeasure": "Kilogram",
+   "packSize": 1,
+   "grammage": 0.4,
+   "price": {
+    "price": 3.49
+   },
+   "isAvailable": true,
+   "productUrl": "https://www.frisco.pl/pid,800/n,kupiec-ryz-bialy-(4x100g)/stn,product"
+  },
+  {
+   "id": "39698",
+   "name": {
+    "pl": "Orzechy włoskie",
+    "en": "Walnuts"
+   },
+   "unitOfMeasure": "Kilogram",
+   "packSize": 1,
+   "grammage": 0.1,
+   "price": {
+    "priceBeforeDiscount": 10.39,
+    "price": 7.99,
+    "lowPrice": 10.39,
+    "discountPercent": 23,
+    "lowPriceDiscountPercent": 23,
+    "validTo": "2026-11-01T23:59:00+01:00",
+    "campaignName": "handel_promocja_cenowa",
+    "discountId": "3a241f84-fada-4e4a-b16a-953abcc2a936"
+   },
+   "isAvailable": null,
+   "productUrl": "https://www.frisco.pl/pid,39698/n,bakalland-orzechy-wloskie/stn,product"
+  }
+ ]
+}

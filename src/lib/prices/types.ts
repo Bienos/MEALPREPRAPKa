@@ -22,6 +22,7 @@ export const SHOPS = [
   "stokrotka",
   "zabka",
   "leclerc",
+  "frisco",
 ] as const;
 export type Shop = (typeof SHOPS)[number];
 
@@ -37,6 +38,7 @@ export const SHOP_LABELS: Record<Shop, string> = {
   stokrotka: "Stokrotka",
   zabka: "Żabka",
   leclerc: "Leclerc",
+  frisco: "Frisco",
 };
 
 /** "w Lidlu", for sentences. */
@@ -52,6 +54,7 @@ export const SHOP_IN: Record<Shop, string> = {
   stokrotka: "w Stokrotce",
   zabka: "w Żabce",
   leclerc: "w Leclerc",
+  frisco: "we Frisco",
 };
 
 /** One promotion, the same shape whichever shop it came from. */
