@@ -346,13 +346,17 @@ export function promoCandidates(itemName: string, itemUnit: Unit | null, promos:
   return promos
     .filter((promo) => {
       const product = fold(promo.name);
-      if (!rule.product.test(product) || rule.not?.test(product)) return false;
+      if (!rule.product.test(product) || rule.not?.test(product) || NOT_PLAIN.test(product)) return false;
       // An offer without a pack size gets the usual one below; a known pack must fit the list.
       if (promo.packQuantity === null || itemUnit === null) return true;
       return packInItemUnit(promo.packQuantity, promo.packUnit, itemUnit) !== null;
     })
     .sort((a, b) => perUnit(a) - perUnit(b));
 }
+
+/** Never the plain ingredient, whatever the item: spreads, porridge, sauces, quail eggs, sausages. */
+const NOT_PLAIN =
+  /parowk|\bpasta\b|owsiank|do mies|przepior|konfitur|serdel|kabanos|\bsos\b|zupa|danie|salatk|musl[iy]|kasza manna/;
 
 /** A whole shop's range holds more than food: pet food, cosmetics, baby food. */
 const NOT_FOOD =
@@ -378,7 +382,7 @@ export function catalogCandidates<T extends { name: string }>(
   return entries
     .filter((entry) => {
       const name = fold(entry.name);
-      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name)) return false;
+      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name) || NOT_PLAIN.test(name)) return false;
       // A drink is not the fruit, unless the item is itself a liquid.
       if (!liquid && VOLUME.test(name)) return false;
       // A pack in pieces can never price an item in grams, and the other way round.

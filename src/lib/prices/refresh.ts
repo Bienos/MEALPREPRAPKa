@@ -6,6 +6,8 @@ import type { Unit } from "@/lib/meals/ingredients";
 import { fetchBiedronkaSitemap, fetchShelfPrices, MAX_PAGES_PER_REFRESH, type ShelfResult } from "./biedronka";
 import { BLIX_SHOPS, fetchBlixPromos } from "./blix";
 import { fetchLidlPromos } from "./lidl";
+import { fetchStokrotkaFeed, toShelfPrice } from "./stokrotka";
+import type { ShelfPrice } from "./types";
 import { blixSearchFor, catalogCandidates } from "./match";
 
 /** Products read per shopping item: the plainest few that the rules accept. */
@@ -122,4 +124,42 @@ export async function refreshShopPromos(): Promise<RefreshResult> {
 function messageOf(error: unknown, fallback: string): string {
   console.error("[prices] refresh source failed:", error);
   return error instanceof Error ? error.message : fallback;
+}
+
+/** Stokrotka's feed is big and slow to build, so it is read again only after this many hours. */
+const FEED_FRESH_HOURS = 12;
+/** Feed products kept per shopping item: the plainest few, in stock first. */
+const FEED_PER_ITEM = 5;
+
+export type FeedRefresh = { count: number; skipped: boolean };
+
+/**
+ * Stokrotka's regular prices from the product feed its shop publishes (one
+ * request, up to a minute, so it has a call of its own after "Sprawdź
+ * promocje"). The products that look like my list are kept in shelf_prices.
+ */
+export async function refreshStokrotkaPrices(): Promise<FeedRefresh> {
+  const now = new Date();
+  const stored = (await listShelfPrices()).filter((price) => price.shop === "stokrotka");
+  const newest = stored.reduce((latest, price) => (price.fetchedAt > latest ? price.fetchedAt : latest), "");
+  if (newest && now.getTime() - new Date(newest).getTime() < FEED_FRESH_HOURS * 3_600_000) {
+    return { count: stored.length, skipped: true };
+  }
+
+  const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
+  if (items.length === 0) return { count: 0, skipped: false };
+  const feed = await fetchStokrotkaFeed();
+  const prices = new Map<string, ShelfPrice>();
+  for (const item of items) {
+    const candidates = catalogCandidates(item.name, item.unit as Unit | null, feed, 40)
+      .sort((a, b) => Number(b.inStock) - Number(a.inStock))
+      .slice(0, FEED_PER_ITEM);
+    for (const candidate of candidates) {
+      const price = toShelfPrice(candidate);
+      if (price) prices.set(price.productKey, price);
+    }
+  }
+  await upsertShelfPrices("stokrotka", [...prices.values()], now.toISOString());
+  console.info(`[prices] stokrotka feed: ${feed.length} products, ${prices.size} kept`);
+  return { count: prices.size, skipped: false };
 }

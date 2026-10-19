@@ -14,8 +14,9 @@
  * Not `server-only` so the tests can import it; only server code uses it.
  */
 
-import { parsePack } from "./promo.ts";
 import type { Unit } from "../meals/ingredients.ts";
+import { parsePack } from "./pack.ts";
+import type { ShelfPrice } from "./types.ts";
 
 const ORIGIN = "https://zakupy.biedronka.pl";
 export const BIEDRONKA_SITEMAP = `${ORIGIN}/sitemap_0.xml`;
@@ -25,18 +26,6 @@ const USER_AGENT =
 
 /** A product page from the sitemap, named from its address. */
 export type CatalogEntry = { productKey: string; name: string; url: string };
-
-/** One product's regular price, as stored. */
-export type ShelfPrice = {
-  productKey: string;
-  name: string;
-  /** What the price is for: a pack, or a kilo of something sold by weight. */
-  packQuantity: number;
-  packUnit: Unit;
-  loose: boolean;
-  price: number;
-  sourceUrl: string;
-};
 
 /* Sitemap ------------------------------------------------------------------- */
 

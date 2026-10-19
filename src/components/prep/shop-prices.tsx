@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Sheet } from "@/components/ui/sheet";
-import type { RefreshPromosResult } from "@/app/(app)/prep/zakupy/actions";
+import type { RefreshFeedsResult, RefreshPromosResult } from "@/app/(app)/prep/zakupy/actions";
 import { formatAmount, type Unit } from "@/lib/meals/ingredients";
 import { buildBasket, type BasketLine, type NeededItem, type PriceOption } from "@/lib/prices/basket";
 import { matchPromos, priceKey, type PromoMatch } from "@/lib/prices/match";
@@ -34,6 +34,7 @@ export type ShopPricing = {
   /** When promotions were last fetched, ready to show ("19.10, 07:02"). */
   fetchedLabel: string | null;
   onRefresh: () => Promise<RefreshPromosResult>;
+  onRefreshFeeds: () => Promise<RefreshFeedsResult>;
   onSavePrice: (price: ShopPrice) => Promise<void>;
   onSavePrices: (prices: ShopPrice[]) => Promise<void>;
   onRemovePrice: (itemName: string, shop: Shop) => Promise<void>;
@@ -128,13 +129,17 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     setRefreshNote(null);
     startRefresh(async () => {
       const result = await pricing.onRefresh();
-      if (!result.ok) setRefreshNote({ error: true, text: result.message });
-      else if (result.warnings.length > 0) setRefreshNote({ error: false, text: result.warnings.join(" ") });
-      else if (result.count === 0)
-        setRefreshNote({
-          error: false,
-          text: "Sklepy nie pokazują teraz promocji z Twojej listy",
-        });
+      const notes: string[] = [];
+      if (!result.ok) {
+        setRefreshNote({ error: true, text: result.message });
+        return;
+      }
+      notes.push(...result.warnings);
+      if (result.count === 0) notes.push("Sklepy nie pokazują teraz promocji z Twojej listy");
+      // Stokrotka's product feed is a request of its own (up to a minute).
+      const feeds = await pricing.onRefreshFeeds();
+      if (!feeds.ok) notes.push(feeds.message);
+      setRefreshNote(notes.length > 0 ? { error: false, text: notes.join(" ") } : null);
     });
   }
 
@@ -302,7 +307,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
         </p>
         <Button variant="outline" size="sm" disabled={refreshing} onClick={refresh}>
           <RefreshCw className={cn("size-4", refreshing && "animate-spin")} />
-          {refreshing ? "Sprawdzam…" : "Sprawdź promocje"}
+          {refreshing ? "Sprawdzam…" : "Sprawdź promocje i ceny"}
         </Button>
       </div>
 
