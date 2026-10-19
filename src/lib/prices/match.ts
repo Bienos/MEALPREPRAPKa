@@ -173,7 +173,7 @@ const RULES: Rule[] = [
   {
     item: /platki/,
     product: /platki owsiane|owsian/,
-    not: /baton|ciastk|granola|musli|czekolad|smoothie|napoj|owsianka|\d+ ml\b/,
+    not: /baton|ciastk|granola|musli|czekolad|smoothie|napoj|owsianka|\d+ ml\b|\bmaka\b|otreb|kasza|kulki|ze smakiem|z morel|z jablk|z owocami|barista|ciasteczk|chrupki|batonik/,
     search: { sub: "platki", q: "owsian" },
   },
   {
@@ -296,7 +296,7 @@ const RULES: Rule[] = [
   {
     item: /miod/,
     product: /\bmiod\b/,
-    not: /piernik|ciastk|musztard/,
+    not: /piernik|ciastk|musztard|pitny|sztuczny|polsk\w* pitn|\bz miodem\b/,
     search: { sub: "", q: "miód" },
   },
   {

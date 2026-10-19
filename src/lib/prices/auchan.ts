@@ -92,8 +92,9 @@ export function parseAuchanProduct(html: string, entry: CatalogEntry): ShelfPric
 
 /* Fetching ------------------------------------------------------------------ */
 
-const PARALLEL = 3;
-export const MAX_AUCHAN_PAGES = 45;
+/** The shop answers fast; 120 pages at 6 a time take about 20 s, well inside the request limit. */
+const PARALLEL = 6;
+export const MAX_AUCHAN_PAGES = 120;
 
 export async function fetchAuchanSitemap(): Promise<CatalogEntry[]> {
   return parseAuchanSitemap(await fetchText(AUCHAN_SITEMAP, 30_000));
