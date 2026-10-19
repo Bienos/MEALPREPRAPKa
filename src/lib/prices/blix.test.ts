@@ -35,8 +35,10 @@ describe("parseBlixPromos", () => {
       [
         ["biedronka", 14.99],
         ["biedronka", 18.99],
+        ["leclerc", 16.99],
       ],
     );
+    // Smaller chains with leaflets (Delikatesy Centrum, SPAR, ABC...) are not priced here.
     assert.equal(skyr.length, 12);
     assert.ok([...chicken, ...skyr].every((promo) => Object.values(BLIX_SHOPS).includes(promo.shop)));
     assert.ok(!skyr.some((promo) => /łaciaty$/i.test(promo.name) && promo.shop === "lidl"));
@@ -61,6 +63,11 @@ describe("parseBlixPromos", () => {
     assert.equal(rice.packQuantity, null);
   });
 
+  test("an offer that starts in a day or two is kept, dated from then", () => {
+    const leclerc = chicken.find((promo) => promo.shop === "leclerc");
+    assert.deepEqual([leclerc?.validFrom, leclerc?.validTo], ["2026-10-20", "2026-10-26"]);
+  });
+
   test("links to the leaflet page it is on, and says which leaflet in the fine print", () => {
     assert.equal(chicken[1].sourceUrl, "https://blix.pl/sklep/biedronka/gazetka/530004/?pageNumber=48");
     assert.equal(chicken[0].conditions, "Gazetka Biedronka · aktualna");
@@ -74,6 +81,26 @@ describe("parseBlixPromos", () => {
     assert.deepEqual(label("lav-starting-soon", "już za 2 dni"), [["2026-10-21", "2026-10-27"]]);
     assert.deepEqual(label("lav-starting-soon", "od jutra"), [["2026-10-20", "2026-10-26"]]);
     assert.deepEqual(label("lav-expired", "zakończona"), []);
+  });
+
+  test("Żabka and Leclerc offers are read like the other chains', with a leaflet link each", () => {
+    const response = {
+      offers: [
+        { offerName: "Banany Żabka", brandId: 58, price: "4,99zł", leafletPage: { leafletId: 7, page: 2 } },
+        { offerName: "Banany Leclerc", brandId: 10079, price: "3,49zł", leafletPage: { leafletId: 9, page: 0 } },
+      ].map((offer) => ({ ...offer, availabilityLabel: { class: "lav-available", message: "aktualna" } })),
+      availableBrands: [
+        { id: 58, name: "Żabka", slug: "zabka" },
+        { id: 10079, name: "Leclerc", slug: "leclerc" },
+      ],
+    };
+    assert.deepEqual(
+      parseBlixPromos(response, monday).map((promo) => [promo.shop, promo.promoPrice, promo.sourceUrl]),
+      [
+        ["zabka", 4.99, "https://blix.pl/sklep/zabka/gazetka/7/?pageNumber=3"],
+        ["leclerc", 3.49, "https://blix.pl/sklep/leclerc/gazetka/9/?pageNumber=1"],
+      ],
+    );
   });
 
   test("a response that no longer looks like Blix's throws instead of returning nothing", () => {

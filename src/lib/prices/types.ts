@@ -10,7 +10,19 @@ import type { Unit } from "../meals/ingredients.ts";
  * the others' from their leaflets, read through Blix (`blix.ts`). My own
  * prices work for any of them.
  */
-export const SHOPS = ["lidl", "biedronka", "kaufland", "aldi", "netto", "dino", "carrefour", "auchan", "stokrotka"] as const;
+export const SHOPS = [
+  "lidl",
+  "biedronka",
+  "kaufland",
+  "aldi",
+  "netto",
+  "dino",
+  "carrefour",
+  "auchan",
+  "stokrotka",
+  "zabka",
+  "leclerc",
+] as const;
 export type Shop = (typeof SHOPS)[number];
 
 export const SHOP_LABELS: Record<Shop, string> = {
@@ -23,6 +35,8 @@ export const SHOP_LABELS: Record<Shop, string> = {
   carrefour: "Carrefour",
   auchan: "Auchan",
   stokrotka: "Stokrotka",
+  zabka: "Żabka",
+  leclerc: "Leclerc",
 };
 
 /** "w Lidlu", for sentences. */
@@ -36,6 +50,8 @@ export const SHOP_IN: Record<Shop, string> = {
   carrefour: "w Carrefourze",
   auchan: "w Auchan",
   stokrotka: "w Stokrotce",
+  zabka: "w Żabce",
+  leclerc: "w Leclerc",
 };
 
 /** One promotion, the same shape whichever shop it came from. */
