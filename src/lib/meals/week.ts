@@ -3,26 +3,21 @@ import "server-only";
 import { addDays, todayIso } from "@/lib/date";
 import {
   addPlannedMeals,
+  clearPlannedMeals,
   listDayPlans,
+  listPlannedMeals,
   listPlannedMealsBetween,
   upsertDayPlan,
   type NewPlannedMeal,
   type PlannedMeal,
 } from "@/lib/db/day-plans";
-import { listAllDefaultDayMeals } from "@/lib/db/default-day";
 import type { DayType, IsoDate, Macros } from "@/lib/db/helpers";
 import { getSettings, getTargets } from "@/lib/db/settings";
 import { getMealLibrary } from "./library";
-import { applyDefaultDay } from "./plan";
-import { kindOfCategory, slotNameForCategory, type MealKind } from "./slots";
-import { findMealVariant, type Meal } from "./types";
-import {
-  topUpPicks,
-  weekDates,
-  type Snack,
-  type WeekEntry,
-  type WeekOption,
-} from "./week-plan";
+import { rebuildShoppingList } from "./prep";
+import { planWeek, readyDayFromKey, readyDays, type ReadyDay } from "./ready-days";
+import { kindOfCategory, type MealKind } from "./slots";
+import { weekDates, type WeekEntry } from "./week-plan";
 
 export type WeekView = {
   today: IsoDate;
@@ -30,9 +25,8 @@ export type WeekView = {
   dayTypes: Record<IsoDate, DayType>;
   targets: Record<DayType, Macros>;
   entries: WeekEntry[];
-  options: WeekOption[];
-  /** A default day exists to fill empty days from. */
-  hasTemplate: Record<DayType, boolean>;
+  /** The closest ready days for each day type, to pick from. */
+  proposals: Record<DayType, ReadyDay[]>;
 };
 
 function toEntry(meal: PlannedMeal, kinds: Map<string, MealKind>): WeekEntry {
@@ -52,38 +46,16 @@ function toEntry(meal: PlannedMeal, kinds: Map<string, MealKind>): WeekEntry {
   };
 }
 
-function toOption(meal: Meal): WeekOption {
-  const version = (dayType: DayType) => {
-    const variant = findMealVariant([meal], meal.key, dayType)!;
-    return {
-      variant: variant.variant,
-      kcal: variant.kcal,
-      protein_g: variant.protein_g,
-      fat_g: variant.fat_g,
-      carbs_g: variant.carbs_g,
-    };
-  };
-  return {
-    mealKey: meal.key,
-    name: meal.name,
-    category: meal.category,
-    kind: kindOfCategory(meal.category),
-    ingredients: meal.variants[0]?.ingredients ?? "",
-    forDay: { DT: version("DT"), DNT: version("DNT") },
-  };
-}
-
 /** Everything the week screen needs, in one round of reads. */
 export async function loadWeek(start: IsoDate): Promise<WeekView> {
   const dates = weekDates(start);
   const end = dates[dates.length - 1];
-  const [settings, targets, plans, planned, { library }, templates] = await Promise.all([
+  const [settings, targets, plans, planned, { library }] = await Promise.all([
     getSettings(),
     getTargets(),
     listDayPlans(start, end),
     listPlannedMealsBetween(start, end),
     getMealLibrary(),
-    listAllDefaultDayMeals(),
   ]);
 
   const saved = new Map(plans.map((plan) => [plan.date, plan.day_type]));
@@ -95,83 +67,84 @@ export async function loadWeek(start: IsoDate): Promise<WeekView> {
     dayTypes: Object.fromEntries(dates.map((date) => [date, saved.get(date) ?? settings.default_day_type])),
     targets,
     entries: planned.map((meal) => toEntry(meal, kinds)),
-    options: library.meals.map(toOption),
-    hasTemplate: { DT: templates.DT.length > 0, DNT: templates.DNT.length > 0 },
+    proposals: {
+      DT: readyDays(library.meals, "DT", targets.DT),
+      DNT: readyDays(library.meals, "DNT", targets.DNT),
+    },
   };
 }
 
+function plannedRows(date: IsoDate, day: ReadyDay): NewPlannedMeal[] {
+  return day.items.map((item, position) => ({
+    plan_date: date,
+    slot: item.slot,
+    position,
+    source: "sheet",
+    status: "planned",
+    meal_key: item.mealKey,
+    meal_name: item.name,
+    variant: item.variant,
+    portions: 1,
+    kcal: Math.round(item.kcal),
+    protein_g: item.protein_g,
+    fat_g: item.fat_g,
+    carbs_g: item.carbs_g,
+  }));
+}
+
+/** Only a day with nothing eaten or logged yet is replaced; a day under way is changed on the day itself. */
+function replaceable(meals: Pick<PlannedMeal, "status">[]): boolean {
+  return meals.every((meal) => meal.status === "planned");
+}
+
 /**
- * Plans several dishes at once, each on its day in that day's DT/DNT version,
- * after what the day already has. One insert, so a top-up lands in one go.
+ * Puts one ready day on a date, replacing what was planned there, then
+ * rebuilds the shopping list. false when the day is past or under way, or a
+ * dish is gone from the sheet.
  */
-async function planDishes(week: WeekView, picks: { date: IsoDate; mealKey: string }[], meals: Meal[]): Promise<number> {
-  if (picks.length === 0) return 0;
-  // Each new entry goes after the last one already on its day.
-  const lastPosition = new Map<string, number>();
-  for (const meal of await listPlannedMealsBetween(week.dates[0], week.dates[week.dates.length - 1])) {
-    lastPosition.set(meal.plan_date, Math.max(lastPosition.get(meal.plan_date) ?? -1, meal.position));
-  }
+export async function applyReadyDay(date: IsoDate, key: string, dayType: DayType): Promise<boolean> {
+  const [settings, targets, existing, { library }] = await Promise.all([
+    getSettings(),
+    getTargets(),
+    listPlannedMeals(date),
+    getMealLibrary(),
+  ]);
+  if (date < todayIso(settings.timezone) || !replaceable(existing)) return false;
+  const day = readyDayFromKey(library.meals, key, dayType, targets[dayType]);
+  if (!day) return false;
 
-  const rows: NewPlannedMeal[] = [];
-  for (const pick of picks) {
-    const variant = findMealVariant(meals, pick.mealKey, week.dayTypes[pick.date]);
-    if (!variant) continue;
-    const position = (lastPosition.get(pick.date) ?? -1) + 1;
-    lastPosition.set(pick.date, position);
-    rows.push({
-      plan_date: pick.date,
-      slot: slotNameForCategory(variant.category),
-      position,
-      source: "sheet",
-      status: "planned",
-      meal_key: variant.mealKey,
-      meal_name: variant.name,
-      variant: variant.variant,
-      portions: 1,
-      kcal: Math.round(variant.kcal),
-      protein_g: variant.protein_g,
-      fat_g: variant.fat_g,
-      carbs_g: variant.carbs_g,
-    });
-  }
-  if (rows.length === 0) return 0;
-
-  // A meal needs its day saved first; saving also pins the day's DT/DNT.
-  const days = [...new Set(rows.map((row) => row.plan_date))];
-  await Promise.all(days.map((date) => upsertDayPlan(date, week.dayTypes[date])));
-  await addPlannedMeals(rows);
-  return rows.length;
+  await upsertDayPlan(date, dayType);
+  await clearPlannedMeals(date);
+  await addPlannedMeals(plannedRows(date, day));
+  await rebuildShoppingList();
+  return true;
 }
 
-/** [ DOPEŁNIJ ]: snacks that close the week's calorie gap. Returns how many were added. */
-export async function topUpWeek(start: IsoDate): Promise<number> {
+/**
+ * [ UŁÓŻ TYDZIEŃ ]: a ready day on every day from today that has nothing
+ * planned, one meal-prep dish per block of days. Returns how many were filled.
+ */
+export async function fillWeekWithReadyDays(start: IsoDate): Promise<number> {
   const [week, { library }] = await Promise.all([loadWeek(start), getMealLibrary()]);
-  const snacksFor = (dayType: DayType): Snack[] =>
-    week.options
-      .filter((option) => option.kind === "przekaska")
-      .map((option) => ({ mealKey: option.mealKey, name: option.name, ...option.forDay[dayType] }));
+  const empty = week.dates
+    .filter((date) => date >= week.today && !week.entries.some((entry) => entry.date === date))
+    .map((date) => ({ date, dayType: week.dayTypes[date] }));
+  const plan = planWeek(library.meals, empty, week.targets);
+  if (plan.length === 0) return 0;
 
-  const picks = topUpPicks({
-    dates: week.dates,
-    dayTypes: week.dayTypes,
-    entries: week.entries,
-    targets: week.targets,
-    snacks: { DT: snacksFor("DT"), DNT: snacksFor("DNT") },
-    today: week.today,
-  });
-  return planDishes(week, picks.map((pick) => ({ date: pick.date, mealKey: pick.snack.mealKey })), library.meals);
+  await Promise.all(plan.map(({ date }) => upsertDayPlan(date, week.dayTypes[date])));
+  await addPlannedMeals(plan.flatMap(({ date, day }) => plannedRows(date, day)));
+  await rebuildShoppingList();
+  return plan.length;
 }
 
-/** Puts the default DT/DNT day on every day of the week that has nothing yet. */
-export async function fillWeekWithDefaults(start: IsoDate): Promise<number> {
-  const week = await loadWeek(start);
-  let filled = 0;
-  for (const date of week.dates) {
-    if (date < week.today || week.entries.some((entry) => entry.date === date)) continue;
-    const result = await applyDefaultDay(date, week.dayTypes[date]);
-    if (result.ok) filled += 1;
-  }
-  return filled;
+/** "Wyczyść dzień": takes a day's plan off, unless something was already eaten. */
+export async function clearDay(date: IsoDate): Promise<boolean> {
+  const [settings, existing] = await Promise.all([getSettings(), listPlannedMeals(date)]);
+  if (date < todayIso(settings.timezone) || !replaceable(existing)) return false;
+  await clearPlannedMeals(date);
+  await rebuildShoppingList();
+  return true;
 }
 
 /** "19–25 października", "28 września – 4 października". */

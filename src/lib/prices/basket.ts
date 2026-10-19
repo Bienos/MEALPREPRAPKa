@@ -50,11 +50,18 @@ export type ShopBasket = {
 export type BasketSummary = {
   shops: ShopBasket[];
   itemCount: number;
-  /** Items priced at every shop: the only fair ground to say which shop is cheaper. */
-  compared: { count: number; totals: Record<Shop, number>; cheapest: Shop | null };
+  /**
+   * The shops that price enough of the list to be weighed against each other,
+   * compared on the items every one of them prices: the only fair ground to
+   * say which is cheaper. Shops with a few leaflet hits are not in it.
+   */
+  compared: { shops: Shop[]; count: number; totals: Partial<Record<Shop, number>>; cheapest: Shop | null };
   /** Each compared item bought wherever it is cheaper, and what that saves over the cheaper shop. */
   split: { total: number; savings: number } | null;
 };
+
+/** A shop pricing at least this share of the list takes part in the comparison. */
+const COMPARE_COVERAGE = 0.5;
 
 export function isPromoActive(promo: Pick<ShopPromo, "validFrom" | "validTo">, today: string): boolean {
   return promo.validFrom <= today && (promo.validTo === null || today <= promo.validTo);
@@ -127,39 +134,50 @@ export function buildBasket(
     };
   });
 
-  const comparedIds = items
-    .filter((item, index) => baskets.every((basket) => basket.lines[index].cost))
-    .map((item) => item.id);
-  const compared = new Set(comparedIds);
+  // The shops that price enough of the list; with fewer than two, the two that price the most.
+  let contenders = baskets.filter((basket) => basket.priced > 0 && basket.priced >= items.length * COMPARE_COVERAGE);
+  if (contenders.length < 2) {
+    contenders = [...baskets]
+      .filter((basket) => basket.priced > 0)
+      .sort((a, b) => b.priced - a.priced)
+      .slice(0, 2);
+  }
+
+  const compared = new Set(
+    items.filter((_, index) => contenders.every((basket) => basket.lines[index].cost)).map((item) => item.id),
+  );
   const amountAt = (basket: ShopBasket, index: number) => basket.lines[index].cost?.amount ?? 0;
 
-  const totals = Object.fromEntries(
-    baskets.map((basket) => [
-      basket.shop,
-      round(items.reduce((sum, item, index) => sum + (compared.has(item.id) ? amountAt(basket, index) : 0), 0)),
-    ]),
-  ) as Record<Shop, number>;
+  const totals: Partial<Record<Shop, number>> = {};
+  for (const basket of contenders) {
+    totals[basket.shop] = round(
+      items.reduce((sum, item, index) => sum + (compared.has(item.id) ? amountAt(basket, index) : 0), 0),
+    );
+  }
 
   let cheapest: Shop | null = null;
   let split: BasketSummary["split"] = null;
-  if (compared.size > 0 && baskets.length > 1) {
-    const sorted = [...baskets].sort((a, b) => totals[a.shop] - totals[b.shop]);
-    if (totals[sorted[1].shop] - totals[sorted[0].shop] >= 0.01) cheapest = sorted[0].shop;
+  if (compared.size > 0 && contenders.length > 1) {
+    const sorted = [...contenders].sort((a, b) => totals[a.shop]! - totals[b.shop]!);
+    if (totals[sorted[1].shop]! - totals[sorted[0].shop]! >= 0.01) cheapest = sorted[0].shop;
     const splitTotal = round(
       items.reduce(
         (sum, item, index) =>
-          compared.has(item.id) ? sum + Math.min(...baskets.map((basket) => amountAt(basket, index))) : sum,
+          compared.has(item.id) ? sum + Math.min(...contenders.map((basket) => amountAt(basket, index))) : sum,
         0,
       ),
     );
-    const savings = round(totals[sorted[0].shop] - splitTotal);
+    const savings = round(totals[sorted[0].shop]! - splitTotal);
     if (savings >= 0.01) split = { total: splitTotal, savings };
   }
 
+  const comparable = contenders.length > 1 && compared.size > 0;
   return {
     shops: baskets,
     itemCount: items.length,
-    compared: { count: compared.size, totals, cheapest },
+    compared: comparable
+      ? { shops: contenders.map((basket) => basket.shop), count: compared.size, totals, cheapest }
+      : { shops: [], count: 0, totals: {}, cheapest: null },
     split,
   };
 }

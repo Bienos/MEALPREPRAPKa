@@ -149,7 +149,7 @@ export default async function PrepPage() {
           <span className="block text-sm text-muted-foreground">
             {weekKcal > 0
               ? `${weekKcal.toLocaleString("pl-PL")} / ${weekGoal.toLocaleString("pl-PL")} kcal${weekMatches ? " · pasuje" : ""}`
-              : "Wybierz jedzenie na tydzień, policzę makro i zrobię listę zakupów"}
+              : "Ułóż tydzień z gotowych dni w makro i zobacz, gdzie zakupy wyjdą najtaniej"}
           </span>
         </span>
         <ChevronRight className="size-5 shrink-0 text-muted-foreground" />

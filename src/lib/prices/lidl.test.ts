@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import { parseLidlPromos, parsePack } from "./lidl.ts";
+import { parseLidlPromos } from "./lidl.ts";
+import { parsePack } from "./promo.ts";
 
 /**
  * A real lidl.pl search response from Monday 19.10.2026 (food category), with

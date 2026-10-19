@@ -1,0 +1,285 @@
+Typ,Danie,Wersja,Składniki i gramatura,Kcal,B (g),T (g),W (g),Czas,Batch,Lodówka,Mrożenie
+Śniadanie,Overnight oats,DT,Płatki 80 g SUCHE; skyr 250 g; whey 30 g; banan 120 g; masło orzechowe 15 g,772,66,16,91,5 min,3 słoiki,3 dni,Nie
+Śniadanie,Overnight oats,DNT,Płatki 50 g SUCHE; skyr 300 g; whey 30 g; banan 100 g; masło orzechowe 25 g,739,70,19,72,5 min,3 słoiki,3 dni,Nie
+Śniadanie,Jajka + pieczywo,DT,3 jajka (~180 g); białka jaj 150 g; pieczywo 100 g; warzywa 100 g,630,51,22,57,10 min,1–2 dni,2 dni,Nie
+Śniadanie,Jajka + pieczywo,DNT,3 jajka (~180 g); białka jaj 150 g; pieczywo 80 g; warzywa 100 g,586,49,22,48,10 min,1–2 dni,2 dni,Nie
+Śniadanie,Skyr bowl,DT,Skyr 300 g; whey 20 g; płatki 60 g SUCHE; owoce 150 g; PB 20 g,677,63,17,68,3 min,1,—,Nie
+Śniadanie,Skyr bowl,DNT,Skyr 350 g; whey 20 g; płatki 40 g SUCHE; owoce 150 g; PB 25 g,666,67,18,59,3 min,1,—,Nie
+Meal prep,Chicken Rice,DT,Kurczak 200 g SUROWY; ryż 110 g SUCHY; warzywa 200 g; oliwa 10 g,789,59,17,100,25–30 min,4–6,2–3 dni,Tak
+Meal prep,Chicken Rice,DNT,Kurczak 230 g SUROWY; ryż 60 g SUCHY; warzywa 250 g; oliwa 15 g,715,63,23,64,25–30 min,4–6,2–3 dni,Tak
+Meal prep,Turkey Pasta,DT,Indyk 220 g SUROWY; makaron 110 g SUCHY; passata 200 g; warzywa 150 g; oliwa 5 g,839,68,19,99,25–30 min,4–6,3 dni,Tak
+Meal prep,Turkey Pasta,DNT,Indyk 250 g SUROWY; makaron 60 g SUCHY; passata 250 g; warzywa 200 g; oliwa 10 g,785,71,25,69,25–30 min,4–6,3 dni,Tak
+Meal prep,Beef Burrito Bowl,DT,Wołowina 5% 200 g SUROWA; ryż 100 g SUCHY; fasola 100 g; warzywa 150 g; salsa 100 g; ser light 20 g,843,68,15,109,25 min,4–6,3 dni,Tak
+Meal prep,Beef Burrito Bowl,DNT,Wołowina 220 g; ryż 50 g; fasola 100 g; warzywa 200 g; salsa 100 g; ser light 30 g,741,73,17,74,25 min,4–6,3 dni,Tak
+Meal prep,Chili con carne,DT,Wołowina 180 g; ryż 90 g; fasola 150 g; passata 250 g; warzywa 150 g; oliwa 5 g,857,62,17,114,30 min,6,3 dni,Tak
+Meal prep,Chili con carne,DNT,Wołowina 220 g; ryż 40 g; fasola 150 g; passata 250 g; warzywa 200 g; oliwa 10 g,804,68,24,79,30 min,6,3 dni,Tak
+Meal prep,Chicken Teriyaki,DT,Kurczak 200 g; ryż 110 g; warzywa 200 g; teriyaki 30 g; oliwa 5 g,776,59,12,108,25 min,4–6,2–3 dni,Tak
+Meal prep,Chicken Teriyaki,DNT,Kurczak 230 g; ryż 60 g; warzywa 250 g; teriyaki 20 g; oliwa 10 g,698,64,18,70,25 min,4–6,2–3 dni,Tak
+Kolacja,Egg wrap,—,2 jajka 120 g; białka jaj 150 g; tortilla 60 g; warzywa 100 g; ser light 20 g; salsa 50 g,545,45,21,44,10 min,1,1 dzień,Nie
+Kolacja,Protein Skyr Bowl,—,Skyr 300 g; whey 20 g; owoce 100 g; masło orzechowe 10 g,371,52,7,25,3 min,1,—,Nie
+Kolacja,Tuna sandwich,—,Tuńczyk 120 g odsączony; pieczywo 100 g; warzywa 150 g; jogurt 2% 50 g,503,49,7,61,5 min,1,—,Nie
+Awaryjne,Protein bomb,—,Skyr 300 g; whey 30 g; banan 100 g,407,58,3,37,2 min,1,—,Nie
+Awaryjne,Tuna wraps,—,Tuńczyk 130 g; tortille 120 g; salsa 100 g,551,45,11,68,3 min,1,—,Nie
+Awaryjne,Serek + pieczywo,—,Serek wiejski 250 g; chleb 80 g; jabłko 150 g,546,38,14,67,2 min,1,—,Nie
+Meal prep,Chicken Curry Rice,DT,Kurczak 200 g SUROWY; ryż 110 g SUCHY; warzywa 200 g; mleko kokosowe light 100 g; oliwa 5 g; curry,803,58,19,100,25 min,4–6,3 dni,Tak
+Meal prep,Chicken Curry Rice,DNT,Kurczak 230 g SUROWY; ryż 60 g SUCHY; warzywa 250 g; mleko kokosowe light 120 g; oliwa 10 g; curry,742,63,26,64,25 min,4–6,3 dni,Tak
+Meal prep,Beef Bolognese,DT,Wołowina 5% 200 g SUROWA; makaron 110 g SUCHY; passata 250 g; warzywa 150 g; oliwa 5 g,818,63,18,101,30 min,4–6,3 dni,Tak
+Meal prep,Beef Bolognese,DNT,Wołowina 5% 230 g SUROWA; makaron 60 g SUCHY; passata 300 g; warzywa 200 g; oliwa 10 g,756,65,24,70,30 min,4–6,3 dni,Tak
+Meal prep,Chicken Fajita Bowl,DT,Kurczak 200 g; ryż 100 g SUCHY; fasola 80 g; warzywa 200 g; kukurydza 80 g; oliwa 5 g,845,66,13,116,25 min,4–6,3 dni,Tak
+Meal prep,Chicken Fajita Bowl,DNT,Kurczak 230 g; ryż 50 g SUCHY; fasola 100 g; warzywa 250 g; kukurydza 50 g; oliwa 10 g,762,71,18,79,25 min,4–6,3 dni,Tak
+Meal prep,Greek Chicken Potatoes,DT,Kurczak 200 g; ziemniaki 450 g; warzywa 200 g; feta light 40 g; oliwa 10 g,799,67,19,90,35 min,4–6,3 dni,Tak
+Meal prep,Greek Chicken Potatoes,DNT,Kurczak 250 g; ziemniaki 250 g; warzywa 250 g; feta light 60 g; oliwa 15 g,803,80,27,60,35 min,4–6,3 dni,Tak
+Meal prep,Turkey Chili,DT,Indyk 220 g; ryż 90 g SUCHY; fasola 150 g; passata 250 g; warzywa 150 g; oliwa 5 g,879,78,11,117,30 min,6,3 dni,Tak
+Meal prep,Turkey Chili,DNT,Indyk 260 g; ryż 40 g SUCHY; fasola 150 g; passata 250 g; warzywa 200 g; oliwa 10 g,808,85,16,81,30 min,6,3 dni,Tak
+Meal prep,Chicken Orzo,DT,Kurczak 200 g; orzo 110 g SUCHE; passata 200 g; warzywa 200 g; mozzarella light 30 g; oliwa 5 g,839,74,15,102,25 min,4–6,3 dni,Tak
+Meal prep,Chicken Orzo,DNT,Kurczak 240 g; orzo 60 g SUCHE; passata 250 g; warzywa 250 g; mozzarella light 40 g; oliwa 10 g,801,81,21,72,25 min,4–6,3 dni,Tak
+Meal prep,Turkey Taco Bowl,DT,Indyk 220 g; ryż 100 g SUCHY; fasola 100 g; warzywa 200 g; kukurydza 80 g; feta light 30 g,885,80,9,121,25 min,4–6,3 dni,Tak
+Meal prep,Turkey Taco Bowl,DNT,Indyk 260 g; ryż 50 g SUCHY; fasola 120 g; warzywa 250 g; kukurydza 50 g; feta light 40 g; oliwa 5 g,831,90,15,84,25 min,4–6,3 dni,Tak
+Meal prep,Chicken Satay Rice,DT,Kurczak 200 g; ryż 110 g SUCHY; warzywa 200 g; masło orzechowe 20 g; oliwa 5 g; sos sojowy,858,63,22,102,25 min,4–6,3 dni,Tak
+Meal prep,Chicken Satay Rice,DNT,Kurczak 230 g; ryż 60 g SUCHY; warzywa 250 g; masło orzechowe 30 g; oliwa 5 g; sos sojowy,795,70,27,68,25 min,4–6,3 dni,Tak
+,,,,,,,,,,,
+Śniadanie,Protein Pancakes,DT,Płatki 70 g; 2 jajka; białka jaj 150 g; whey 25 g; banan 100 g,700,61,20,69,15 min,1–2,2 dni,Tak
+Śniadanie,Protein Pancakes,DNT,Płatki 40 g; 2 jajka; białka jaj 200 g; whey 25 g; banan 70 g; PB 15 g,681,66,25,48,15 min,1–2,2 dni,Tak
+Śniadanie,Breakfast Burrito,DT,2 jajka; białka jaj 150 g; tortilla 90 g; indyk/szynka 80 g; ser light 30 g; warzywa 100 g,712,66,24,58,12 min,2–3,2 dni,Tak
+Śniadanie,Breakfast Burrito,DNT,3 jajka; białka jaj 150 g; tortilla 60 g; indyk/szynka 100 g; ser light 30 g; warzywa 150 g,762,76,30,47,12 min,2–3,2 dni,Tak
+Śniadanie,Apple Cinnamon Oats,DT,Płatki 80 g; skyr 250 g; whey 25 g; jabłko 180 g; cynamon; PB 10 g,709,61,13,87,5 min,3,3 dni,Nie
+Śniadanie,Apple Cinnamon Oats,DNT,Płatki 50 g; skyr 300 g; whey 25 g; jabłko 120 g; PB 20 g,664,65,16,65,5 min,3,3 dni,Nie
+Śniadanie,Protein French Toast,DT,Pieczywo 120 g; 2 jajka; białka jaj 150 g; skyr 150 g; owoce 150 g,730,60,18,82,15 min,1,—,Nie
+Śniadanie,Protein French Toast,DNT,Pieczywo 70 g; 3 jajka; białka jaj 150 g; skyr 200 g; owoce 100 g,690,68,22,55,15 min,1,—,Nie
+Śniadanie,Cottage Cheese Bowl,DT,Serek wiejski 250 g; płatki 60 g; whey 20 g; banan 120 g; miód 15 g,704,55,16,85,3 min,1,—,Nie
+Śniadanie,Cottage Cheese Bowl,DNT,Serek wiejski 300 g; płatki 35 g; whey 20 g; owoce 100 g; PB 20 g,666,63,26,45,3 min,1,—,Nie
+Śniadanie,Egg Potato Bowl,DT,3 jajka; białka jaj 150 g; ziemniaki 300 g; szynka z indyka 80 g; warzywa 150 g,727,64,23,66,20 min,2–3,2 dni,Tak
+Śniadanie,Egg Potato Bowl,DNT,3 jajka; białka jaj 200 g; ziemniaki 180 g; szynka z indyka 100 g; warzywa 200 g; oliwa 5 g,749,72,29,50,20 min,2–3,2 dni,Tak
+Śniadanie,Chocolate Banana Protein Oats,DT,Płatki owsiane 70 g SUCHE; Skyr 250 g; Whey 30 g; Banan 120 g; Kakao 10 g; Masło orzechowe 10 g,738,67,14,86,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Chocolate Banana Protein Oats,DNT,Płatki owsiane 45 g SUCHE; Skyr 300 g; Whey 30 g; Banan 80 g; Kakao 10 g; Masło orzechowe 20 g,701,71,17,66,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Berry Protein Oats,DT,Płatki owsiane 75 g SUCHE; Skyr 250 g; Whey 25 g; Owoce jagodowe 180 g; Miód 15 g; Masło orzechowe 10 g,721,62,13,89,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Berry Protein Oats,DNT,Płatki owsiane 45 g SUCHE; Skyr 300 g; Whey 30 g; Owoce jagodowe 150 g; Masło orzechowe 20 g,664,70,16,60,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Banana Baked Oats,DT,Płatki owsiane 60 g SUCHE; Skyr 200 g; Whey 30 g; Banan 140 g; Jajka 100 g,741,68,17,79,20 min,2–3,2–3 dni,Tak
+Śniadanie,Banana Baked Oats,DNT,Płatki owsiane 45 g SUCHE; Skyr 250 g; Whey 30 g; Banan 90 g; Jajka 100 g; Masło orzechowe 10 g,737,74,21,63,20 min,2–3,2–3 dni,Tak
+Śniadanie,Apple Baked Oats,DT,Płatki owsiane 70 g SUCHE; Skyr 200 g; Whey 30 g; Jabłko 180 g; Jajka 100 g,750,69,18,78,20 min,2–3,2–3 dni,Tak
+Śniadanie,Apple Baked Oats,DNT,Płatki owsiane 45 g SUCHE; Skyr 250 g; Whey 30 g; Jabłko 120 g; Jajka 100 g; Masło orzechowe 10 g,717,73,21,59,20 min,2–3,2–3 dni,Tak
+Śniadanie,Protein Chia Oats,DT,Płatki owsiane 65 g SUCHE; Skyr 250 g; Whey 30 g; Nasiona chia 15 g; Banan 100 g,684,64,12,80,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Protein Chia Oats,DNT,Płatki owsiane 40 g SUCHE; Skyr 300 g; Whey 30 g; Nasiona chia 20 g; Owoce jagodowe 120 g,608,67,12,58,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Twaróg Sweet Bowl,DT,Twaróg chudy 230 g; Skyr 150 g; Płatki owsiane 55 g SUCHE; Banan 120 g; Miód 10 g,662,69,6,83,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Twaróg Sweet Bowl,DNT,Twaróg chudy 250 g; Skyr 150 g; Płatki owsiane 30 g SUCHE; Owoce jagodowe 120 g; Masło orzechowe 15 g,592,73,12,48,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Twaróg Savory Toast,DT,Twaróg chudy 250 g; Pieczywo 110 g; Warzywa / mieszanka mrożona 150 g; Oliwa 5 g,626,61,10,73,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Twaróg Savory Toast,DNT,Twaróg chudy 300 g; Pieczywo 70 g; Warzywa / mieszanka mrożona 200 g; Oliwa 10 g,643,68,15,59,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Cottage Berry Crunch,DT,Serek wiejski 250 g; Skyr 150 g; Płatki owsiane 55 g SUCHE; Owoce jagodowe 150 g; Miód 10 g,635,55,15,70,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Cottage Berry Crunch,DNT,Serek wiejski 300 g; Skyr 150 g; Płatki owsiane 30 g SUCHE; Owoce jagodowe 150 g; Masło orzechowe 15 g,659,62,23,51,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Cottage Apple Cinnamon,DT,Serek wiejski 250 g; Płatki owsiane 55 g SUCHE; Jabłko 180 g; Whey 20 g; Miód 10 g,651,54,15,75,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Cottage Apple Cinnamon,DNT,Serek wiejski 300 g; Płatki owsiane 30 g SUCHE; Jabłko 120 g; Whey 20 g; Masło orzechowe 15 g,639,60,23,48,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Greek Yogurt Protein Bowl,DT,Jogurt 2% 300 g; Skyr 200 g; Whey 25 g; Płatki owsiane 55 g SUCHE; Banan 100 g,708,66,12,84,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Greek Yogurt Protein Bowl,DNT,Jogurt 2% 250 g; Skyr 250 g; Whey 30 g; Płatki owsiane 30 g SUCHE; Owoce jagodowe 120 g; Masło orzechowe 10 g,659,72,15,59,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Egg Rice Breakfast Bowl,DT,Jajka 150 g; Białka jaj 150 g; Ryż 65 g SUCHY; Szynka z indyka 80 g; Warzywa / mieszanka mrożona 150 g,680,59,20,66,10–15 min,2–3,2–3 dni,Nie
+Śniadanie,Egg Rice Breakfast Bowl,DNT,Jajka 180 g; Białka jaj 180 g; Ryż 35 g SUCHY; Szynka z indyka 100 g; Warzywa / mieszanka mrożona 200 g; Oliwa 5 g,725,69,29,47,10–15 min,2–3,2–3 dni,Nie
+Śniadanie,Egg Ham Wrap,DT,Jajka 120 g; Białka jaj 180 g; Tortilla 90 g; Szynka z indyka 80 g; Warzywa / mieszanka mrożona 120 g; Salsa 50 g,681,61,21,62,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Egg Ham Wrap,DNT,Jajka 180 g; Białka jaj 180 g; Tortilla 60 g; Szynka z indyka 100 g; Warzywa / mieszanka mrożona 150 g; Salsa 50 g,723,71,27,49,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Breakfast Quesadilla Turkey,DT,Jajka 120 g; Białka jaj 150 g; Tortilla 90 g; Szynka z indyka 100 g; Ser light 25 g; Salsa 50 g,696,66,24,54,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Breakfast Quesadilla Turkey,DNT,Jajka 150 g; Białka jaj 180 g; Tortilla 60 g; Szynka z indyka 120 g; Ser light 30 g; Salsa 50 g,698,76,26,40,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Breakfast Sandwich Egg Turkey,DT,Jajka 120 g; Białka jaj 120 g; Pieczywo 120 g; Szynka z indyka 80 g; Warzywa / mieszanka mrożona 100 g,679,57,19,70,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Breakfast Sandwich Egg Turkey,DNT,Jajka 180 g; Białka jaj 150 g; Pieczywo 75 g; Szynka z indyka 100 g; Warzywa / mieszanka mrożona 150 g,709,69,25,52,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Breakfast Pizza Tortilla,DT,Tortilla 90 g; Jajka 120 g; Białka jaj 150 g; Szynka z indyka 100 g; Mozzarella light 40 g; Passata 60 g,721,69,25,55,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Breakfast Pizza Tortilla,DNT,Tortilla 60 g; Jajka 150 g; Białka jaj 180 g; Szynka z indyka 100 g; Mozzarella light 50 g; Passata 60 g,707,76,27,40,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Egg Potato Hash Turkey,DT,Jajka 120 g; Białka jaj 150 g; Ziemniaki 350 g; Szynka z indyka 100 g; Warzywa / mieszanka mrożona 150 g; Oliwa 5 g,742,62,22,74,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Egg Potato Hash Turkey,DNT,Jajka 150 g; Białka jaj 150 g; Ziemniaki 200 g; Szynka z indyka 100 g; Warzywa / mieszanka mrożona 200 g; Oliwa 10 g,738,64,30,53,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Twaróg Oats Bowl,DT,Twaróg chudy 230 g; Skyr 150 g; Płatki owsiane 60 g SUCHE; Banan 100 g,622,69,6,73,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Twaróg Oats Bowl,DNT,Twaróg chudy 250 g; Skyr 150 g; Płatki owsiane 35 g SUCHE; Owoce jagodowe 100 g; Masło orzechowe 10 g,570,72,10,48,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Cottage Toast + Egg,DT,Serek wiejski 250 g; Jajka 100 g; Pieczywo 100 g; Warzywa / mieszanka mrożona 150 g,708,55,24,68,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Cottage Toast + Egg,DNT,Serek wiejski 260 g; Jajka 120 g; Pieczywo 60 g; Warzywa / mieszanka mrożona 200 g,674,57,26,53,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Ham Cheese Omelette + Toast,DT,Jajka 150 g; Białka jaj 160 g; Szynka z indyka 90 g; Ser light 25 g; Pieczywo 80 g; Warzywa / mieszanka mrożona 120 g,712,71,24,53,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Ham Cheese Omelette + Toast,DNT,Jajka 150 g; Białka jaj 160 g; Szynka z indyka 100 g; Ser light 25 g; Pieczywo 45 g; Warzywa / mieszanka mrożona 150 g,652,71,24,38,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Scrambled Eggs + Toast + Skyr,DT,Jajka 150 g; Białka jaj 150 g; Pieczywo 100 g; Skyr 150 g; Warzywa / mieszanka mrożona 120 g,696,63,20,66,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Scrambled Eggs + Toast + Skyr,DNT,Jajka 180 g; Białka jaj 180 g; Pieczywo 60 g; Skyr 200 g; Warzywa / mieszanka mrożona 150 g,694,73,22,51,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Tuna Egg Breakfast Sandwich,DT,Tuńczyk 100 g ODSĄCZONY; Jajka 100 g; Pieczywo 110 g; Jogurt 2% 40 g; Warzywa / mieszanka mrożona 120 g,624,54,16,66,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Tuna Egg Breakfast Sandwich,DNT,Tuńczyk 130 g ODSĄCZONY; Jajka 150 g; Pieczywo 70 g; Jogurt 2% 50 g; Warzywa / mieszanka mrożona 150 g,645,65,21,49,10–15 min,1–2,1–2 dni,Tak
+Śniadanie,Tiramisu Overnight Oats,DT,Płatki owsiane 70 g SUCHE; Skyr 300 g; Whey 25 g; Kakao 8 g; Banan 100 g; Miód 10 g,688,65,8,89,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Tiramisu Overnight Oats,DNT,Płatki owsiane 45 g SUCHE; Skyr 350 g; Whey 25 g; Kakao 8 g; Owoce jagodowe 100 g; Masło orzechowe 15 g,638,71,14,57,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Chocolate Berry Overnight Oats,DT,Płatki owsiane 70 g SUCHE; Skyr 250 g; Whey 30 g; Kakao 10 g; Owoce jagodowe 180 g; Miód 10 g,678,65,10,82,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Chocolate Berry Overnight Oats,DNT,Płatki owsiane 45 g SUCHE; Skyr 300 g; Whey 30 g; Kakao 10 g; Owoce jagodowe 150 g; Masło orzechowe 15 g,659,70,15,61,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Banana PB Protein Porridge,DT,Płatki owsiane 70 g SUCHE; Skyr 200 g; Whey 30 g; Banan 120 g; Masło orzechowe 15 g,711,61,15,83,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Banana PB Protein Porridge,DNT,Płatki owsiane 40 g SUCHE; Skyr 250 g; Whey 35 g; Banan 80 g; Masło orzechowe 25 g,674,68,18,60,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Berry Cheesecake Bowl,DT,Twaróg chudy 220 g; Skyr 200 g; Płatki owsiane 50 g SUCHE; Owoce jagodowe 180 g; Miód 15 g,646,72,6,76,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Berry Cheesecake Bowl,DNT,Twaróg chudy 240 g; Skyr 200 g; Płatki owsiane 25 g SUCHE; Owoce jagodowe 150 g; Masło orzechowe 15 g,608,76,12,49,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Savory Oats Egg Turkey,DT,Płatki owsiane 60 g SUCHE; Jajka 120 g; Białka jaj 160 g; Szynka z indyka 90 g; Warzywa / mieszanka mrożona 150 g; Ser light 20 g,683,68,23,51,10–15 min,2–3,2–3 dni,Nie
+Śniadanie,Savory Oats Egg Turkey,DNT,Płatki owsiane 35 g SUCHE; Jajka 150 g; Białka jaj 160 g; Szynka z indyka 100 g; Warzywa / mieszanka mrożona 200 g; Ser light 25 g,677,73,25,40,10–15 min,2–3,2–3 dni,Nie
+Śniadanie,Tuna Egg Tortilla Melt,DT,Tuńczyk 100 g ODSĄCZONY; Jajka 100 g; Tortilla 90 g; Mozzarella light 40 g; Salsa 50 g; Warzywa / mieszanka mrożona 100 g,653,58,21,58,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Tuna Egg Tortilla Melt,DNT,Tuńczyk 130 g ODSĄCZONY; Jajka 150 g; Tortilla 60 g; Mozzarella light 50 g; Salsa 50 g; Warzywa / mieszanka mrożona 150 g,718,74,26,47,10–15 min,1–2,1–2 dni,Nie
+Śniadanie,Protein Yogurt Banana Crunch,DT,Jogurt 2% 250 g; Skyr 250 g; Whey 25 g; Płatki owsiane 55 g SUCHE; Banan 100 g,707,69,11,83,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Protein Yogurt Banana Crunch,DNT,Jogurt 2% 200 g; Skyr 300 g; Whey 30 g; Płatki owsiane 30 g SUCHE; Owoce jagodowe 120 g; Masło orzechowe 10 g,658,75,14,58,3–5 min,1–2,1–2 dni,Nie
+Śniadanie,Apple Skyr Cheesecake Bowl,DT,Skyr 300 g; Twaróg chudy 180 g; Płatki owsiane 45 g SUCHE; Jabłko 180 g; Miód 10 g,657,74,5,79,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Apple Skyr Cheesecake Bowl,DNT,Skyr 300 g; Twaróg chudy 200 g; Płatki owsiane 25 g SUCHE; Jabłko 120 g; Masło orzechowe 10 g,601,77,9,53,3–5 min,2–3,2–3 dni,Nie
+Śniadanie,Egg + Cottage Breakfast Bowl,DT,Serek wiejski 250 g; Jajka 120 g; Białka jaj 120 g; Ziemniaki 250 g; Warzywa / mieszanka mrożona 150 g,732,66,24,63,10–15 min,2–3,2–3 dni,Nie
+Śniadanie,Egg + Cottage Breakfast Bowl,DNT,Serek wiejski 250 g; Jajka 120 g; Białka jaj 120 g; Ziemniaki 150 g; Warzywa / mieszanka mrożona 200 g; Oliwa 5 g,721,66,29,49,10–15 min,2–3,2–3 dni,Nie
+Meal prep,Turkey Rice Bowl,DT,Indyk 5% 220 g SUROWY; Ryż 105 g SUCHY; Warzywa / mieszanka mrożona 220 g; Oliwa 5 g; Salsa 80 g,814,62,18,101,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Rice Bowl,DNT,Indyk 5% 260 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 280 g; Oliwa 12 g; Salsa 80 g,783,69,27,66,25–35 min,4–6,3 dni,Tak
+Meal prep,Beef Rice Bowl,DT,Wołowina 5% 210 g SUROWA; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 220 g; Oliwa 5 g; Salsa 80 g,769,57,17,97,25–35 min,4–6,3 dni,Tak
+Meal prep,Beef Rice Bowl,DNT,Wołowina 5% 240 g SUROWA; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 280 g; Oliwa 12 g; Salsa 80 g,746,62,26,66,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Pesto Pasta,DT,Pierś z kurczaka 210 g SUROWY; Makaron 105 g SUCHY; Warzywa / mieszanka mrożona 180 g; Pesto 20 g; Skyr 80 g,763,76,11,90,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Pesto Pasta,DNT,Pierś z kurczaka 240 g SUROWY; Makaron 60 g SUCHY; Warzywa / mieszanka mrożona 230 g; Pesto 30 g; Skyr 100 g,697,81,13,64,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Pesto Pasta,DT,Indyk 5% 220 g SUROWY; Makaron 105 g SUCHY; Warzywa / mieszanka mrożona 180 g; Pesto 20 g; Skyr 80 g,826,76,18,90,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Pesto Pasta,DNT,Indyk 5% 250 g SUROWY; Makaron 60 g SUCHY; Warzywa / mieszanka mrożona 230 g; Pesto 30 g; Skyr 100 g,769,81,21,64,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Tomato Pasta,DT,Pierś z kurczaka 210 g SUROWY; Makaron 110 g SUCHY; Passata 250 g; Warzywa / mieszanka mrożona 180 g; Oliwa 5 g,809,71,13,102,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Tomato Pasta,DNT,Pierś z kurczaka 250 g SUROWY; Makaron 60 g SUCHY; Passata 300 g; Warzywa / mieszanka mrożona 230 g; Oliwa 12 g,776,76,20,73,25–35 min,4–6,3 dni,Tak
+Meal prep,Beef Potato Bowl,DT,Wołowina 5% 220 g SUROWA; Ziemniaki 450 g; Warzywa / mieszanka mrożona 220 g; Oliwa 10 g; Jogurt 2% 80 g,864,65,24,97,25–35 min,4–6,3 dni,Tak
+Meal prep,Beef Potato Bowl,DNT,Wołowina 5% 250 g SUROWA; Ziemniaki 260 g; Warzywa / mieszanka mrożona 280 g; Oliwa 15 g; Jogurt 2% 100 g,839,70,31,70,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Paprika Potatoes,DT,Indyk 5% 230 g SUROWY; Ziemniaki 450 g; Warzywa / mieszanka mrożona 220 g; Oliwa 10 g; Jogurt 2% 80 g,889,69,25,97,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Paprika Potatoes,DNT,Indyk 5% 270 g SUROWY; Ziemniaki 260 g; Warzywa / mieszanka mrożona 280 g; Oliwa 15 g; Jogurt 2% 100 g,876,77,32,70,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Tikka Rice,DT,Pierś z kurczaka 210 g SUROWY; Ryż 105 g SUCHY; Warzywa / mieszanka mrożona 200 g; Jogurt 2% 100 g; Passata 150 g; Oliwa 5 g,825,68,13,109,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Tikka Rice,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 260 g; Jogurt 2% 120 g; Passata 180 g; Oliwa 12 g,805,77,21,77,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Tikka Rice,DT,Indyk 5% 220 g SUROWY; Ryż 105 g SUCHY; Warzywa / mieszanka mrożona 200 g; Jogurt 2% 100 g; Passata 150 g; Oliwa 5 g,888,68,20,109,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Tikka Rice,DNT,Indyk 5% 260 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 260 g; Jogurt 2% 120 g; Passata 180 g; Oliwa 10 g,855,76,27,77,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Shawarma Rice,DT,Pierś z kurczaka 210 g SUROWY; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 220 g; Jogurt 2% 100 g; Oliwa 7 g,795,66,15,99,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Shawarma Rice,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 280 g; Jogurt 2% 120 g; Oliwa 15 g,792,74,24,70,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Gyros Potatoes,DT,Pierś z kurczaka 210 g SUROWY; Ziemniaki 450 g; Warzywa / mieszanka mrożona 220 g; Feta light 35 g; Jogurt 2% 80 g; Oliwa 7 g,842,73,18,97,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Gyros Potatoes,DNT,Pierś z kurczaka 250 g SUROWY; Ziemniaki 250 g; Warzywa / mieszanka mrożona 280 g; Feta light 50 g; Jogurt 2% 100 g; Oliwa 12 g,842,83,26,69,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Gyros Rice,DT,Indyk 5% 220 g SUROWY; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 220 g; Feta light 30 g; Jogurt 2% 80 g; Oliwa 5 g,874,70,22,99,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Gyros Rice,DNT,Indyk 5% 260 g SUROWY; Ryż 50 g SUCHY; Warzywa / mieszanka mrożona 280 g; Feta light 45 g; Jogurt 2% 100 g; Oliwa 10 g,863,80,31,66,25–35 min,4–6,3 dni,Tak
+Meal prep,Beef Taco Rice,DT,Wołowina 5% 210 g SUROWA; Ryż 95 g SUCHY; Fasola 100 g ODSĄCZONA; Warzywa / mieszanka mrożona 180 g; Salsa 100 g; Ser light 20 g,863,70,15,112,25–35 min,4–6,3 dni,Tak
+Meal prep,Beef Taco Rice,DNT,Wołowina 5% 240 g SUROWA; Ryż 45 g SUCHY; Fasola 100 g ODSĄCZONA; Warzywa / mieszanka mrożona 240 g; Salsa 100 g; Ser light 30 g; Oliwa 5 g,822,78,22,78,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Burrito Bowl,DT,Pierś z kurczaka 210 g SUROWY; Ryż 95 g SUCHY; Fasola 100 g ODSĄCZONA; Warzywa / mieszanka mrożona 180 g; Salsa 100 g; Kukurydza 60 g ODSĄCZONA,827,70,7,121,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Burrito Bowl,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 45 g SUCHY; Fasola 100 g ODSĄCZONA; Warzywa / mieszanka mrożona 240 g; Salsa 100 g; Kukurydza 40 g ODSĄCZONA; Oliwa 10 g,802,77,18,83,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Mexican Rice,DT,Pierś z kurczaka 210 g SUROWY; Ryż 100 g SUCHY; Fasola 80 g ODSĄCZONA; Kukurydza 70 g ODSĄCZONA; Passata 150 g; Warzywa / mieszanka mrożona 180 g; Oliwa 5 g,901,71,13,125,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Mexican Rice,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 50 g SUCHY; Fasola 100 g ODSĄCZONA; Kukurydza 40 g ODSĄCZONA; Passata 180 g; Warzywa / mieszanka mrożona 240 g; Oliwa 10 g,842,79,18,91,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken One-Pot Pasta,DT,Pierś z kurczaka 210 g SUROWY; Makaron 105 g SUCHY; Passata 220 g; Warzywa / mieszanka mrożona 220 g; Mozzarella light 30 g,802,78,10,100,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken One-Pot Pasta,DNT,Pierś z kurczaka 250 g SUROWY; Makaron 60 g SUCHY; Passata 280 g; Warzywa / mieszanka mrożona 260 g; Mozzarella light 40 g; Oliwa 5 g,788,86,16,75,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey One-Pot Pasta,DT,Indyk 5% 220 g SUROWY; Makaron 105 g SUCHY; Passata 220 g; Warzywa / mieszanka mrożona 220 g; Mozzarella light 25 g,861,77,17,100,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey One-Pot Pasta,DNT,Indyk 5% 260 g SUROWY; Makaron 60 g SUCHY; Passata 280 g; Warzywa / mieszanka mrożona 260 g; Mozzarella light 35 g; Oliwa 5 g,852,84,24,75,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Parmesan Pasta,DT,Pierś z kurczaka 210 g SUROWY; Makaron 100 g SUCHY; Passata 220 g; Mozzarella light 50 g; Warzywa / mieszanka mrożona 180 g,812,81,12,95,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Parmesan Pasta,DNT,Pierś z kurczaka 250 g SUROWY; Makaron 55 g SUCHY; Passata 280 g; Mozzarella light 60 g; Warzywa / mieszanka mrożona 230 g; Oliwa 5 g,798,89,18,70,25–35 min,4–6,3 dni,Tak
+Meal prep,Light Beef Lasagne,DT,Wołowina 5% 200 g SUROWA; Makaron 90 g SUCHY; Passata 300 g; Warzywa / mieszanka mrożona 180 g; Mozzarella light 50 g; Skyr 100 g,890,86,18,96,25–35 min,4–6,3 dni,Tak
+Meal prep,Light Beef Lasagne,DNT,Wołowina 5% 230 g SUROWA; Makaron 50 g SUCHY; Passata 320 g; Warzywa / mieszanka mrożona 230 g; Mozzarella light 60 g; Skyr 120 g; Oliwa 5 g,880,93,24,73,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Meatballs Pasta,DT,Indyk 5% 230 g SUROWY; Makaron 100 g SUCHY; Passata 250 g; Warzywa / mieszanka mrożona 180 g; Oliwa 5 g,848,72,20,95,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Meatballs Pasta,DNT,Indyk 5% 270 g SUROWY; Makaron 55 g SUCHY; Passata 300 g; Warzywa / mieszanka mrożona 240 g; Oliwa 10 g,822,77,26,70,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Meatballs Rice,DT,Pierś z kurczaka 220 g SUROWY; Ryż 100 g SUCHY; Passata 200 g; Warzywa / mieszanka mrożona 200 g; Oliwa 5 g,780,66,12,102,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Meatballs Rice,DNT,Pierś z kurczaka 260 g SUROWY; Ryż 55 g SUCHY; Passata 250 g; Warzywa / mieszanka mrożona 260 g; Oliwa 12 g,763,74,19,74,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Rice Casserole,DT,Pierś z kurczaka 210 g SUROWY; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 220 g; Mozzarella light 40 g; Passata 150 g,790,73,10,102,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Rice Casserole,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 280 g; Mozzarella light 55 g; Passata 180 g; Oliwa 5 g,781,84,17,73,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Potato Casserole,DT,Indyk 5% 230 g SUROWY; Ziemniaki 420 g; Warzywa / mieszanka mrożona 220 g; Mozzarella light 40 g; Passata 150 g; Oliwa 5 g,882,76,22,95,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Potato Casserole,DNT,Indyk 5% 270 g SUROWY; Ziemniaki 240 g; Warzywa / mieszanka mrożona 280 g; Mozzarella light 55 g; Passata 180 g; Oliwa 10 g,898,87,30,70,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken High-Protein Mac & Cheese,DT,Pierś z kurczaka 200 g SUROWY; Makaron 100 g SUCHY; Ser light 35 g; Skyr 120 g; Warzywa / mieszanka mrożona 180 g,799,87,11,88,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken High-Protein Mac & Cheese,DNT,Pierś z kurczaka 240 g SUROWY; Makaron 55 g SUCHY; Ser light 45 g; Skyr 150 g; Warzywa / mieszanka mrożona 230 g; Oliwa 5 g,793,98,17,62,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Fried Rice,DT,Pierś z kurczaka 190 g SUROWY; Ryż 95 g SUCHY; Jajka 100 g; Warzywa / mieszanka mrożona 220 g; Sos sojowy 20 g; Oliwa 5 g,837,70,21,92,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Fried Rice,DNT,Pierś z kurczaka 230 g SUROWY; Ryż 50 g SUCHY; Jajka 120 g; Warzywa / mieszanka mrożona 280 g; Sos sojowy 20 g; Oliwa 10 g,825,80,29,61,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Fried Rice,DT,Indyk 5% 200 g SUROWY; Ryż 95 g SUCHY; Jajka 100 g; Warzywa / mieszanka mrożona 220 g; Sos sojowy 20 g; Oliwa 5 g,891,70,27,92,25–35 min,4–6,3 dni,Tak
+Meal prep,Turkey Fried Rice,DNT,Indyk 5% 240 g SUROWY; Ryż 50 g SUCHY; Jajka 120 g; Warzywa / mieszanka mrożona 280 g; Sos sojowy 20 g; Oliwa 8 g,870,80,34,61,25–35 min,4–6,3 dni,Tak
+Meal prep,Sweet Chilli Chicken,DT,Pierś z kurczaka 210 g SUROWY; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 220 g; Sos sweet chilli 30 g; Oliwa 5 g,771,61,11,107,25–35 min,4–6,3 dni,Tak
+Meal prep,Sweet Chilli Chicken,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 280 g; Sos sweet chilli 20 g; Oliwa 12 g,731,68,19,72,25–35 min,4–6,3 dni,Tak
+Meal prep,Honey Garlic Chicken,DT,Pierś z kurczaka 210 g SUROWY; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 220 g; Miód 15 g; Sos sojowy 20 g; Oliwa 5 g,775,62,11,107,25–35 min,4–6,3 dni,Tak
+Meal prep,Honey Garlic Chicken,DNT,Pierś z kurczaka 250 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 280 g; Miód 8 g; Sos sojowy 20 g; Oliwa 12 g,731,70,19,70,25–35 min,4–6,3 dni,Tak
+Meal prep,BBQ Chicken Potatoes,DT,Pierś z kurczaka 210 g SUROWY; Ziemniaki 450 g; Warzywa / mieszanka mrożona 220 g; Sos BBQ 35 g; Oliwa 7 g,777,63,13,102,25–35 min,4–6,3 dni,Tak
+Meal prep,BBQ Chicken Potatoes,DNT,Pierś z kurczaka 250 g SUROWY; Ziemniaki 260 g; Warzywa / mieszanka mrożona 280 g; Sos BBQ 25 g; Oliwa 15 g,762,70,22,71,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Stroganoff Pasta,DT,Pierś z kurczaka 210 g SUROWY; Makaron 100 g SUCHY; Warzywa / mieszanka mrożona 250 g; Jogurt 2% 120 g; Passata 100 g; Oliwa 5 g,835,75,15,100,25–35 min,4–6,3 dni,Tak
+Meal prep,Chicken Stroganoff Pasta,DNT,Pierś z kurczaka 250 g SUROWY; Makaron 55 g SUCHY; Warzywa / mieszanka mrożona 300 g; Jogurt 2% 150 g; Passata 120 g; Oliwa 12 g,827,81,23,74,25–35 min,4–6,3 dni,Tak
+Kolacja,Chicken Wrap,DT,Pierś z kurczaka 150 g SUROWY; Tortilla 70 g; Warzywa / mieszanka mrożona 150 g; Jogurt 2% 50 g; Salsa 50 g,477,47,9,52,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Wrap,DNT,Pierś z kurczaka 170 g SUROWY; Tortilla 50 g; Warzywa / mieszanka mrożona 200 g; Jogurt 2% 70 g; Salsa 50 g; Oliwa 5 g,522,52,14,47,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Tuna Wrap,DT,Tuńczyk 130 g ODSĄCZONY; Tortilla 70 g; Warzywa / mieszanka mrożona 150 g; Jogurt 2% 50 g; Salsa 50 g,455,46,7,52,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Tuna Wrap,DNT,Tuńczyk 160 g ODSĄCZONY; Tortilla 50 g; Warzywa / mieszanka mrożona 200 g; Jogurt 2% 70 g; Salsa 50 g; Oliwa 5 g,516,55,12,47,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Turkey Sandwich,DT,Szynka z indyka 140 g; Pieczywo 100 g; Ser light 25 g; Warzywa / mieszanka mrożona 150 g; Musztarda 15 g,551,49,11,64,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Turkey Sandwich,DNT,Szynka z indyka 170 g; Pieczywo 65 g; Ser light 35 g; Warzywa / mieszanka mrożona 200 g; Musztarda 15 g,536,56,12,51,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Sandwich,DT,Pierś z kurczaka 140 g SUROWY; Pieczywo 100 g; Jogurt 2% 40 g; Warzywa / mieszanka mrożona 150 g; Musztarda 15 g,516,48,8,63,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Sandwich,DNT,Pierś z kurczaka 170 g SUROWY; Pieczywo 65 g; Jogurt 2% 60 g; Warzywa / mieszanka mrożona 200 g; Oliwa 5 g; Musztarda 15 g,533,54,13,50,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Protein Pizza Wrap,DT,Tortilla 70 g; Pierś z kurczaka 120 g SUROWY; Mozzarella light 40 g; Passata 80 g; Warzywa / mieszanka mrożona 100 g,470,47,10,48,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Protein Pizza Wrap,DNT,Tortilla 50 g; Pierś z kurczaka 150 g SUROWY; Mozzarella light 50 g; Passata 80 g; Warzywa / mieszanka mrożona 150 g,487,55,11,42,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Skyr Cheesecake Bowl,DT,Skyr 300 g; Twaróg chudy 120 g; Owoce jagodowe 120 g; Płatki owsiane 30 g SUCHE; Miód 10 g,496,61,4,54,5 min,1–2,1–2 dni,Nie
+Kolacja,Skyr Cheesecake Bowl,DNT,Skyr 300 g; Twaróg chudy 170 g; Owoce jagodowe 100 g; Masło orzechowe 10 g,459,69,7,30,5 min,1–2,1–2 dni,Nie
+Kolacja,Cottage Savory Bowl,DT,Serek wiejski 280 g; Pieczywo 75 g; Warzywa / mieszanka mrożona 180 g; Szynka z indyka 70 g,616,59,16,59,5 min,1–2,1–2 dni,Nie
+Kolacja,Cottage Savory Bowl,DNT,Serek wiejski 270 g; Pieczywo 50 g; Warzywa / mieszanka mrożona 220 g; Szynka z indyka 90 g; Oliwa 5 g,629,60,21,50,5 min,1–2,1–2 dni,Nie
+Kolacja,Twaróg Sweet Dinner,DT,Twaróg chudy 230 g; Skyr 150 g; Banan 100 g; Miód 10 g,442,61,2,45,5 min,1–2,1–2 dni,Nie
+Kolacja,Twaróg Sweet Dinner,DNT,Twaróg chudy 260 g; Skyr 150 g; Owoce jagodowe 120 g; Masło orzechowe 10 g,459,70,7,29,5 min,1–2,1–2 dni,Nie
+Kolacja,Scrambled Eggs + Toast,DT,Jajka 120 g; Białka jaj 180 g; Pieczywo 80 g; Warzywa / mieszanka mrożona 150 g,532,45,16,52,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Scrambled Eggs + Toast,DNT,Jajka 180 g; Białka jaj 180 g; Pieczywo 50 g; Warzywa / mieszanka mrożona 200 g,570,51,22,42,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Tuna Rice Bowl,DT,Tuńczyk 140 g ODSĄCZONY; Ryż microwave GOTOWY 180 g; Warzywa / mieszanka mrożona 180 g; Salsa 60 g,484,46,4,66,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Tuna Rice Bowl,DNT,Tuńczyk 170 g ODSĄCZONY; Ryż microwave GOTOWY 110 g; Warzywa / mieszanka mrożona 220 g; Salsa 60 g; Oliwa 5 g,489,53,9,49,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Rice Bowl,DT,Pierś z kurczaka 150 g SUROWY; Ryż microwave GOTOWY 180 g; Warzywa / mieszanka mrożona 180 g; Salsa 60 g,485,44,5,66,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Rice Bowl,DNT,Pierś z kurczaka 180 g SUROWY; Ryż microwave GOTOWY 110 g; Warzywa / mieszanka mrożona 220 g; Salsa 60 g; Oliwa 5 g,486,50,10,49,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Salad + Bread,DT,Pierś z kurczaka 160 g SUROWY; Pieczywo 70 g; Warzywa / mieszanka mrożona 250 g; Jogurt 2% 70 g; Oliwa 5 g,553,53,13,56,5 min,1–2,1–2 dni,Nie
+Kolacja,Chicken Salad + Bread,DNT,Pierś z kurczaka 180 g SUROWY; Pieczywo 40 g; Warzywa / mieszanka mrożona 300 g; Jogurt 2% 80 g; Oliwa 10 g,566,56,18,45,5 min,1–2,1–2 dni,Nie
+Kolacja,Tuna Salad + Bread,DT,Tuńczyk 150 g ODSĄCZONY; Pieczywo 70 g; Warzywa / mieszanka mrożona 250 g; Jogurt 2% 70 g; Oliwa 5 g,543,55,11,56,5 min,1–2,1–2 dni,Nie
+Kolacja,Tuna Salad + Bread,DNT,Tuńczyk 180 g ODSĄCZONY; Pieczywo 40 g; Warzywa / mieszanka mrożona 300 g; Jogurt 2% 80 g; Oliwa 10 g,572,62,16,45,5 min,1–2,1–2 dni,Nie
+Kolacja,Protein Pudding Bowl,DT,Pudding proteinowy 300 g; Skyr 200 g; Banan 100 g; Płatki owsiane 25 g SUCHE,576,56,8,70,5 min,1–2,1–2 dni,Nie
+Kolacja,Protein Pudding Bowl,DNT,Pudding proteinowy 300 g; Skyr 250 g; Owoce jagodowe 100 g; Masło orzechowe 10 g,536,61,12,46,5 min,1–2,1–2 dni,Nie
+Kolacja,Ham Cheese Omelette,DT,Jajka 120 g; Białka jaj 160 g; Szynka z indyka 90 g; Ser light 20 g; Pieczywo 55 g; Warzywa / mieszanka mrożona 120 g,596,64,20,40,8–12 min,1–2,1–2 dni,Nie
+Kolacja,Ham Cheese Omelette,DNT,Jajka 150 g; Białka jaj 150 g; Szynka z indyka 100 g; Ser light 25 g; Pieczywo 30 g; Warzywa / mieszanka mrożona 150 g,603,69,23,30,8–12 min,1–2,1–2 dni,Nie
+Awaryjne — NO COOK,Skyr + whey + banan,DT,Skyr 300 g; Whey 30 g; Banan 120 g,427,58,3,42,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Skyr + whey + banan,DNT,Skyr 350 g; Whey 35 g; Banan 70 g; Masło orzechowe 10 g,492,70,8,35,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Skyr + whey + płatki,DT,Skyr 300 g; Whey 30 g; Płatki owsiane 50 g SUCHE,486,64,6,44,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Skyr + whey + płatki,DNT,Skyr 350 g; Whey 35 g; Płatki owsiane 25 g SUCHE; Masło orzechowe 10 g,510,72,10,33,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Serek wiejski + chleb,DT,Serek wiejski 300 g; Pieczywo 90 g,523,44,15,53,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Serek wiejski + chleb,DNT,Serek wiejski 350 g; Pieczywo 55 g; Oliwa 5 g,525,47,21,37,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Tuńczyk + tortilla,DT,Tuńczyk 140 g ODSĄCZONY; Tortilla 80 g; Salsa 70 g,410,44,6,45,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Tuńczyk + tortilla,DNT,Tuńczyk 170 g ODSĄCZONY; Tortilla 50 g; Salsa 70 g; Oliwa 5 g,406,49,10,30,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Tuńczyk + ryż microwave,DT,Tuńczyk 140 g ODSĄCZONY; Ryż microwave GOTOWY 200 g; Salsa 70 g,435,42,3,60,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Tuńczyk + ryż microwave,DNT,Tuńczyk 170 g ODSĄCZONY; Ryż microwave GOTOWY 120 g; Salsa 70 g; Oliwa 5 g,412,48,8,37,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Protein pudding + banan,DT,Pudding proteinowy 300 g; Skyr 150 g; Banan 120 g,487,48,7,58,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Protein pudding + banan,DNT,Pudding proteinowy 300 g; Skyr 200 g; Banan 70 g; Masło orzechowe 10 g,528,55,12,50,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Whey + oats + banan,DT,Whey 40 g; Płatki owsiane 60 g SUCHE; Banan 120 g; Skyr 150 g,583,58,7,72,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Whey + oats + banan,DNT,Whey 45 g; Płatki owsiane 35 g SUCHE; Banan 70 g; Skyr 200 g; Masło orzechowe 10 g,563,66,11,50,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Twaróg + pieczywo,DT,Twaróg chudy 250 g; Pieczywo 90 g; Warzywa / mieszanka mrożona 150 g,533,59,5,63,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Twaróg + pieczywo,DNT,Twaróg chudy 300 g; Pieczywo 55 g; Warzywa / mieszanka mrożona 200 g; Oliwa 5 g,553,67,9,51,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Kanapki z indykiem,DT,Szynka z indyka 150 g; Pieczywo 100 g; Ser light 20 g; Warzywa / mieszanka mrożona 150 g,538,49,10,63,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Kanapki z indykiem,DNT,Szynka z indyka 180 g; Pieczywo 60 g; Ser light 30 g; Warzywa / mieszanka mrożona 200 g,511,55,11,48,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Mozzarella light + szynka + pieczywo,DT,Mozzarella light 100 g; Szynka z indyka 120 g; Pieczywo 90 g; Warzywa / mieszanka mrożona 150 g,611,60,15,59,2–5 min,1,—,Nie
+Awaryjne — NO COOK,Mozzarella light + szynka + pieczywo,DNT,Mozzarella light 120 g; Szynka z indyka 150 g; Pieczywo 55 g; Warzywa / mieszanka mrożona 200 g,613,69,17,46,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Gotowy kurczak + ryż microwave,DT,Kurczak gotowy 180 g; Ryż microwave GOTOWY 220 g; Warzywa / mieszanka mrożona 150 g; Salsa 60 g,601,53,9,77,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Gotowy kurczak + ryż microwave,DNT,Kurczak gotowy 220 g; Ryż microwave GOTOWY 130 g; Warzywa / mieszanka mrożona 200 g; Salsa 60 g; Oliwa 5 g,616,62,16,56,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Skyr + protein pudding + banan,DT,Skyr 250 g; Pudding proteinowy 200 g; Banan 120 g,457,49,5,54,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Skyr + protein pudding + banan,DNT,Skyr 300 g; Pudding proteinowy 200 g; Banan 70 g; Masło orzechowe 10 g,498,56,10,46,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Tuńczyk puszka + pieczywo + skyr,DT,Tuńczyk 130 g ODSĄCZONY; Pieczywo 100 g; Skyr 150 g; Warzywa / mieszanka mrożona 100 g,541,62,5,62,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Tuńczyk puszka + pieczywo + skyr,DNT,Tuńczyk 160 g ODSĄCZONY; Pieczywo 60 g; Skyr 200 g; Warzywa / mieszanka mrożona 150 g; Oliwa 5 g,574,73,10,48,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Serek wiejski + szynka + bułki/pieczywo,DT,Serek wiejski 250 g; Szynka z indyka 120 g; Pieczywo 100 g; Warzywa / mieszanka mrożona 100 g,681,66,17,66,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Serek wiejski + szynka + bułki/pieczywo,DNT,Serek wiejski 300 g; Szynka z indyka 150 g; Pieczywo 60 g; Warzywa / mieszanka mrożona 150 g,679,75,19,52,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Protein pudding + skyr + płatki,DT,Pudding proteinowy 300 g; Skyr 200 g; Płatki owsiane 45 g SUCHE,558,58,10,59,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Protein pudding + skyr + płatki,DNT,Pudding proteinowy 300 g; Skyr 250 g; Płatki owsiane 25 g SUCHE; Masło orzechowe 10 g,573,63,13,51,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Mozzarella light + tuńczyk + pieczywo,DT,Mozzarella light 100 g; Tuńczyk 120 g ODSĄCZONY; Pieczywo 90 g; Warzywa / mieszanka mrożona 120 g,588,66,12,54,2–5 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Mozzarella light + tuńczyk + pieczywo,DNT,Mozzarella light 120 g; Tuńczyk 150 g ODSĄCZONY; Pieczywo 55 g; Warzywa / mieszanka mrożona 160 g,598,77,14,41,2–5 min,1,—,Nie
+Przekąska / uzupełniacz,Whey shake,—,Whey 30 g,122,24,2,2,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Skyr mini,—,Skyr 200 g,120,22,0,8,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Skyr + whey mini,—,Skyr 150 g; Whey 20 g,174,32,2,7,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Banan + whey,—,Banan 120 g; Whey 25 g,218,21,2,29,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Pieczywo + szynka,—,Pieczywo 60 g; Szynka z indyka 80 g,244,21,4,31,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Serek wiejski mini,—,Serek wiejski 200 g,192,24,8,6,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Twaróg mini,—,Twaróg chudy 180 g,169,34,1,6,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Protein pudding,—,Pudding proteinowy 200 g,180,20,4,16,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Ryż microwave mini + tuńczyk,—,Ryż microwave GOTOWY 100 g; Tuńczyk 100 g ODSĄCZONY,246,29,2,28,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Skyr + PB,—,Skyr 200 g; Masło orzechowe 15 g,220,26,8,11,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Jajka + skyr,—,Jajka 100 g; Skyr 150 g,243,29,11,7,1–2 min,1,—,Nie
+Przekąska / uzupełniacz,Whey + banan + PB,—,Whey 25 g; Banan 100 g; Masło orzechowe 10 g,267,24,7,27,1–2 min,1,—,Nie
+Meal prep — AIR FRYER,Air Fryer Chicken Potatoes,DT,Pierś z kurczaka 220 g SUROWY; Ziemniaki 430 g; Warzywa / mieszanka mrożona 200 g; Oliwa 7 g; Jogurt 2% 80 g,754,67,14,90,30–35 min,3–4,3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Chicken Potatoes,DNT,Pierś z kurczaka 260 g SUROWY; Ziemniaki 250 g; Warzywa / mieszanka mrożona 260 g; Oliwa 14 g; Jogurt 2% 100 g,763,75,23,64,30–35 min,3–4,3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Turkey Meatballs Potatoes,DT,Indyk 5% 230 g SUROWY; Ziemniaki 400 g; Warzywa / mieszanka mrożona 200 g; Oliwa 7 g; Jogurt 2% 80 g,762,64,18,86,30–35 min,3–4,3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Turkey Meatballs Potatoes,DNT,Indyk 5% 270 g SUROWY; Ziemniaki 230 g; Warzywa / mieszanka mrożona 260 g; Oliwa 14 g; Jogurt 2% 100 g,775,71,27,62,30–35 min,3–4,3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Chicken Fajita Wrap,DT,Pierś z kurczaka 200 g SUROWY; Tortilla 90 g; Warzywa / mieszanka mrożona 180 g; Salsa 80 g; Jogurt 2% 60 g,612,61,12,65,20–25 min,3–4,2–3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Chicken Fajita Wrap,DNT,Pierś z kurczaka 240 g SUROWY; Tortilla 60 g; Warzywa / mieszanka mrożona 240 g; Salsa 80 g; Jogurt 2% 80 g; Oliwa 5 g,632,69,16,53,20–25 min,3–4,2–3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Chicken Parmesan Potatoes,DT,Pierś z kurczaka 210 g SUROWY; Ziemniaki 400 g; Warzywa / mieszanka mrożona 180 g; Mozzarella light 40 g; Passata 100 g,709,72,9,85,30–35 min,3–4,3 dni,Tak
+Meal prep — AIR FRYER,Air Fryer Chicken Parmesan Potatoes,DNT,Pierś z kurczaka 250 g SUROWY; Ziemniaki 230 g; Warzywa / mieszanka mrożona 240 g; Mozzarella light 50 g; Passata 120 g; Oliwa 5 g,716,82,16,61,30–35 min,3–4,3 dni,Tak
+Meal prep — ONE PAN,One-Pan Turkey Tomato Rice,DT,Indyk 5% 220 g SUROWY; Ryż 100 g SUCHY; Warzywa / mieszanka mrożona 200 g; Passata 200 g; Oliwa 5 g,810,62,18,100,25–30 min,4–6,3 dni,Tak
+Meal prep — ONE PAN,One-Pan Turkey Tomato Rice,DNT,Indyk 5% 260 g SUROWY; Ryż 55 g SUCHY; Warzywa / mieszanka mrożona 260 g; Passata 250 g; Oliwa 12 g,803,70,27,70,25–30 min,4–6,3 dni,Tak
+Meal prep — ONE POT,One-Pot Beef Orzo,DT,Wołowina 5% 210 g SUROWA; Orzo 100 g SUCHE; Warzywa / mieszanka mrożona 200 g; Passata 200 g; Oliwa 5 g,786,63,18,93,25–30 min,4–6,3 dni,Tak
+Meal prep — ONE POT,One-Pot Beef Orzo,DNT,Wołowina 5% 240 g SUROWA; Orzo 55 g SUCHE; Warzywa / mieszanka mrożona 260 g; Passata 250 g; Oliwa 12 g,783,68,27,67,25–30 min,4–6,3 dni,Tak
+Meal prep — ONE PAN,One-Pan Chicken Pesto Pasta,DT,Pierś z kurczaka 210 g SUROWY; Makaron 100 g SUCHY; Warzywa / mieszanka mrożona 200 g; Pesto 20 g; Skyr 80 g,735,74,11,85,20–25 min,4–6,3 dni,Tak
+Meal prep — ONE PAN,One-Pan Chicken Pesto Pasta,DNT,Pierś z kurczaka 250 g SUROWY; Makaron 55 g SUCHY; Warzywa / mieszanka mrożona 250 g; Pesto 30 g; Skyr 100 g,677,81,13,59,20–25 min,4–6,3 dni,Tak
+Meal prep — ONE POT,One-Pot Turkey Chili Rice,DT,Indyk 5% 220 g SUROWY; Ryż 95 g SUCHY; Fasola 120 g ODSĄCZONA; Passata 220 g; Warzywa / mieszanka mrożona 180 g; Oliwa 5 g,907,70,19,114,30 min,4–6,3 dni,Tak
+Meal prep — ONE POT,One-Pot Turkey Chili Rice,DNT,Indyk 5% 260 g SUROWY; Ryż 50 g SUCHY; Fasola 130 g ODSĄCZONA; Passata 260 g; Warzywa / mieszanka mrożona 240 g; Oliwa 10 g,886,78,26,85,30 min,4–6,3 dni,Tak
+Awaryjne — MICROWAVE ONLY,Microwave Tuna Rice,DT,Tuńczyk 150 g ODSĄCZONY; Ryż microwave GOTOWY 220 g; Warzywa / mieszanka mrożona 180 g; Salsa 70 g,533,48,5,74,5 min,1,—,Nie
+Awaryjne — MICROWAVE ONLY,Microwave Tuna Rice,DNT,Tuńczyk 180 g ODSĄCZONY; Ryż microwave GOTOWY 130 g; Warzywa / mieszanka mrożona 220 g; Salsa 70 g; Oliwa 5 g,521,55,9,55,5 min,1,—,Nie
+Awaryjne — MICROWAVE ONLY,Microwave Chicken Rice,DT,Kurczak gotowy 180 g; Ryż microwave GOTOWY 220 g; Warzywa / mieszanka mrożona 180 g; Salsa 70 g,636,54,12,78,5 min,1,—,Nie
+Awaryjne — MICROWAVE ONLY,Microwave Chicken Rice,DNT,Kurczak gotowy 220 g; Ryż microwave GOTOWY 130 g; Warzywa / mieszanka mrożona 220 g; Salsa 70 g; Oliwa 5 g,614,63,14,59,5 min,1,—,Nie
+Awaryjne — MICROWAVE ONLY,Microwave Egg Rice Bowl,DT,Jajka 120 g; Białka jaj 180 g; Ryż microwave GOTOWY 180 g; Warzywa / mieszanka mrożona 180 g; Salsa 60 g,568,42,16,64,6–8 min,1,—,Nie
+Awaryjne — MICROWAVE ONLY,Microwave Egg Rice Bowl,DNT,Jajka 150 g; Białka jaj 200 g; Ryż microwave GOTOWY 110 g; Warzywa / mieszanka mrożona 220 g; Salsa 60 g,590,50,22,48,6–8 min,1,—,Nie
+Awaryjne — TRAVEL / HOTEL,Hotel Skyr Oats Banana,DT,Skyr 350 g; Whey 30 g; Płatki owsiane 55 g SUCHE; Banan 120 g,623,66,7,74,3 min,1,—,Nie
+Awaryjne — TRAVEL / HOTEL,Hotel Skyr Oats Banana,DNT,Skyr 400 g; Whey 35 g; Płatki owsiane 30 g SUCHE; Banan 80 g; Masło orzechowe 10 g,602,74,10,54,3 min,1,—,Nie
+Awaryjne — TRAVEL / HOTEL,Travel Tuna Tortilla Pack,DT,Tuńczyk 160 g ODSĄCZONY; Tortilla 80 g; Salsa 70 g,475,54,7,49,3 min,1,—,Nie
+Awaryjne — TRAVEL / HOTEL,Travel Tuna Tortilla Pack,DNT,Tuńczyk 190 g ODSĄCZONY; Tortilla 55 g; Salsa 70 g; Oliwa 5 g,486,62,10,37,3 min,1,—,Nie
+Awaryjne — TRAVEL / HOTEL,Hotel Cottage Cheese Bread Pack,DT,Serek wiejski 300 g; Pieczywo 90 g; Szynka z indyka 100 g,613,60,17,55,3 min,1,—,Nie
+Awaryjne — TRAVEL / HOTEL,Hotel Cottage Cheese Bread Pack,DNT,Serek wiejski 330 g; Pieczywo 55 g; Szynka z indyka 130 g,595,67,19,39,3 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Supermarket Chicken Wrap Kit,DT,Kurczak gotowy 180 g; Tortilla 80 g; Skyr 100 g; Salsa 70 g,590,63,14,53,3 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Supermarket Chicken Wrap Kit,DNT,Kurczak gotowy 220 g; Tortilla 55 g; Skyr 120 g; Salsa 70 g,591,73,15,41,3 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Supermarket Skyr Pudding Oats,DT,Skyr 250 g; Pudding proteinowy 250 g; Płatki owsiane 45 g SUCHE; Banan 100 g,608,55,8,79,2 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Supermarket Skyr Pudding Oats,DNT,Skyr 300 g; Pudding proteinowy 250 g; Płatki owsiane 25 g SUCHE; Owoce jagodowe 100 g; Masło orzechowe 10 g,568,60,12,55,2 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Supermarket Turkey Mozzarella Sandwich,DT,Szynka z indyka 160 g; Mozzarella light 80 g; Pieczywo 100 g; Warzywa / mieszanka mrożona 100 g,606,60,14,60,3 min,1,—,Nie
+Awaryjne — SUPERMARKET / CONVENIENCE,Supermarket Turkey Mozzarella Sandwich,DNT,Szynka z indyka 190 g; Mozzarella light 100 g; Pieczywo 60 g; Warzywa / mieszanka mrożona 150 g,592,68,16,44,3 min,1,—,Nie
+Lekki posiłek 250–400,Light Skyr Berry Whey,—,Skyr 250 g; Whey 20 g; Owoce jagodowe 120 g,290,45,2,23,2 min,1,—,Nie
+Lekki posiłek 250–400,Light Twaróg Berry Bowl,—,Twaróg chudy 200 g; Skyr 100 g; Owoce jagodowe 100 g,314,50,2,24,2 min,1,—,Nie
+Lekki posiłek 250–400,Light Tuna Sandwich,—,Tuńczyk 100 g ODSĄCZONY; Pieczywo 60 g; Warzywa / mieszanka mrożona 100 g,336,36,4,39,3 min,1,—,Nie
+Lekki posiłek 250–400,Light Egg White Toast,—,Białka jaj 250 g; Jajka 60 g; Pieczywo 50 g; Warzywa / mieszanka mrożona 100 g,369,38,9,34,8 min,1,—,Nie
+Lekki posiłek 250–400,Light Cottage Cheese Fruit Bowl,—,Serek wiejski 200 g; Skyr 100 g; Owoce jagodowe 120 g,313,36,9,22,2 min,1,—,Nie

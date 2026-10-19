@@ -6,17 +6,37 @@
 import type { Unit } from "../meals/ingredients.ts";
 
 /**
- * Shops the shopping list is priced at. Promotions are read only for shops
- * with an adapter (Lidl); Biedronka publishes its offers as leaflet images, so
- * it is priced from my own prices alone.
+ * Shops the shopping list is priced at. Lidl's promotions come from lidl.pl;
+ * the others' from their leaflets, read through Blix (`blix.ts`). My own
+ * prices work for any of them.
  */
-export const SHOPS = ["lidl", "biedronka"] as const;
+export const SHOPS = ["lidl", "biedronka", "kaufland", "aldi", "netto", "dino", "carrefour", "auchan", "stokrotka"] as const;
 export type Shop = (typeof SHOPS)[number];
 
-export const SHOP_LABELS: Record<Shop, string> = { lidl: "Lidl", biedronka: "Biedronka" };
+export const SHOP_LABELS: Record<Shop, string> = {
+  lidl: "Lidl",
+  biedronka: "Biedronka",
+  kaufland: "Kaufland",
+  aldi: "Aldi",
+  netto: "Netto",
+  dino: "Dino",
+  carrefour: "Carrefour",
+  auchan: "Auchan",
+  stokrotka: "Stokrotka",
+};
+
 /** "w Lidlu", for sentences. */
-export const SHOP_IN: Record<Shop, string> = { lidl: "w Lidlu", biedronka: "w Biedronce" };
-export const PROMO_SHOPS: readonly Shop[] = ["lidl"];
+export const SHOP_IN: Record<Shop, string> = {
+  lidl: "w Lidlu",
+  biedronka: "w Biedronce",
+  kaufland: "w Kauflandzie",
+  aldi: "w Aldi",
+  netto: "w Netto",
+  dino: "w Dino",
+  carrefour: "w Carrefourze",
+  auchan: "w Auchan",
+  stokrotka: "w Stokrotce",
+};
 
 /** One promotion, the same shape whichever shop it came from. */
 export type ShopPromo = {
@@ -62,4 +82,9 @@ export type ProductLink = {
   shop: Shop;
   productKey: string;
   matches: boolean;
+  /** What the price is for, given when the offer did not say it (leaflet prices often do not). */
+  packQuantity: number | null;
+  packUnit: Unit | null;
+  /** The price is per kilo (or litre) and I pay for what I take. */
+  packLoose: boolean;
 };
