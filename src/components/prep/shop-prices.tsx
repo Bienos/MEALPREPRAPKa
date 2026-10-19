@@ -183,7 +183,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       <div>
         <p className="text-lg font-extrabold">Gdzie taniej?</p>
         <p className="text-sm text-muted-foreground">
-          Promocje z Lidla i gazetek 8 sieci, dla tego, co zostało do kupienia
+          Promocje z Lidla i gazetek {SHOPS.length - 1} sieci, dla tego, co zostało do kupienia
         </p>
       </div>
 

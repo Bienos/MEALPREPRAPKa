@@ -34,6 +34,8 @@ export const BLIX_SHOPS: Record<number, Shop> = {
   31: "carrefour",
   47: "auchan",
   161: "stokrotka",
+  58: "zabka",
+  10079: "leclerc",
 };
 
 /** Where to look for one shopping item: a grocery subcategory (or none) and a text filter. */
