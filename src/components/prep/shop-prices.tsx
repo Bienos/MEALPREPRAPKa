@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Sheet } from "@/components/ui/sheet";
-import type { RefreshFeedsResult, RefreshPromosResult } from "@/app/(app)/prep/zakupy/actions";
+import type { RefreshFeedsResult, RefreshPromosResult, RefreshSweepResult } from "@/app/(app)/prep/zakupy/actions";
 import { formatAmount, type Unit } from "@/lib/meals/ingredients";
 import { buildBasket, type BasketLine, type NeededItem, type PriceOption } from "@/lib/prices/basket";
 import { matchPromos, priceKey, type PromoMatch } from "@/lib/prices/match";
@@ -34,6 +34,7 @@ export type ShopPricing = {
   /** When promotions were last fetched, ready to show ("19.10, 07:02"). */
   fetchedLabel: string | null;
   onRefresh: () => Promise<RefreshPromosResult>;
+  onRefreshSweep: () => Promise<RefreshSweepResult>;
   onRefreshFeeds: () => Promise<RefreshFeedsResult>;
   onSavePrice: (price: ShopPrice) => Promise<void>;
   onSavePrices: (prices: ShopPrice[]) => Promise<void>;
@@ -136,7 +137,12 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       }
       notes.push(...result.warnings);
       if (result.count === 0) notes.push("Sklepy nie pokazują teraz promocji z Twojej listy");
-      // Stokrotka's product feed is a request of its own (up to a minute).
+      // Every offer of every leaflet, then Stokrotka's product feed: each a request of its own (up to a minute).
+      const sweep = await pricing.onRefreshSweep();
+      if (!sweep.ok) notes.push(sweep.message);
+      else if (!sweep.complete) {
+        notes.push(`Gazetki: przeczytano ${sweep.pagesRead} z ${sweep.pagesTotal} stron, kliknij jeszcze raz.`);
+      }
       const feeds = await pricing.onRefreshFeeds();
       if (!feeds.ok) notes.push(feeds.message);
       setRefreshNote(notes.length > 0 ? { error: false, text: notes.join(" ") } : null);

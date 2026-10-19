@@ -2,7 +2,10 @@ import "server-only";
 
 import { APP_TIMEZONE, todayIso } from "@/lib/date";
 import { listProductLinks, listShelfPrices, listShopPrices, listShopPromos } from "@/lib/db/prices";
+import { listShoppingItems } from "@/lib/db/shopping";
+import type { Unit } from "@/lib/meals/ingredients";
 import { isPromoActive } from "./basket";
+import { relevantPromos } from "./match";
 import type { ProductLink, ShopPrice, ShopPromo } from "./types";
 
 export type PricingData = {
@@ -16,12 +19,16 @@ export type PricingData = {
 
 /** What the "Gdzie taniej?" card needs, for any page that shows it. */
 export async function loadPricing(): Promise<PricingData> {
-  const [promos, shelf, prices, links] = await Promise.all([
+  const [promos, shelf, prices, links, shopping] = await Promise.all([
     listShopPromos(),
     listShelfPrices(),
     listShopPrices(),
     listProductLinks(),
+    listShoppingItems(),
   ]);
+  const items = shopping
+    .filter((item) => !item.checked && !item.owned)
+    .map((item) => ({ name: item.name, unit: item.unit as Unit | null }));
   const today = todayIso();
   const lastFetch = promos.reduce<string | null>(
     (latest, promo) => (latest === null || promo.fetchedAt > latest ? promo.fetchedAt : latest),
@@ -29,7 +36,11 @@ export async function loadPricing(): Promise<PricingData> {
   );
   return {
     // Leaflet deals and shelf prices go through the same matching; a shelf price is marked `shelf`.
-    promos: [...promos, ...shelf].filter((promo) => isPromoActive(promo, today)),
+    promos: relevantPromos(
+      items,
+      [...promos, ...shelf].filter((promo) => isPromoActive(promo, today)),
+      links,
+    ),
     prices,
     links,
     fetchedLabel: lastFetch ? fetchedLabel(lastFetch) : null,

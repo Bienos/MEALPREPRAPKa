@@ -11,6 +11,7 @@ import { checkShoppingItemAction, clearCheckedAction, ownShoppingItemAction, set
 import {
   answerPromoAction,
   refreshFeedsAction,
+  refreshSweepAction,
   refreshPromosAction,
   removeShopPriceAction,
   saveShopPriceAction,
@@ -59,6 +60,7 @@ export default async function ShoppingPage() {
         pricing={{
           ...pricing,
           onRefresh: refreshPromosAction,
+          onRefreshSweep: refreshSweepAction,
           onRefreshFeeds: refreshFeedsAction,
           onSavePrice: saveShopPriceAction,
           onSavePrices: saveShopPricesAction,

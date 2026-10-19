@@ -12,6 +12,7 @@ import { loadPricing } from "@/lib/prices/load";
 import {
   answerPromoAction,
   refreshFeedsAction,
+  refreshSweepAction,
   refreshPromosAction,
   removeShopPriceAction,
   saveShopPriceAction,
@@ -62,6 +63,7 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
         pricing={{
           ...pricing,
           onRefresh: refreshPromosAction,
+          onRefreshSweep: refreshSweepAction,
           onRefreshFeeds: refreshFeedsAction,
           onSavePrice: saveShopPriceAction,
           onSavePrices: saveShopPricesAction,

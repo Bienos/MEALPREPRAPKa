@@ -358,6 +358,22 @@ export function promoCandidates(itemName: string, itemUnit: Unit | null, promos:
 const NOT_PLAIN =
   /parowk|\bpasta\b|owsiank|do mies|przepior|konfitur|serdel|kabanos|\bsos\b|zupa|danie|salatk|musl[iy]|kasza manna/;
 
+/**
+ * The promos that could be any of these items, plus the ones I confirmed. The
+ * full leaflet sweep stores thousands of offers; only these go to the screen.
+ */
+export function relevantPromos(
+  items: { name: string; unit: Unit | null }[],
+  promos: ShopPromo[],
+  links: ProductLink[],
+): ShopPromo[] {
+  const keep = new Set<string>();
+  const id = (promo: { shop: string; productKey: string }) => `${promo.shop}|${promo.productKey}`;
+  for (const item of items) for (const promo of promoCandidates(item.name, item.unit, promos)) keep.add(id(promo));
+  for (const link of links) if (link.matches) keep.add(id(link));
+  return promos.filter((promo) => keep.has(id(promo)));
+}
+
 /** A whole shop's range holds more than food: pet food, cosmetics, baby food. */
 const NOT_FOOD =
   /felix|whiskas|pedigree|kitekat|purina|sheba|friskies|dla kota|dla psa|karma|durex|\bzel\b|szampon|serum|balsam|krem do|mydl|gerber|bobovita|hipp|nestle nan|kaszka|dla dzieci|smoothie|\bnapoj|\bsok\b|nektar\b|\bmus\b|galaret|kisiel|budyn|o smaku|deserek|strucl|rogal|produkt 100|konfitur|powidl|drazetk|cukierk|zelk|\bguma\b|po \d+ miesia/;

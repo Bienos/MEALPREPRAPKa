@@ -1,10 +1,19 @@
 import "server-only";
 
-import { listShelfPrices, replaceShopPromos, upsertShelfPrices } from "@/lib/db/prices";
+import { todayIso } from "@/lib/date";
+import {
+  deleteExpiredPromos,
+  getRefreshedAt,
+  listShelfPrices,
+  markRefreshed,
+  replaceShopPromos,
+  upsertShelfPrices,
+  upsertShopPromos,
+} from "@/lib/db/prices";
 import { listShoppingItems } from "@/lib/db/shopping";
 import type { Unit } from "@/lib/meals/ingredients";
 import { fetchBiedronkaSitemap, fetchShelfPrices, MAX_PAGES_PER_REFRESH, type ShelfResult } from "./biedronka";
-import { BLIX_SHOPS, fetchBlixPromos } from "./blix";
+import { fetchBlixPromos, fetchBlixSweep } from "./blix";
 import { fetchLidlPromos } from "./lidl";
 import { fetchStokrotkaFeed, toShelfPrice } from "./stokrotka";
 import type { ShelfPrice } from "./types";
@@ -89,7 +98,9 @@ export async function refreshShopPromos(): Promise<RefreshResult> {
 
   if (blix.status === "fulfilled" && blix.value) {
     const { promos, searched, failed } = blix.value;
-    await replaceShopPromos(Object.values(BLIX_SHOPS), promos, fetchedAt, "blix:");
+    // Added, not replaced: the full sweep's offers stay; offers that ended are dropped.
+    await upsertShopPromos(promos, fetchedAt);
+    await deleteExpiredPromos(todayIso());
     count += promos.length;
     if (failed > 0) warnings.push(`Gazetki: ${failed} z ${searched} wyszukiwań się nie udało, reszta jest.`);
     console.info(`[prices] blix: ${promos.length} promos from ${searched} searches (${failed} failed)`);
@@ -162,4 +173,34 @@ export async function refreshStokrotkaPrices(): Promise<FeedRefresh> {
   await upsertShelfPrices("stokrotka", [...prices.values()], now.toISOString());
   console.info(`[prices] stokrotka feed: ${feed.length} products, ${prices.size} kept`);
   return { count: prices.size, skipped: false };
+}
+
+/** A finished sweep is not repeated for this many hours. */
+const SWEEP_FRESH_HOURS = 12;
+/** The sweep gives up starting new pages this long after it began (the request limit is 60 s). */
+const SWEEP_BUDGET_MS = 50_000;
+
+export type SweepRefresh = { pagesRead: number; pagesTotal: number; complete: boolean; skipped: boolean };
+
+/**
+ * Every grocery offer of the priced chains from the Blix leaflets (about 115
+ * to 145 pages, up to a minute), so matching never depends on a search term.
+ * Saved as it goes; a sweep that ran out of time says how far it got and the
+ * next tap does it again.
+ */
+export async function refreshBlixSweep(): Promise<SweepRefresh> {
+  const started = Date.now();
+  const last = await getRefreshedAt("blix-sweep");
+  if (last && started - new Date(last).getTime() < SWEEP_FRESH_HOURS * 3_600_000) {
+    return { pagesRead: 0, pagesTotal: 0, complete: true, skipped: true };
+  }
+  const now = new Date();
+  const result = await fetchBlixSweep(started + SWEEP_BUDGET_MS, now);
+  await upsertShopPromos(result.promos, now.toISOString());
+  await deleteExpiredPromos(todayIso());
+  if (result.complete) await markRefreshed("blix-sweep", now.toISOString());
+  console.info(
+    `[prices] blix sweep: ${result.promos.length} offers, ${result.pagesRead}/${result.pagesTotal} pages in ${Date.now() - started} ms`,
+  );
+  return { pagesRead: result.pagesRead, pagesTotal: result.pagesTotal, complete: result.complete, skipped: false };
 }

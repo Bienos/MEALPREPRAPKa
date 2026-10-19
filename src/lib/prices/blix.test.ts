@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import { BLIX_SHOPS, blixUrl, parseBlixPromos } from "./blix.ts";
+import { BLIX_SHOPS, SWEEP_SUBS, blixUrl, fetchBlixSweep, parseBlixPromos } from "./blix.ts";
 
 /**
  * Two real Blix responses from Monday 19.10.2026, as Blix sent them:
@@ -135,5 +135,70 @@ describe("blixUrl", () => {
     const url = new URL(blixUrl({ sub: "", q: "tuńczyk" }, 2));
     assert.equal(url.pathname, "/produkty/artykuly-spozywcze");
     assert.deepEqual([url.searchParams.get("q"), url.searchParams.get("page")], ["tuńczyk", "2"]);
+  });
+});
+
+describe("fetchBlixSweep", () => {
+  const realFetch = globalThis.fetch;
+  const stub = (pageCount: number, failOn?: (url: string) => boolean) => {
+    const urls: string[] = [];
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      const url = String(input);
+      urls.push(url);
+      if (failOn?.(url)) return new Response("nope", { status: 503 });
+      return new Response(JSON.stringify({ ...read("blix-nabial-skyr-2026-10-19.json"), pageCount }), { status: 200 });
+    }) as typeof fetch;
+    return urls;
+  };
+  const restore = () => {
+    globalThis.fetch = realFetch;
+  };
+
+  test("reads every page of every grocery category, and dedupes the same offer across pages", async () => {
+    const urls = stub(3);
+    try {
+      const sweep = await fetchBlixSweep(Date.now() + 30_000, monday);
+      assert.equal(urls.length, SWEEP_SUBS.length * 3);
+      assert.deepEqual([sweep.pagesRead, sweep.pagesTotal, sweep.complete], [51, 51, true]);
+      // The same saved response came back 51 times: one offer per shop and name is kept.
+      assert.equal(sweep.promos.length, 14);
+      assert.ok(urls.some((url) => url.includes("/artykuly-spozywcze/mieso?") && url.includes("page=3")));
+      assert.ok(
+        urls.every((url) => !url.includes("q=")),
+        "a sweep has no text filter",
+      );
+    } finally {
+      restore();
+    }
+  });
+
+  test("a page that fails is counted and the sweep is not complete, but the rest is kept", async () => {
+    stub(2, (url) => url.includes("/oleje?") && url.includes("page=2"));
+    try {
+      const sweep = await fetchBlixSweep(Date.now() + 30_000, monday);
+      assert.deepEqual([sweep.pagesRead, sweep.pagesTotal, sweep.complete], [33, 34, false]);
+      assert.ok(sweep.promos.length > 0);
+    } finally {
+      restore();
+    }
+  });
+
+  test("no page can be read: the error is thrown so last week's offers stay", async () => {
+    stub(2, () => true);
+    try {
+      await assert.rejects(fetchBlixSweep(Date.now() + 30_000, monday), /Blix/);
+    } finally {
+      restore();
+    }
+  });
+
+  test("past the deadline no new page is started", async () => {
+    const urls = stub(5);
+    try {
+      await assert.rejects(fetchBlixSweep(Date.now() - 1, monday));
+      assert.equal(urls.length, 0);
+    } finally {
+      restore();
+    }
   });
 });

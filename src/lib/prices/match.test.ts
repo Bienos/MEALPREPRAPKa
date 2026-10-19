@@ -4,7 +4,7 @@ import { describe, test } from "node:test";
 
 import { parseBlixPromos } from "./blix.ts";
 import { parseLidlPromos } from "./lidl.ts";
-import { blixSearchFor, matchPromos, priceKey, promoCandidates } from "./match.ts";
+import { blixSearchFor, matchPromos, priceKey, promoCandidates, relevantPromos } from "./match.ts";
 import type { ProductLink } from "./types.ts";
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
@@ -229,5 +229,27 @@ describe("matchPromos", () => {
 
   test("answers are stored under the trimmed, lower-case item name", () => {
     assert.equal(priceKey("  Pierś z  kurczaka "), "pierś z kurczaka");
+  });
+});
+
+describe("relevantPromos", () => {
+  test("keeps what could be an item on the list and what I confirmed, and drops the rest", () => {
+    const biedronka = leaflets.filter((p) => p.shop === "biedronka");
+    const confirmed = {
+      itemName: "coś",
+      shop: "biedronka" as const,
+      productKey: biedronka[0].productKey,
+      matches: true,
+      packQuantity: null,
+      packUnit: null,
+      packLoose: false,
+    };
+    const unrelated = { ...leaflets[0], name: "Kawa mielona Family Classic", productKey: "blix:kawa" };
+    const kept = relevantPromos([{ name: "skyr", unit: "g" }], [...leaflets, unrelated], []);
+    assert.ok(kept.length > 0 && kept.every((p) => /skyr/i.test(p.name)));
+    assert.ok(!kept.some((p) => p.productKey === "blix:kawa"));
+    // A confirmed product stays even when no rule would pick it.
+    const withLink = relevantPromos([{ name: "skyr", unit: "g" }], [...leaflets, unrelated], [confirmed]);
+    assert.ok(withLink.some((p) => p.productKey === biedronka[0].productKey));
   });
 });
