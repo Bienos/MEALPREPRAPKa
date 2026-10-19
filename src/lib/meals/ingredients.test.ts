@@ -38,6 +38,27 @@ describe("parsing one fragment", () => {
     assert.equal(parsed.unit, "szt");
   });
 
+  test("eggs are pieces however the sheet wrote them", () => {
+    const pieces = (text: string) => {
+      const { name, quantity, unit } = parseIngredient(text);
+      return [name, quantity, unit];
+    };
+    assert.deepEqual(pieces("2 jajka 120 g"), ["jajka", 2, "szt"]);
+    assert.deepEqual(pieces("Jajka 120 g"), ["jajka", 2, "szt"]);
+    assert.deepEqual(pieces("Jajka 100 g"), ["jajka", 100 / 60, "szt"]);
+    // Egg whites are a separate thing, in grams.
+    assert.deepEqual(pieces("białka jaj 150 g"), ["białka jaj", 150, "g"]);
+  });
+
+  test("the same eggs written two ways make one line, in whole pieces (9,7 means 10)", () => {
+    const list = aggregateIngredients([
+      { text: "3 jajka (~180 g); białka jaj 150 g", portions: 1 },
+      { text: "Jajka 100 g; Białka jaj 150 g", portions: 4 },
+    ]);
+    const eggs = list.filter((item) => item.name === "jajka");
+    assert.deepEqual(eggs, [{ name: "jajka", category: "dairy", quantity: 10, unit: "szt" }]);
+  });
+
   test("keeps an unreadable fragment as raw text with no amount", () => {
     assert.deepEqual(parseIngredient("curry"), {
       name: "curry",
