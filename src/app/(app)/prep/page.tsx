@@ -1,21 +1,23 @@
 import Link from "next/link";
-import { Refrigerator, ShoppingBasket } from "lucide-react";
+import { CalendarRange, ChevronRight, Refrigerator, ShoppingBasket } from "lucide-react";
 
 import { PageHeader } from "@/components/shell/page-header";
 import { addDays, longDateLabel, relativeDayLabel, todayIso } from "@/lib/date";
-import { listDayPlans } from "@/lib/db/day-plans";
+import { listDayPlans, listPlannedMealsBetween } from "@/lib/db/day-plans";
 import { listAvailablePortions } from "@/lib/db/prep";
 import {
   getActivePrepSession,
   getJustCompletedPrepSession,
   listPrepSessionItems,
 } from "@/lib/db/prep-sessions";
-import { getSettings } from "@/lib/db/settings";
+import { getSettings, getTargets } from "@/lib/db/settings";
 import { listShoppingItems } from "@/lib/db/shopping";
 import { buildCookingSteps } from "@/lib/meals/cooking-steps";
-import { PREP_SLOT_LABELS } from "@/lib/meals/prep-plan";
+import { getMealLibrary } from "@/lib/meals/library";
+import { maxPrepDays, PREP_SLOT_LABELS, PREP_SLOTS, type PrepSlot } from "@/lib/meals/prep-plan";
 import { toPrepItems } from "@/lib/meals/prep";
 import type { PrepDayView, PrepItemView } from "@/lib/meals/prep-view-types";
+import { counts, defaultWeekStart, WEEK_TOLERANCE, weekTarget } from "@/lib/meals/week-plan";
 import { PrepClient, type PrepStage } from "./prep-client";
 
 export const dynamic = "force-dynamic";
@@ -24,12 +26,32 @@ export default async function PrepPage() {
   const settings = await getSettings();
   const today = todayIso(settings.timezone);
   const horizon = addDays(today, 3);
-  const [session, plans, portions, shopping] = await Promise.all([
+  const weekFrom = defaultWeekStart(today);
+  const weekTo = addDays(weekFrom, 6);
+  const [session, plans, portions, shopping, { library }, targets, weekPlans, weekMeals] = await Promise.all([
     getActivePrepSession(),
     listDayPlans(today, horizon),
     listAvailablePortions(),
     listShoppingItems(),
+    getMealLibrary(),
+    getTargets(),
+    listDayPlans(weekFrom, weekTo),
+    listPlannedMealsBetween(weekFrom, weekTo),
   ]);
+
+  // How the week the week screen opens on adds up, for the card at the top.
+  const weekTypes = new Map(weekPlans.map((plan) => [plan.date, plan.day_type]));
+  const weekGoal = weekTarget(
+    Array.from({ length: 7 }, (_, index) => weekTypes.get(addDays(weekFrom, index)) ?? settings.default_day_type),
+    targets,
+  ).kcal;
+  const weekKcal = weekMeals.filter((meal) => counts(meal)).reduce((sum, meal) => sum + meal.kcal, 0);
+  const weekMatches = Math.abs(weekKcal - weekGoal) <= weekGoal * WEEK_TOLERANCE;
+
+  // Suppers keep a day or two, so the day picker offers only what each slot's dishes last.
+  const maxDays = Object.fromEntries(
+    PREP_SLOTS.map((slot) => [slot, Math.min(maxPrepDays(library.meals, slot), 4)]),
+  ) as Record<PrepSlot, number>;
 
   let stage: PrepStage;
 
@@ -61,9 +83,10 @@ export default async function PrepPage() {
         count: item.portions,
       })),
       days: nextDays,
+      maxDays,
     };
   } else if (!session) {
-    stage = { kind: "start", days: nextDays };
+    stage = { kind: "start", days: nextDays, maxDays };
   } else {
     const items = await listPrepSessionItems(session.id);
 
@@ -113,6 +136,24 @@ export default async function PrepPage() {
             : "Zaplanuj 2–4 dni i przygotuj wszystko za jednym razem."
         }
       />
+
+      <Link
+        href="/prep/tydzien"
+        className="flex min-h-20 items-center gap-3 rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-card to-primary/10 px-4 py-3 hover:border-primary/60"
+      >
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <CalendarRange className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-extrabold">Plan tygodnia</span>
+          <span className="block text-sm text-muted-foreground">
+            {weekKcal > 0
+              ? `${weekKcal.toLocaleString("pl-PL")} / ${weekGoal.toLocaleString("pl-PL")} kcal${weekMatches ? " · pasuje" : ""}`
+              : "Wybierz jedzenie na tydzień, policzę makro i zrobię listę zakupów"}
+          </span>
+        </span>
+        <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+      </Link>
 
       <PrepClient stage={stage} />
 

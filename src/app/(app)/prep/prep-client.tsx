@@ -5,6 +5,7 @@ import { DayPicker } from "@/components/prep/day-picker";
 import { PrepComplete, type CreatedPortion } from "@/components/prep/prep-complete";
 import { PrepResult } from "@/components/prep/prep-result";
 import type { CookingStep } from "@/lib/meals/cooking-steps";
+import type { PrepSlot } from "@/lib/meals/prep-plan";
 import type { DayType, PrepDayView, PrepItemView } from "@/lib/meals/prep-view-types";
 import {
   addDishAction,
@@ -20,7 +21,7 @@ import {
 } from "./actions";
 
 export type PrepStage =
-  | { kind: "start"; days: PrepDayView[] }
+  | { kind: "start"; days: PrepDayView[]; maxDays: Record<PrepSlot, number> }
   | {
       kind: "result";
       days: number;
@@ -32,13 +33,14 @@ export type PrepStage =
       short: boolean;
     }
   | { kind: "cooking"; steps: CookingStep[]; currentStep: number }
-  | { kind: "complete"; portions: CreatedPortion[]; days: PrepDayView[] };
+  | { kind: "complete"; portions: CreatedPortion[]; days: PrepDayView[]; maxDays: Record<PrepSlot, number> };
 
 export function PrepClient({ stage }: { stage: PrepStage }) {
   if (stage.kind === "start") {
     return (
       <DayPicker
         initialDays={stage.days}
+        maxDays={stage.maxDays}
         onBuild={(days: { date: string; day_type: DayType }[], slot) => buildPrepAction(days, slot)}
       />
     );
@@ -83,6 +85,7 @@ export function PrepClient({ stage }: { stage: PrepStage }) {
         <h2 className="text-xl font-extrabold">Kolejny prep</h2>
         <DayPicker
           initialDays={stage.days}
+          maxDays={stage.maxDays}
           onBuild={(days: { date: string; day_type: DayType }[], slot) => buildPrepAction(days, slot)}
         />
       </section>
