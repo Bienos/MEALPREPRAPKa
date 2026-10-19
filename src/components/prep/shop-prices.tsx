@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, Plus, RefreshCw, Smartphone } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, PencilLine, Plus, RefreshCw, Smartphone } from "lucide-react";
 
+import { BulkPrices } from "@/components/prep/bulk-prices";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ export type ShopPricing = {
   fetchedLabel: string | null;
   onRefresh: () => Promise<RefreshPromosResult>;
   onSavePrice: (price: ShopPrice) => Promise<void>;
+  onSavePrices: (prices: ShopPrice[]) => Promise<void>;
   onRemovePrice: (itemName: string, shop: Shop) => Promise<void>;
   onAnswer: (
     itemName: string,
@@ -58,6 +60,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
   const [links, setLinks] = useState(pricing.links);
   const [openShop, setOpenShop] = useState<Shop | null>(null);
   const [reviewing, setReviewing] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [editing, setEditing] = useState<{
     shop: Shop;
     item: NeededItem;
@@ -160,6 +163,17 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     ]);
     setEditing(null);
     void pricing.onSavePrice(price);
+  }
+
+  function savePrices(list: ShopPrice[]) {
+    if (list.length === 0) return;
+    setPrices((current) => [
+      ...current.filter(
+        (existing) => !list.some((price) => price.shop === existing.shop && price.itemName === existing.itemName),
+      ),
+      ...list,
+    ]);
+    void pricing.onSavePrices(list);
   }
 
   function removePrice(shop: Shop, item: NeededItem) {
@@ -267,6 +281,19 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
           </button>
         ) : null}
       </div>
+
+      <Button variant="outline" onClick={() => setBulkOpen(true)}>
+        <PencilLine className="size-4" />
+        Wpisz ceny z półki
+      </Button>
+
+      <BulkPrices
+        open={bulkOpen && editing === null}
+        onClose={() => setBulkOpen(false)}
+        items={items}
+        prices={prices}
+        onSave={savePrices}
+      />
 
       <div className="flex items-center gap-3 border-t pt-3">
         <p className={cn("min-w-0 flex-1 text-xs", refreshNote?.error ? "text-destructive" : "text-muted-foreground")}>

@@ -9,7 +9,13 @@ import type { Unit } from "@/lib/meals/ingredients";
 import { loadWeek, weekRangeLabel } from "@/lib/meals/week";
 import { defaultWeekStart } from "@/lib/meals/week-plan";
 import { loadPricing } from "@/lib/prices/load";
-import { answerPromoAction, refreshPromosAction, removeShopPriceAction, saveShopPriceAction } from "../zakupy/actions";
+import {
+  answerPromoAction,
+  refreshPromosAction,
+  removeShopPriceAction,
+  saveShopPriceAction,
+  saveShopPricesAction,
+} from "../zakupy/actions";
 import { WeekPlanner } from "./week-planner";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +62,7 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
           ...pricing,
           onRefresh: refreshPromosAction,
           onSavePrice: saveShopPriceAction,
+          onSavePrices: saveShopPricesAction,
           onRemovePrice: removeShopPriceAction,
           onAnswer: answerPromoAction,
         }}

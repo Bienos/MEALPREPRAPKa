@@ -3,7 +3,7 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 
-import { deleteShopPrice, findShopPromo, saveProductLink, upsertShopPrice } from "@/lib/db/prices";
+import { deleteShopPrice, findShopPromo, saveProductLink, upsertShopPrice, upsertShopPrices } from "@/lib/db/prices";
 import { priceKey } from "@/lib/prices/match";
 import { refreshShopPromos } from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
@@ -38,6 +38,12 @@ const priceSchema = z.object({
 export async function saveShopPriceAction(input: z.input<typeof priceSchema>): Promise<void> {
   const price = priceSchema.parse(input);
   await upsertShopPrice({ ...price, itemName: priceKey(price.itemName) });
+}
+
+/** "Wpisz ceny": everything typed on the one screen, saved together. */
+export async function saveShopPricesAction(inputs: z.input<typeof priceSchema>[]): Promise<void> {
+  const prices = z.array(priceSchema).max(500).parse(inputs);
+  await upsertShopPrices(prices.map((price) => ({ ...price, itemName: priceKey(price.itemName) })));
 }
 
 export async function removeShopPriceAction(itemName: string, shop: string): Promise<void> {
