@@ -41,6 +41,13 @@ type RawProduct = {
   productUrl?: unknown;
 };
 
+/**
+ * The feed's names leave out the brand, which the product URL keeps
+ * ("…/n,winiary-pomysl-na...-spaghetti-napoli/…" is "Spaghetti Napoli"): seasoning
+ * mixes and snack lines that would read as the plain ingredient are left out.
+ */
+const NOT_AN_INGREDIENT = /\/n,[^/]*(?:pomysl-na|knorr-fix|-fix-|bake-rolls|7-days|lay-s|\blays|crunchips|chipsy|przekask)/;
+
 /** The feed's products. Throws when it no longer looks like the feed. */
 export function parseFriscoFeed(json: unknown): FriscoItem[] {
   const products = (json as { products?: unknown } | null)?.products;
@@ -57,11 +64,13 @@ export function parseFriscoFeed(json: unknown): FriscoItem[] {
     if (unit !== "Kilogram" && unit !== "Litre" && unit !== "Piece") continue;
     // packSize > 1 is a carton (12 packs of rice for one price): not what I buy on a shelf.
     if (Number(raw.packSize) > 1) continue;
+    const url = typeof raw.productUrl === "string" ? raw.productUrl : "https://www.frisco.pl/";
+    if (NOT_AN_INGREDIENT.test(url)) continue;
     const grammage = Number(raw.grammage);
     items.push({
       productKey: `frisco:${String(raw.id)}`,
       name,
-      url: typeof raw.productUrl === "string" ? raw.productUrl : "https://www.frisco.pl/",
+      url,
       price,
       inStock: raw.isAvailable === true,
       grammage: grammage > 0 ? grammage : null,

@@ -45,10 +45,10 @@ function either(...patterns: RegExp[]): RegExp {
 
 /** Not the plain ingredient: ready meals, cold cuts, sauces, snacks, drinks. */
 const PROCESSED =
-  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|\blays\b|crunchips|pringles|doritos|cheetos/;
+  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|krakers|\blays\b|crunchips|pringles|doritos|cheetos|\bsmak\b/;
 
-/** A name that lists several foods ("mozzarella, pomidor, cebula czerwona") is a dish, not the vegetable. */
-const LISTED = /,[^,]+,/;
+/** A name that lists several foods ("mozzarella, pomidor, cebula czerwona", "śmietana & cebula") is a dish or a flavour, not the vegetable. */
+const LISTED = /,[^,]+,|\s&\s/;
 
 /** A flavoured dairy product, not the plain one the meals use. */
 const FLAVOURED =
@@ -83,7 +83,7 @@ const RULES: Rule[] = [
     // The meals' "kurczak" is breast: that is what the macros are counted for.
     item: /kurczak|kurczec/,
     product: /^(?=.*kurcz)(?=.*(piers|filet))/,
-    not: either(/kaczk|indyk|indycz|w galarecie|marynowan|pieczon|szynk|wedzon|gotowan|parzon|grillowan/, PROCESSED),
+    not: either(/kaczk|indyk|indycz|w galarecie|marynowan|pieczon|szynk|wedzon|gotowan|parzon|grillowan|piratk/, PROCESSED),
     search: { sub: "mieso", q: "filet" },
   },
   {
@@ -102,7 +102,7 @@ const RULES: Rule[] = [
   {
     item: /indyk|indycz/,
     product: /^(?=.*(indyk|indycz))(?=.*(filet|piers|mielon|mieso|uda|udziec|gulasz|kotlet|sznycl|medalion|pask))/,
-    not: either(/golonk|skrzyd|podudz|rosol|zestaw|szyj|wedzon|parzon|pieczon|filetk|z indykiem/, PROCESSED),
+    not: either(/golonk|skrzyd|podudz|rosol|zestaw|szyj|wedzon|parzon|pieczon|filetk|z indykiem|szynk|wedlin|w plastrach/, PROCESSED),
     search: { sub: "mieso", q: "indyk" },
   },
   {
@@ -319,7 +319,7 @@ const RULES: Rule[] = [
     product: /passata|przecier pomidor|pomidory (krojone|w puszce)/,
     search: { sub: "", q: "passata" },
   },
-  { item: /salsa/, product: /salsa/, not: /\bdip\b|serow/, search: { sub: "", q: "salsa" } },
+  { item: /salsa/, product: /salsa/, not: /\bdip\b|serow|hummus|chips|nachos|tortilla/, search: { sub: "", q: "salsa" } },
   {
     item: /warzyw/,
     product: /brokul|kalafior|marchew|papryk|cukini|szpinak|warzyw|fasolka szparag|brukselk|kapust/,
@@ -329,7 +329,7 @@ const RULES: Rule[] = [
   {
     item: /banan/,
     product: /banan/,
-    not: either(/chips|suszon|baton|jogurt|chlebek|koktajl|smoothie|\bmus\b|napoj|shake|\bsmak|mleko|milch/, FRUIT_FLAVOUR, LISTED),
+    not: either(/chips|suszon|baton|jogurt|chlebek|koktajl|smoothie|\bmus\b|napoj|shake|\bsmak|mleko|milch|kokos|truskaw|mango|malin|jagod|borowk|ananas|jablk|gruszk/, FRUIT_FLAVOUR, LISTED),
     search: { sub: "owoce", q: "banan" },
   },
   {

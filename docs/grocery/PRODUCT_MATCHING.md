@@ -48,7 +48,12 @@ community data:
   papryka; Chrupki pomidor z serem → pomidor; "Mozarella, pomidor, cebula czerwona" → cebula; Premium Whey Bar →
   whey; Pieczywo Sonko Lekkie (crispbread) → pieczywo; Cebula dymka (spring onions) → cebula; Ogórek Dziadunia (a
   jar) → ogórek; Smoked sweet paprika (the spice) → papryka; Refried Black Beans → fasola; Müllermilch Banana Taste
-  → banan; Napar owocowy z maliną (tea) → maliny
+  → banan; Napar owocowy z maliną (tea) → maliny; Szynka Filet z Indyk → filet z indyka; Fitos Śmietana & cebula
+  (crisps) → cebula; Hummus … spicy salsa → salsa; Bio Kokos Truskawka Banan → banan; Japońska wołowina smak wasabi
+  → wołowina; krakersy czerwona papryka → papryka; Piratki Filet z Kurczaka (a cold cut) → filet z kurczaka
+- Frisco's feed names leave out the brand: "Spaghetti Napoli" is Winiary's "Pomysł na…" seasoning mix and
+  "pomidor oliwki" is Bake Rolls. Products whose URL names a seasoning-mix or snack line are dropped from the feed
+  (`NOT_AN_INGREDIENT` in `frisco.ts`)
 - Kinds: penne for spaghetti, yellow for red pepper, raspberries for strawberries, forest for multiflower
   honey, organic for free-range eggs, Greek for natural yogurt and the other way round
 

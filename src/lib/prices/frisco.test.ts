@@ -44,6 +44,27 @@ describe("Frisco feed", () => {
     assert.equal(matchName(item("Mleko 2% UHT")), "Mleko 2% UHT");
   });
 
+  test("seasoning mixes and snacks, whose brand only the URL names, are left out", () => {
+    const product = (id: number, name: string, slug: string) => ({
+      id,
+      name: { pl: name },
+      unitOfMeasure: "Kilogram",
+      packSize: 1,
+      grammage: 0.4,
+      price: { price: 5 },
+      isAvailable: true,
+      productUrl: `https://www.frisco.pl/pid,${id}/n,${slug}/stn,product`,
+    });
+    const parsed = parseFriscoFeed({
+      products: [
+        product(1, "Spaghetti Napoli", "winiary-pomysl-na...-spaghetti-napoli"),
+        product(2, "pomidor oliwki", "bake-rolls-pomidor-oliwki"),
+        product(3, "Makaron spaghetti", "barilla-makaron-spaghetti"),
+      ],
+    });
+    assert.deepEqual(parsed.map((item) => item.name), ["Makaron spaghetti"]);
+  });
+
   test("a carton of many packs for one price is left out", () => {
     assert.ok(!items.some((item) => item.price > 50 && item.name.startsWith("Ryż biały")));
   });

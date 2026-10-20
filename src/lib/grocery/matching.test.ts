@@ -108,6 +108,14 @@ describe("matching tiers", () => {
     assert.equal(tier(need("banan"), product("Müllermilch Protein Banana Taste 400 ml")), "none");
     assert.equal(tier(need("maliny mrożone"), product("Bifix Napar owocowy z maliną 40 g")), "none");
     assert.equal(tier(need("ogórek"), product("Ogórek Dziadunia Różana rozkosz 860 g")), "none");
+    // Found by the audit of the final pilot run.
+    assert.equal(tier(need("filet z indyka"), product("Szynka Filet Z Indyk 250 g")), "none");
+    assert.equal(tier(need("cebula"), product("Fitos Smietana & cebula 100 g")), "none");
+    assert.equal(tier(need("salsa"), product("Hummus z ciecierzycy spicy salsa 200 g")), "none");
+    assert.equal(tier(need("banan"), product("Bio Kokos Truskawka BANAN 150 g")), "none");
+    assert.equal(tier(need("wołowina 5%"), product("Japońska wołowina smak wasabi 100 g")), "none");
+    assert.equal(tier(need("papryka czerwona"), product("Oven Baked krakersy czerwona papryka 100 g")), "none");
+    assert.equal(tier(need("filet z kurczaka"), product("Piratki Filet z Kurczaka 100 g")), "none");
   });
 
   test("a pack in another unit can never price the item", () => {
