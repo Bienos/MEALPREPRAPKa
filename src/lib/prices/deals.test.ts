@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { countByShop, dayLabel, discountPercent, selectDeals, unitPriceLabel, type DealQuery } from "./deals.ts";
+import {
+  countByShop,
+  dayLabel,
+  discountPercent,
+  highlights,
+  selectDeals,
+  unitPriceLabel,
+  type DealQuery,
+} from "./deals.ts";
 import type { ShopPromo } from "./types.ts";
 
 const deal = (over: Partial<ShopPromo>): ShopPromo => ({
@@ -88,4 +96,64 @@ describe("deals", () => {
   });
 
   test("a day as 25.10", () => assert.equal(dayLabel("2026-10-25"), "25.10"));
+});
+
+describe("highlights", () => {
+  const promos = [
+    deal({
+      productKey: "a",
+      shop: "biedronka",
+      name: "Świeży filet z piersi kurczaka Mega Paka",
+      packQuantity: null,
+      packUnit: null,
+      promoPrice: 14.99,
+    }),
+    deal({
+      productKey: "b",
+      shop: "lidl",
+      name: "Filet z piersi kurczaka 1 kg",
+      packQuantity: 1000,
+      packUnit: "g",
+      promoPrice: 18.99,
+    }),
+    deal({
+      productKey: "c",
+      shop: "auchan",
+      name: "Skyr naturalny Piątnica 150 g",
+      packQuantity: 150,
+      packUnit: "g",
+      promoPrice: 2.99,
+    }),
+    deal({ productKey: "d", shop: "lidl", name: "Pasta do zębów", packQuantity: 75, packUnit: "ml", promoPrice: 4 }),
+    deal({
+      productKey: "e",
+      shop: "lidl",
+      name: "Filet z piersi kurczaka stary",
+      packQuantity: 1000,
+      packUnit: "g",
+      promoPrice: 9.99,
+      validTo: "2026-10-19",
+    }),
+  ];
+
+  test("each staple that is on offer, cheapest per kilo first; the rest is left out", () => {
+    const groups = highlights(promos, "2026-10-20");
+    assert.deepEqual(
+      groups.map((group) => group.label),
+      ["Kurczak", "Skyr"],
+    );
+    const chicken = groups[0].deals.map((entry) => [entry.promo.productKey, entry.assumed]);
+    assert.deepEqual(chicken, [
+      ["a", true],
+      ["b", false],
+    ]);
+  });
+
+  test("an ended deal is not a highlight", () => {
+    assert.ok(
+      !highlights(promos, "2026-10-20")
+        .flatMap((group) => group.deals)
+        .some((entry) => entry.promo.productKey === "e"),
+    );
+  });
 });

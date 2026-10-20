@@ -3,7 +3,8 @@
  * ordered for one screen. Pure, so the page stays a thin layer over it.
  */
 
-import { fold } from "./match.ts";
+import type { Unit } from "../meals/ingredients.ts";
+import { fold, matchPromos } from "./match.ts";
 import { SHOPS, type Shop, type ShopPromo } from "./types.ts";
 
 /** The loyalty app that unlocks some of a shop's deals. */
@@ -88,4 +89,62 @@ export function countByShop(promos: ShopPromo[], query: DealQuery, mine: Set<str
   const counts = Object.fromEntries(SHOPS.map((shop) => [shop, 0])) as Record<Shop, number>;
   for (const promo of selectDeals(promos, { ...query, shop: null }, mine)) counts[promo.shop]++;
   return counts;
+}
+
+/* What is worth buying now -------------------------------------------------- */
+
+/** The staples this diet is built on: always shown when they are on offer, listed or not. */
+export const WATCHED: { label: string; item: string; unit: Unit }[] = [
+  { label: "Kurczak", item: "kurczak", unit: "g" },
+  { label: "Indyk", item: "indyk", unit: "g" },
+  { label: "Wołowina", item: "wołowina", unit: "g" },
+  { label: "Wieprzowina", item: "wieprzowina", unit: "g" },
+  { label: "Mięso mielone", item: "mięso mielone", unit: "g" },
+  { label: "Łosoś", item: "łosoś", unit: "g" },
+  { label: "Skyr", item: "skyr", unit: "g" },
+  { label: "Serek wiejski", item: "serek wiejski", unit: "g" },
+  { label: "Twaróg", item: "twaróg", unit: "g" },
+  { label: "Jogurt", item: "jogurt naturalny", unit: "g" },
+  { label: "Jajka", item: "jajka", unit: "szt" },
+];
+
+export type Highlight = {
+  promo: ShopPromo;
+  /** The offer named no pack, so the usual one was assumed to compare it. */
+  assumed: boolean;
+};
+
+export type HighlightGroup = { label: string; item: string; deals: Highlight[] };
+
+/** Price per kilo, litre or piece, to compare offers of one staple. */
+function perUnitValue(promo: ShopPromo): number {
+  if (promo.loose) return promo.promoPrice;
+  if (!promo.packQuantity) return Number.POSITIVE_INFINITY;
+  return promo.packUnit === "szt"
+    ? promo.promoPrice / promo.packQuantity
+    : (promo.promoPrice / promo.packQuantity) * 1000;
+}
+
+/**
+ * The best current deals on each staple of `WATCHED`, cheapest per kilo first,
+ * at most `perGroup` each, one offer once. A staple with no deal is left out.
+ */
+export function highlights(promos: ShopPromo[], today: string, perGroup = 3): HighlightGroup[] {
+  const active = promos.filter(
+    (promo) => !promo.shelf && promo.validFrom <= today && (promo.validTo === null || promo.validTo >= today),
+  );
+  return WATCHED.flatMap(({ label, item, unit }) => {
+    const seen = new Set<string>();
+    const deals = matchPromos({ name: item, unit }, active, [])
+      .estimates.map((estimate): Highlight => ({ promo: estimate.promo, assumed: estimate.packAssumed }))
+      .filter(({ promo }) => {
+        const key = `${promo.shop}|${fold(promo.name)}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => perUnitValue(a.promo) - perUnitValue(b.promo))
+      .slice(0, perGroup);
+    return deals.length > 0 ? [{ label, item, deals }] : [];
+  });
 }

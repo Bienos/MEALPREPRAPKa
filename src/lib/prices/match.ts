@@ -98,6 +98,21 @@ const RULES: Rule[] = [
     search: { sub: "mieso", q: "wołow" },
   },
   {
+    item: /wieprzow|schab|karkowk|lopatk/,
+    product: /wieprzow|schab|karkowk|lopatk/,
+    not: either(
+      /kielbas|szynk|boczek|salami|kabanos|parowk|wedzon|gotowan|w galarecie|konserw|pasztet|kosc|zeberk|golonk|w sloj|sloik/,
+      PROCESSED,
+    ),
+    search: { sub: "mieso", q: "wieprzowina" },
+  },
+  {
+    item: /mielon/,
+    product: /mielon/,
+    not: either(/kotlet|pulpet|burger|gotow|mrozon|sos|pasztet|kebab|panier|zapiekank/, PROCESSED),
+    search: { sub: "mieso", q: "mielone" },
+  },
+  {
     item: /tunczyk/,
     product: /tunczyk/,
     not: either(/pasta|w oleju|w oliwie|z suszon|jalapeno|mayo/, PROCESSED),
@@ -500,7 +515,7 @@ const perKilo = () => pack(1000, "g", true);
 const USUAL_PACKS: [RegExp, (price: number) => Pack][] = [
   [/szynk/, () => pack(150, "g")],
   [/jagod|borowk|malin|truskaw/, () => pack(250, "g")],
-  [/kurczak|indyk|indycz|wolowin|losos|banan|jablk|owoce|warzyw|batat/, perKilo],
+  [/kurczak|indyk|indycz|wolowin|wieprzow|schab|karkowk|lopatk|mielon|losos|banan|jablk|owoce|warzyw|batat/, perKilo],
   [/ziemniak/, (price) => (price >= 6 ? pack(2500, "g") : perKilo())],
   [/tunczyk/, () => pack(150, "g")],
   [/jajk|\bjaja\b/, () => pack(10, "szt")],
@@ -538,6 +553,7 @@ const MIN_PER_KILO: [RegExp, number][] = [
   [/kurczak/, 8],
   [/indyk|indycz/, 10],
   [/wolowin/, 18],
+  [/wieprzow|schab|karkowk|lopatk|mielon/, 12],
   [/losos/, 25],
 ];
 
