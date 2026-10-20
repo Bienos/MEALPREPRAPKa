@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet } from "@/components/ui/sheet";
 import type { RefreshFeedsResult, RefreshPromosResult, RefreshSweepResult } from "@/app/(app)/prep/zakupy/actions";
 import { formatAmount, type Unit } from "@/lib/meals/ingredients";
+import { priceSource } from "@/lib/prices/source";
 import { buildBasket, type BasketLine, type NeededItem, type PriceOption } from "@/lib/prices/basket";
 import { matchPromos, priceKey, type PromoMatch } from "@/lib/prices/match";
 import {
@@ -521,7 +522,29 @@ function CostDetail({ line, fetched }: { line: BasketLine; fetched: boolean }) {
           </Badge>
         ) : null}
       </div>
+      <SourceLine promo={promo} />
     </div>
+  );
+}
+
+/** "Źródło: Gazetka Biedronka, s. 48 · 20.10 · otwórz": where this price was read and when. */
+function SourceLine({ promo }: { promo: ShopPromo }) {
+  const source = priceSource(promo);
+  return (
+    <p className="text-xs text-muted-foreground">
+      Źródło: {source.label}
+      {source.day ? ` · ${source.day}` : ""}
+      {" · "}
+      <a
+        href={source.url}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-0.5 font-semibold text-primary"
+      >
+        otwórz
+        <ExternalLink className="size-3" />
+      </a>
+    </p>
   );
 }
 
@@ -560,8 +583,7 @@ function Suggestion({
     promo.multibuy,
     promo.appOnly ? "aplikacja" : null,
   ];
-  const leaflet = promo.shop !== "lidl";
-  const linkLabel = promo.shelf ? "sklep" : "gazetka";
+  const source = priceSource(promo);
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
@@ -571,22 +593,20 @@ function Suggestion({
             {showShop ? SHOP_LABELS[promo.shop] : "Pasuje?"}
           </p>
           <p className="text-sm font-semibold">{promo.name}</p>
+          <p className="text-xs text-muted-foreground">{facts.filter(Boolean).join(" · ")}</p>
           <p className="text-xs text-muted-foreground">
-            {facts.filter(Boolean).join(" · ")}
-            {leaflet ? (
-              <>
-                {" · "}
-                <a
-                  href={promo.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-0.5 font-semibold text-primary"
-                >
-                  {linkLabel}
-                  <ExternalLink className="size-3" />
-                </a>
-              </>
-            ) : null}
+            {source.label}
+            {source.day ? ` · ${source.day}` : ""}
+            {" · "}
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-0.5 font-semibold text-primary"
+            >
+              otwórz
+              <ExternalLink className="size-3" />
+            </a>
           </p>
         </div>
         <button

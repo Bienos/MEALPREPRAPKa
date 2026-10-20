@@ -21,6 +21,7 @@ import {
   type DealWhen,
 } from "@/lib/prices/deals";
 import { relevantPromos } from "@/lib/prices/match";
+import { priceSource } from "@/lib/prices/source";
 import { SHOPS, SHOP_LABELS, type Shop } from "@/lib/prices/types";
 import { cn } from "@/lib/utils";
 import { refreshFeedsAction, refreshPromosAction, refreshSweepAction } from "../zakupy/actions";
@@ -126,7 +127,7 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
                         <div className="flex min-w-0 flex-1 flex-col">
                           <span className="text-sm leading-snug font-semibold">{promo.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {SHOP_LABELS[promo.shop]}
+                            {priceSource(promo).label}
                             {promo.validTo ? ` · do ${dayLabel(promo.validTo)}` : ""}
                             {promo.appOnly ? ` · ${APP_LABEL[promo.shop] ?? "w aplikacji"}` : ""}
                           </span>
@@ -252,6 +253,10 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
                       {promo.validFrom > today && promo.validTo ? " " : null}
                       {promo.validTo ? `do ${dayLabel(promo.validTo)}` : null}
                       {unit ? ` · ${unit}` : null}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {priceSource(promo).label}
+                      {priceSource(promo).day ? ` · sprawdzone ${priceSource(promo).day}` : ""}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-center gap-0.5 text-right">

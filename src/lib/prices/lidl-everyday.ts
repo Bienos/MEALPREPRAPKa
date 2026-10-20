@@ -111,4 +111,5 @@ export const LIDL_EVERYDAY: ShopPromo[] = ROWS.map(([name, packQuantity, packUni
   multibuyMin: 1,
   sourceUrl: LEAFLET,
   shelf: true,
+  fetchedAt: "2026-10-20",
 }));
