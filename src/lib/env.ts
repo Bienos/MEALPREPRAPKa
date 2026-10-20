@@ -79,9 +79,7 @@ export type ServiceAccountEnv = z.infer<typeof serviceAccountSchema>;
 function parse<S extends z.ZodTypeAny>(schema: S, values: Record<string, unknown>): z.infer<S> {
   const parsed = schema.safeParse(values);
   if (!parsed.success) {
-    const issues = parsed.error.issues
-      .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
-      .join("\n");
+    const issues = parsed.error.issues.map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`).join("\n");
     throw new Error(`Invalid environment variables:\n${issues}\nSee .env.example and DEPLOY.md.`);
   }
   return parsed.data;
@@ -113,8 +111,7 @@ export function getEnv(): Env {
  */
 export function hasDatabaseEnv(): boolean {
   return Boolean(
-    firstOf("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL") &&
-      firstOf("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"),
+    firstOf("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL") && firstOf("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"),
   );
 }
 
@@ -136,9 +133,7 @@ export function getSheetsEnv(): SheetsEnv {
 
 /** True when a service account is configured, enabling the authenticated (private) path. */
 export function hasServiceAccountEnv(): boolean {
-  return Boolean(
-    firstOf("GOOGLE_SERVICE_ACCOUNT_EMAIL") && firstOf("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"),
-  );
+  return Boolean(firstOf("GOOGLE_SERVICE_ACCOUNT_EMAIL") && firstOf("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"));
 }
 
 export function getServiceAccountEnv(): ServiceAccountEnv {
@@ -155,4 +150,15 @@ export function getServiceAccountEnv(): ServiceAccountEnv {
  */
 export function hasAnthropicKey(): boolean {
   return Boolean(firstOf("ANTHROPIC_API_KEY"));
+}
+
+/* Scheduled price refresh ----------------------------------------------------- */
+
+/**
+ * The secret Vercel sends with the daily price refresh (vercel.json "crons").
+ * Unset: the route answers 503 and nothing runs on a schedule; the screens
+ * still refresh prices themselves when opened with old data.
+ */
+export function getCronSecret(): string | null {
+  return firstOf("CRON_SECRET") ?? null;
 }

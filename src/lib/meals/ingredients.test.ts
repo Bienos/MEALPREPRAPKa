@@ -162,6 +162,19 @@ describe("the vegetable mix", () => {
   });
 });
 
+describe("generic fruit", () => {
+  test('"owoce" and "owoce jagodowe" become one line of frozen fruit', () => {
+    const totals = aggregateIngredients([{ text: "owoce 150 g; owoce jagodowe 300 g; jabłko 180 g", portions: 1 }]);
+    assert.deepEqual(
+      totals.filter((item) => item.category === "fruit").map((item) => [item.name, item.quantity]),
+      [
+        ["jabłko", 180],
+        ["owoce mrożone", 450],
+      ],
+    );
+  });
+});
+
 describe("formatting", () => {
   test("switches to kilograms above 1000 g", () => {
     assert.equal(formatAmount(1660, "g"), "1,66 kg");

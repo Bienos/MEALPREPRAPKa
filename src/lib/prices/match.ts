@@ -317,6 +317,13 @@ const RULES: Rule[] = [
     search: { sub: "owoce", q: "jabłk" },
   },
   {
+    // Frozen strawberries, blueberries or raspberries (a mix counts): the bag must say frozen.
+    item: /owoce mrozon|mrozone owoce/,
+    product: /^(?=.*mrozon)(?=.*(truskaw|malin|jagod|borowk|owoc))/,
+    not: either(/lody|sorbet|deser|smoothie|koktajl|ciast|w czekoladzie/, PROCESSED),
+    search: { sub: "", q: "mrożone owoce" },
+  },
+  {
     item: /jagod|borowk|malin|truskaw/,
     product: /malin|borowk|jagod|truskaw|owoce lesne/,
     not: either(
@@ -514,6 +521,7 @@ const perKilo = () => pack(1000, "g", true);
  */
 const USUAL_PACKS: [RegExp, (price: number) => Pack][] = [
   [/szynk/, () => pack(150, "g")],
+  [/owoce mrozon|mrozone owoce/, () => pack(450, "g")],
   [/jagod|borowk|malin|truskaw/, () => pack(250, "g")],
   [/kurczak|indyk|indycz|wolowin|wieprzow|schab|karkowk|lopatk|mielon|losos|banan|jablk|owoce|warzyw|batat/, perKilo],
   [/ziemniak/, (price) => (price >= 6 ? pack(2500, "g") : perKilo())],

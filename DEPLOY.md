@@ -233,3 +233,10 @@ Not required — the app works fully on `*.vercel.app`.
 
 If you add a domain, update `NEXT_PUBLIC_APP_URL` and re-add the app to your
 Home Screen so the icon points at the new address.
+
+## Codzienne odświeżanie cen
+
+`vercel.json` ma cron `0 4 * * *` (06:00 w Polsce) na `GET /api/refresh-prices`. Vercel wysyła nagłówek
+`Authorization: Bearer $CRON_SECRET`; ustaw zmienną `CRON_SECRET` (dowolny długi losowy ciąg) w Vercelu dla
+Production. Bez niej trasa odpowiada 503 i nic nie dzieje się po cichu; ekrany i tak same odświeżają ceny,
+gdy otwierasz je ze starymi danymi.
