@@ -244,6 +244,40 @@ const RULES: Rule[] = [
     search: { sub: "", q: "kukurydz" },
   },
   {
+    // Fresh vegetables of the mix that stands in for "warzywa": the plain vegetable, not the jar, tin or sauce.
+    item: /^(?!.*(passata|krojon|puszk|puszc|suszon|przecier)).*pomidor/,
+    product: /pomidor/,
+    not: either(/krojon|puszk|puszc|suszon|passata|przecier|koncentrat|ketchup|w oleju|salsa|pesto|\bsok\b/, PROCESSED),
+    search: { sub: "warzywa", q: "pomidor" },
+  },
+  {
+    item: /ogork|ogorek/,
+    product: /ogorek|ogorki/,
+    not: either(/kiszon|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b/, PROCESSED),
+    search: { sub: "warzywa", q: "ogórek" },
+  },
+  {
+    item: /cebul/,
+    product: /cebul/,
+    not: either(/w oleju|prazon|kiszon|marynow|konserw|krojon|mrozon|szczypior|chrupiac|smazon|w platkach/, PROCESSED),
+    search: { sub: "warzywa", q: "cebula" },
+  },
+  {
+    item: /papryk/,
+    product: /papryk/,
+    not: either(
+      /mielon|proszek|konserw|marynow|w zalewie|ajvar|nadziew|wedzon|w oleju|pasta|mrozon|ostra|jalapeno/,
+      PROCESSED,
+    ),
+    search: { sub: "warzywa", q: "papryka" },
+  },
+  {
+    item: /pieczark/,
+    product: /pieczark/,
+    not: either(/konserw|marynow|puszk|puszc|w zalewie|mrozon|krem|farsz|nadziew|grillowan|suszon/, PROCESSED),
+    search: { sub: "warzywa", q: "pieczarki" },
+  },
+  {
     item: /passata|pomidor/,
     product: /passata|przecier pomidor|pomidory (krojone|w puszce)/,
     search: { sub: "", q: "passata" },
@@ -487,6 +521,7 @@ const USUAL_PACKS: [RegExp, (price: number) => Pack][] = [
   [/chleb|pieczywo/, () => pack(500, "g")],
   [/tortill/, () => pack(8, "szt")],
   [/fasol|kukurydz/, () => pack(400, "g")],
+  [/^(?!.*(passata|krojon|puszk|puszc|suszon|przecier)).*pomidor|ogork|ogorek|cebul|papryk|pieczark/, perKilo],
   [/passata|pomidor/, () => pack(500, "g")],
   [/salsa/, () => pack(200, "g")],
   [/maslo orzechowe|\bpb\b/, () => pack(350, "g")],

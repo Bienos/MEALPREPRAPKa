@@ -76,8 +76,14 @@ describe("parsing one fragment", () => {
 
 test("splits the sheet's semicolon list", () => {
   const parsed = parseIngredients("Kurczak 200 g SUROWY; ryż 110 g SUCHY; oliwa 10 g");
-  assert.deepEqual(parsed.map((p) => p.name), ["kurczak", "ryż", "oliwa"]);
-  assert.deepEqual(parsed.map((p) => p.quantity), [200, 110, 10]);
+  assert.deepEqual(
+    parsed.map((p) => p.name),
+    ["kurczak", "ryż", "oliwa"],
+  );
+  assert.deepEqual(
+    parsed.map((p) => p.quantity),
+    [200, 110, 10],
+  );
 });
 
 test("normalizeName drops preparation notes so amounts merge", () => {
@@ -122,13 +128,37 @@ describe("aggregation across meals and portions", () => {
 
   test("returns one row per ingredient, grouped by category order", () => {
     const totals = aggregateIngredients(entries);
-    assert.deepEqual(totals.map((item) => item.name), ["kurczak", "ryż", "oliwa"]);
+    assert.deepEqual(
+      totals.map((item) => item.name),
+      ["kurczak", "ryż", "oliwa"],
+    );
   });
 
   test("keeps amount-less ingredients without inventing a number", () => {
     const totals = aggregateIngredients([{ text: "kurczak 100 g; curry", portions: 3 }]);
     const curry = totals.find((item) => item.name === "curry");
     assert.equal(curry?.quantity, null);
+  });
+});
+
+describe("the vegetable mix", () => {
+  test('"warzywa" becomes pomidor, ogórek, cebula, papryka and pieczarki, the amount split evenly', () => {
+    const totals = aggregateIngredients([
+      { text: "kurczak 200 g; warzywa 200 g", portions: 3 },
+      { text: "ryż 100 g; warzywa / mieszanka 130 g", portions: 2 },
+    ]);
+    assert.ok(!totals.some((item) => item.name.startsWith("warzywa")));
+    // 600 + 260 = 860 g over five: 172 g, to 10 g: 180 g.
+    for (const name of ["pomidor", "ogórek", "cebula", "papryka", "pieczarki"]) {
+      const item = totals.find((total) => total.name === name);
+      assert.deepEqual([item?.quantity, item?.unit, item?.category], [180, "g", "vegetables"], name);
+    }
+  });
+
+  test("a vegetable named by the sheet stays as it is, and so does a generic one with no amount", () => {
+    const totals = aggregateIngredients([{ text: "pomidor 100 g; warzywa", portions: 1 }]);
+    assert.equal(totals.find((total) => total.name === "pomidor")?.quantity, 100);
+    assert.equal(totals.find((total) => total.name === "warzywa")?.quantity, null);
   });
 });
 
