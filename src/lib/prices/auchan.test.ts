@@ -2,48 +2,73 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import { parseAuchanProduct, parseAuchanSitemap } from "./auchan.ts";
+import { parseAuchanCategories, parseAuchanCategoryPage } from "./auchan.ts";
+import { categoriesFor } from "./match.ts";
 
-/** Real zakupy.auchan.pl responses from 19.10.2026: part of the sitemap, and three product pages cut to their JSON. */
-const read = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
-const catalogue = parseAuchanSitemap(read("auchan-sitemap-2026-10-19.xml"));
-const entry = (id: string) => {
-  const found = catalogue.find((candidate) => candidate.productKey === `auchan:${id}`);
-  assert.ok(found, id);
-  return found;
-};
-const page = (id: string) => parseAuchanProduct(read(`auchan-product-${id}.html`), entry(id));
+/** Real zakupy.auchan.pl data from 20.10.2026: a few of a dairy category's products, in the page's own state. */
+const state = readFileSync(new URL("./fixtures/auchan-category-2026-10-20.json", import.meta.url), "utf8");
+const page = (json = state) => `<html><script>window.__INITIAL_STATE__={"data":${json}}</script></html>`;
+const products = parseAuchanCategoryPage(page(), "https://zakupy.auchan.pl/categories/x/1");
 
-describe("Auchan sitemap", () => {
-  test("product pages, named from their address; image links are not products", () => {
-    assert.ok(catalogue.length > 0);
-    assert.ok(catalogue.every((one) => /^auchan:\d{8}$/.test(one.productKey) && one.url.includes("/products/")));
-    assert.equal(entry("00706828").name, "jaja ściółkowe rozmiar m auchan 10 sztuk");
-    assert.equal(entry("00746801").name, "filet z królika auchan");
-    assert.throws(() => parseAuchanSitemap("<urlset></urlset>"), /Auchan/);
+const sitemap = `<urlset>
+  <url><loc>https://zakupy.auchan.pl/categories/artykuły-spożywcze/mleko-nabiał-i-jaja/jaja/2370</loc></url>
+  <url><loc>https://zakupy.auchan.pl/categories/artykuły-spożywcze/mleko-nabiał-i-jaja/jaja/jaja-ściółkowe/2371</loc></url>
+  <url><loc>https://zakupy.auchan.pl/categories/dom-i-ogród/pranie/płyny/5954</loc></url>
+</urlset>`;
+
+describe("Auchan categories", () => {
+  test("the food shelves, with their path in plain words; other departments are left out", () => {
+    const categories = parseAuchanCategories(sitemap);
+    assert.deepEqual(
+      categories.map((category) => category.path),
+      [
+        "artykuły spożywcze / mleko nabiał i jaja / jaja",
+        "artykuły spożywcze / mleko nabiał i jaja / jaja / jaja ściółkowe",
+      ],
+    );
+    assert.throws(() => parseAuchanCategories("<urlset></urlset>"), /Auchan/);
+  });
+
+  test("the shelf that names the item last comes first, the narrower one on a tie", () => {
+    const categories = parseAuchanCategories(sitemap);
+    assert.equal(categoriesFor("jajka", categories, 1)[0].path.endsWith("jaja ściółkowe"), true);
+    assert.deepEqual(categoriesFor("pasta do zębów", categories, 3), []);
   });
 });
 
-describe("Auchan product page", () => {
-  test("a pack: the price and the pack from the product's own JSON", () => {
-    const skyr = page("00128805");
-    assert.deepEqual([skyr?.price, skyr?.packQuantity, skyr?.packUnit, skyr?.loose], [4.89, 150, "g", false]);
-    assert.equal(skyr?.name, "BIO Jogurt Skyr z wanilią EKOŁukta 150 g");
+describe("Auchan category page", () => {
+  test("every product in stock is priced, the pack from its name", () => {
+    assert.equal(products.length, 7);
+    const quark = products.find((product) => product.name === "Twaróg wiejski lekki 0% Piątnica 250 g");
+    assert.deepEqual([quark?.price, quark?.packQuantity, quark?.packUnit, quark?.loose], [4.85, 250, "g", false]);
+    assert.ok(products.every((product) => product.productKey.startsWith("auchan:") && product.price > 0));
   });
 
-  test("eggs come in pieces", () => {
-    const eggs = page("00706828");
-    assert.deepEqual([eggs?.price, eggs?.packQuantity, eggs?.packUnit], [9.98, 10, "szt"]);
+  test("a pack the name does not give comes from the price per kilo; sold by weight is loose per kilo", () => {
+    const entity = (name: string, label: string, unit: number) => ({
+      productEntities: {
+        a: {
+          retailerProductId: "1",
+          available: true,
+          name,
+          price: { current: { amount: "6.00" }, unit: { label, current: { amount: String(unit) } } },
+        },
+      },
+    });
+    const [flour] = parseAuchanCategoryPage(page(JSON.stringify(entity("Mąka pszenna", "fop.price.per.kg", 3))), "u");
+    assert.deepEqual([flour.packQuantity, flour.packUnit, flour.loose], [2000, "g", false]);
+    const [fillet] = parseAuchanCategoryPage(
+      page(JSON.stringify(entity("Filet z kurczaka Auchan na wagę ok. 500 g", "fop.price.per.kg", 24.8))),
+      "u",
+    );
+    assert.deepEqual([fillet.price, fillet.packQuantity, fillet.packUnit, fillet.loose], [24.8, 1000, "g", true]);
+    const [eggs] = parseAuchanCategoryPage(page(JSON.stringify(entity("Jaja", "fop.price.per.each", 0.6))), "u");
+    assert.deepEqual([eggs.packQuantity, eggs.packUnit], [10, "szt"]);
   });
 
-  test("sold by weight: the price per kilo, and I pay for what I take", () => {
-    const rabbit = page("00746801");
-    assert.deepEqual([rabbit?.price, rabbit?.packQuantity, rabbit?.packUnit, rabbit?.loose], [65.98, 1000, "g", true]);
-  });
-
-  test("another product's page, or one out of stock, gives no price", () => {
-    assert.equal(parseAuchanProduct(read("auchan-product-00128805.html"), entry("00706828")), null);
-    const gone = read("auchan-product-00128805.html").replace('"available":true', '"available":false');
-    assert.equal(parseAuchanProduct(gone, entry("00128805")), null);
+  test("a product out of stock is left out; a page that is not the shop's throws", () => {
+    const gone = state.replace(/"available": true/g, '"available": false');
+    assert.equal(parseAuchanCategoryPage(page(gone), "u").length, 0);
+    assert.throws(() => parseAuchanCategoryPage("<html></html>", "u"), /Auchan/);
   });
 });

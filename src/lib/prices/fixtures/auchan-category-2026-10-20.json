@@ -1,0 +1,264 @@
+{
+ "productEntities": {
+  "6b0e1b12-9af2-4c66-b844-e5eb67bb6fd2": {
+   "productId": "6b0e1b12-9af2-4c66-b844-e5eb67bb6fd2",
+   "retailerProductId": "00342889",
+   "brand": "Piątnica",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Twaróg",
+    "Twaróg półtłusty"
+   ],
+   "name": "Twaróg wiejski półtłusty Piątnica 250 g",
+   "price": {
+    "original": {
+     "amount": "5.88",
+     "currency": "PLN"
+    },
+    "current": {
+     "amount": "4.85",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "original": {
+      "amount": "23.52",
+      "currency": "PLN"
+     },
+     "current": {
+      "amount": "19.40",
+      "currency": "PLN"
+     }
+    },
+    "reference": {
+     "amount": "5.88",
+     "currency": "PLN",
+     "type": "FRESH"
+    }
+   }
+  },
+  "c814ed80-9594-49b5-8a2d-bdd8d1422a5c": {
+   "productId": "c814ed80-9594-49b5-8a2d-bdd8d1422a5c",
+   "retailerProductId": "00489163",
+   "brand": "Piątnica",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Twaróg",
+    "Twaróg chudy"
+   ],
+   "name": "Twaróg wiejski lekki 0% Piątnica 250 g",
+   "price": {
+    "original": {
+     "amount": "5.88",
+     "currency": "PLN"
+    },
+    "current": {
+     "amount": "4.85",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "original": {
+      "amount": "23.52",
+      "currency": "PLN"
+     },
+     "current": {
+      "amount": "19.40",
+      "currency": "PLN"
+     }
+    },
+    "reference": {
+     "amount": "5.88",
+     "currency": "PLN",
+     "type": "FRESH"
+    }
+   }
+  },
+  "4fbb7691-e61b-472c-8871-596d953938f6": {
+   "productId": "4fbb7691-e61b-472c-8871-596d953938f6",
+   "retailerProductId": "00342894",
+   "brand": "Piątnica",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Twaróg",
+    "Twaróg tłusty"
+   ],
+   "name": "Twaróg wiejski tłusty Piątnica 250 g",
+   "price": {
+    "original": {
+     "amount": "5.88",
+     "currency": "PLN"
+    },
+    "current": {
+     "amount": "4.85",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "original": {
+      "amount": "23.52",
+      "currency": "PLN"
+     },
+     "current": {
+      "amount": "19.40",
+      "currency": "PLN"
+     }
+    },
+    "reference": {
+     "amount": "5.88",
+     "currency": "PLN",
+     "type": "FRESH"
+    }
+   }
+  },
+  "03d8d6f0-8262-4d61-a2de-6be395ac36e5": {
+   "productId": "03d8d6f0-8262-4d61-a2de-6be395ac36e5",
+   "retailerProductId": "00682216",
+   "brand": "Mlekovita",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Serki homogenizowane i desery",
+    "Serki bez laktozy"
+   ],
+   "name": "Serek homogenizowany waniliowy bez laktozy  Mlekovita 150 g",
+   "price": {
+    "original": {
+     "amount": "3.49",
+     "currency": "PLN"
+    },
+    "current": {
+     "amount": "2.85",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "original": {
+      "amount": "23.27",
+      "currency": "PLN"
+     },
+     "current": {
+      "amount": "19.00",
+      "currency": "PLN"
+     }
+    },
+    "reference": {
+     "amount": "3.49",
+     "currency": "PLN",
+     "type": "FRESH"
+    }
+   }
+  },
+  "689e8956-030c-4a9e-b56a-2f35e42a56c1": {
+   "productId": "689e8956-030c-4a9e-b56a-2f35e42a56c1",
+   "retailerProductId": "00043309",
+   "brand": "Włoszczowa",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Twaróg",
+    "Twaróg sernikowy"
+   ],
+   "name": "Twaróg na sernik Włoszczowa 1 kg",
+   "price": {
+    "original": {
+     "amount": "18.08",
+     "currency": "PLN"
+    },
+    "current": {
+     "amount": "10.95",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "original": {
+      "amount": "18.08",
+      "currency": "PLN"
+     },
+     "current": {
+      "amount": "10.95",
+      "currency": "PLN"
+     }
+    },
+    "reference": {
+     "amount": "18.08",
+     "currency": "PLN",
+     "type": "FRESH"
+    }
+   }
+  },
+  "54d8d2ad-ffd6-4063-b661-554ba65f0332": {
+   "productId": "54d8d2ad-ffd6-4063-b661-554ba65f0332",
+   "retailerProductId": "00682218",
+   "brand": "Mlekovita",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Serki homogenizowane i desery",
+    "Serki bez laktozy"
+   ],
+   "name": "Serek homogenizowany naturalny bez laktozy  Mlekovita 150 g",
+   "price": {
+    "original": {
+     "amount": "3.49",
+     "currency": "PLN"
+    },
+    "current": {
+     "amount": "2.85",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "original": {
+      "amount": "23.27",
+      "currency": "PLN"
+     },
+     "current": {
+      "amount": "19.00",
+      "currency": "PLN"
+     }
+    },
+    "reference": {
+     "amount": "3.49",
+     "currency": "PLN",
+     "type": "FRESH"
+    }
+   }
+  },
+  "688629f6-28f7-4f1e-a1e4-746556eb98e5": {
+   "productId": "688629f6-28f7-4f1e-a1e4-746556eb98e5",
+   "retailerProductId": "00533020",
+   "brand": "Mlekovita",
+   "available": true,
+   "categoryPath": [
+    "Artykuły spożywcze",
+    "Mleko, nabiał i jaja",
+    "Masło, margaryny i tłuszcze",
+    "Masło"
+   ],
+   "name": "Masło ekstra Wypasione 82% tłuszczu Mlekovita 200 g",
+   "price": {
+    "current": {
+     "amount": "12.29",
+     "currency": "PLN"
+    },
+    "unit": {
+     "label": "fop.price.per.kg",
+     "current": {
+      "amount": "61.45",
+      "currency": "PLN"
+     }
+    }
+   }
+  }
+ }
+}

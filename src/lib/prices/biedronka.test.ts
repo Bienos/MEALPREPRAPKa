@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import { parseProductPage, parseSitemap } from "./biedronka.ts";
+import { parseCategories, parseCategoryPage, parseProductPage, parseSitemap } from "./biedronka.ts";
 import { catalogCandidates } from "./match.ts";
 
 /**
@@ -79,5 +79,38 @@ describe("which catalogue products are read for an item", () => {
       ["biedronka:0000003518", "biedronka:0000004491"],
     );
     assert.ok(catalogCandidates("jajka", "szt", catalogue, 4).every((e) => /jaja/.test(e.name)));
+  });
+});
+
+describe("Biedronka category page", () => {
+  const html = readFileSync(new URL("./fixtures/biedronka-category-2026-10-20.html", import.meta.url), "utf8");
+  const prices = parseCategoryPage(html);
+
+  test("every tile with a price is a product, with the pack its packaging line gives", () => {
+    assert.equal(prices.length, 6);
+    const rice = prices.find((price) => price.name.includes("Basmati"));
+    assert.deepEqual([rice?.price, rice?.packQuantity, rice?.packUnit, rice?.loose], [6.79, 500, "g", false]);
+    const pieces = prices.find((price) => price.name.includes("4 x 125 g"));
+    assert.deepEqual([pieces?.price, pieces?.packQuantity, pieces?.packUnit], [5.49, 500, "g"]);
+    assert.ok(
+      prices.every((price) => /^biedronka:\d{10}$/.test(price.productKey) && price.sourceUrl.endsWith(".html")),
+    );
+  });
+
+  test("sold by weight: the price per kilo, loose", () => {
+    const arborio = prices.find((price) => price.name.includes("arborio"));
+    assert.deepEqual([arborio?.price, arborio?.packQuantity, arborio?.loose], [11.99, 1000, true]);
+  });
+
+  test("categories from the sitemap: only category pages, with their path in plain words", () => {
+    const xml = `<urlset>
+      <url><loc>https://zakupy.biedronka.pl/artykuly-spozywcze/produkty-sypkie/ryz/</loc></url>
+      <url><loc>https://zakupy.biedronka.pl/gusto-bello-ryz-1-kg-0000009424.html</loc></url></urlset>`;
+    assert.deepEqual(parseCategories(xml), [
+      {
+        url: "https://zakupy.biedronka.pl/artykuly-spozywcze/produkty-sypkie/ryz/",
+        path: "artykuly spozywcze / produkty sypkie / ryz",
+      },
+    ]);
   });
 });

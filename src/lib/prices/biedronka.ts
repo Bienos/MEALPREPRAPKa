@@ -16,7 +16,7 @@
 
 import type { Unit } from "../meals/ingredients.ts";
 import { parsePack } from "./pack.ts";
-import type { ShelfPrice } from "./types.ts";
+import type { CategoryEntry, ShelfPrice } from "./types.ts";
 
 const ORIGIN = "https://zakupy.biedronka.pl";
 export const BIEDRONKA_SITEMAP = `${ORIGIN}/sitemap_0.xml`;
@@ -65,7 +65,11 @@ export function parseProductPage(html: string, entry: CatalogEntry): ShelfPrice 
   const name = text(html.match(/<h1[^>]*product-description__name[^>]*>([\s\S]*?)<\/h1>/)?.[1]) || entry.name;
   const sales = text(html.match(/<div class="price-product__sales">([\s\S]*?)<\/div>/)?.[1]);
   const packaging = text(html.match(/<div class="packaging-details">([\s\S]*?)<\/div>/)?.[1]);
+  return shelfPriceFrom(name, sales, packaging, entry);
+}
 
+/** The price and pack of one product, from its sale price text and its packaging line. */
+function shelfPriceFrom(name: string, sales: string, packaging: string, entry: CatalogEntry): ShelfPrice | null {
   // "2 99 /szt." or "25 49 /kg"
   const sale = sales.match(/(\d+)\s+(\d{2})\s*\/\s*(szt|kg|l)\b/i);
   // "0.2kg - 14,95 zł / kg", "ok. 600 g ~ 0.6kg - 25,49 zł / kg"
@@ -124,6 +128,43 @@ export function parseProductPage(html: string, entry: CatalogEntry): ShelfPrice 
   };
 }
 
+/* Category pages ------------------------------------------------------------ */
+
+/**
+ * The shop's category pages (the sitemap lists the ones with products): every
+ * category page shows its first 32 products as tiles with name, price and pack,
+ * so one request prices a whole shelf instead of one product.
+ */
+export function parseCategories(xml: string): CategoryEntry[] {
+  return [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)]
+    .map((match) => match[1])
+    .filter((url) => !url.endsWith(".html"))
+    .map((url) => ({
+      url,
+      path: safeDecode(new URL(url).pathname)
+        .split("/")
+        .filter(Boolean)
+        .map((part) => part.replace(/-/g, " "))
+        .join(" / "),
+    }));
+}
+
+/** The tiles of a category page as shelf prices. A tile with no readable price is skipped. */
+export function parseCategoryPage(html: string): ShelfPrice[] {
+  const prices: ShelfPrice[] = [];
+  for (const tile of html.split('<div class="product-tile js-product-tile').slice(1)) {
+    const id = tile.match(/data-itemid="(\d{10})"/)?.[1];
+    const url = tile.match(/<a href="([^"]+-\d{10}\.html)"/)?.[1];
+    const name = text(tile.match(/itemprop="name"[^>]*>([\s\S]*?)<\/div>/)?.[1]);
+    if (!id || !url || !name) continue;
+    const sales = text(tile.match(/<div class="price-tile__sales">([\s\S]*?)<\/div>/)?.[1]);
+    const packaging = text(tile.match(/<div class="packaging-details">([\s\S]*?)<\/div>/)?.[1]);
+    const price = shelfPriceFrom(name, sales, packaging, { productKey: `biedronka:${id}`, name, url });
+    if (price) prices.push(price);
+  }
+  return prices;
+}
+
 function text(fragment: string | undefined): string {
   return (fragment ?? "")
     .replace(/<[^>]+>/g, " ")
@@ -162,6 +203,39 @@ export async function fetchShelfPrices(entries: CatalogEntry[]): Promise<ShelfRe
     }
   }
   return { prices, read: batch.length, failed };
+}
+
+/** Categories read per tap: the shop answers in about a second, three at a time. */
+export const MAX_CATEGORIES_PER_REFRESH = 60;
+const CATEGORY_PARALLEL = 3;
+
+export async function fetchBiedronkaCategoryList(): Promise<CategoryEntry[]> {
+  const urls = parseCategories(await fetchText(BIEDRONKA_SITEMAP, 20_000));
+  if (urls.length === 0) throw new Error("Biedronka zmieniła mapę strony (brak kategorii).");
+  return urls;
+}
+
+export type CategoryResult = { prices: ShelfPrice[]; done: CategoryEntry[]; failed: number; limited: boolean };
+
+/** Reads these category pages, a few at a time. A page that fails is skipped and counted. */
+export async function fetchBiedronkaCategories(categories: CategoryEntry[]): Promise<CategoryResult> {
+  const read: CategoryResult = { prices: [], done: [], failed: 0, limited: false };
+  const batch = categories.slice(0, MAX_CATEGORIES_PER_REFRESH);
+  for (let index = 0; index < batch.length; index += CATEGORY_PARALLEL) {
+    const results = await Promise.allSettled(
+      batch.slice(index, index + CATEGORY_PARALLEL).map(async (category) => {
+        const prices = parseCategoryPage(await fetchText(category.url, 15_000));
+        return { category, prices };
+      }),
+    );
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        read.prices.push(...result.value.prices);
+        read.done.push(result.value.category);
+      } else read.failed++;
+    }
+  }
+  return read;
 }
 
 async function fetchText(url: string, timeout: number): Promise<string> {
