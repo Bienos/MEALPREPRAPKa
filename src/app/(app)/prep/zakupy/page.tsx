@@ -16,6 +16,8 @@ import {
   removeShopPriceAction,
   saveShopPriceAction,
   saveShopPricesAction,
+  saveDeliveryQuoteAction,
+  setShoppingCityAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +81,8 @@ export default async function ShoppingPage() {
           onSavePrices: saveShopPricesAction,
           onRemovePrice: removeShopPriceAction,
           onAnswer: answerPromoAction,
+          onSaveQuote: saveDeliveryQuoteAction,
+          onSetCity: setShoppingCityAction,
         }}
       />
     </>

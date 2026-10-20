@@ -9,6 +9,8 @@ const settingsSchema = z.object({
   default_day_type: dayTypeSchema,
   meal_slots: z.array(z.string()),
   timezone: z.string(),
+  /** The town the shopping comparison is for (online shops deliver to some towns only). */
+  shopping_city: z.string().default("Warszawa"),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
@@ -25,7 +27,7 @@ export const getSettings = unstable_cache(
     return row(settingsSchema, result);
   },
   ["settings"],
-  { revalidate: SETTINGS_REVALIDATE_SECONDS },
+  { revalidate: SETTINGS_REVALIDATE_SECONDS, tags: ["settings"] },
 );
 
 export async function updateSettings(patch: Partial<Settings>): Promise<void> {
@@ -39,9 +41,9 @@ export const getTargets = unstable_cache(
   async (): Promise<Record<DayType, Macros>> => {
     const result = await getSupabase().from("day_targets").select("*");
     const list = rows(targetsRowSchema, result);
-    const byType = Object.fromEntries(
-      list.map(({ day_type, ...macros }) => [day_type, macros]),
-    ) as Partial<Record<DayType, Macros>>;
+    const byType = Object.fromEntries(list.map(({ day_type, ...macros }) => [day_type, macros])) as Partial<
+      Record<DayType, Macros>
+    >;
     if (!byType.DT || !byType.DNT) throw new Error("day_targets is missing DT or DNT row");
     return { DT: byType.DT, DNT: byType.DNT };
   },

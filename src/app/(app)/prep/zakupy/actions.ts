@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { z } from "zod";
 
 import {
@@ -11,6 +11,8 @@ import {
   upsertShopPrice,
   upsertShopPrices,
 } from "@/lib/db/prices";
+import { upsertDeliveryQuote } from "@/lib/db/delivery";
+import { updateSettings } from "@/lib/db/settings";
 import { priceKey } from "@/lib/prices/match";
 import {
   refreshAuchanShelf,
@@ -148,4 +150,27 @@ export async function answerPromoAction(
     packUnit: given?.unit ?? null,
     packLoose: given?.loose ?? false,
   });
+}
+
+const quoteSchema = z.object({
+  provider: z.string().trim().min(1).max(40),
+  fee: z.number().min(0).max(500).nullable(),
+  freeAbove: z.number().positive().max(10_000).nullable(),
+  minOrder: z.number().positive().max(10_000).nullable(),
+  confirmed: z.boolean(),
+  note: z.string().trim().max(200),
+});
+
+/** The delivery fee I know for a provider: typed from its page (estimate) or seen at checkout (confirmed). */
+export async function saveDeliveryQuoteAction(input: z.input<typeof quoteSchema>): Promise<void> {
+  await upsertDeliveryQuote(quoteSchema.parse(input));
+  refresh();
+}
+
+/** The town the shopping comparison is for. A town, never an address. */
+export async function setShoppingCityAction(city: string): Promise<void> {
+  const value = z.string().trim().min(2).max(60).parse(city);
+  await updateSettings({ shopping_city: value });
+  updateTag("settings");
+  refresh();
 }
