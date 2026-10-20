@@ -96,6 +96,13 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
         Zakupy
       </Link>
       <PageHeader title="Promocje tygodnia" subtitle="Gazetki i oferty z aplikacji sklepów, w jednym miejscu" />
+      <p className="text-sm text-muted-foreground">
+        Oferty z gazetek (Blix, lidl.pl) i sklepów internetowych bez potwierdzonej zgody na użycie danych są tu
+        orientacyjne.{" "}
+        <Link href="/prep/zrodla" className="font-semibold text-primary">
+          Źródła danych
+        </Link>
+      </p>
 
       <DealsRefresh
         fetchedAt={lastFetch}

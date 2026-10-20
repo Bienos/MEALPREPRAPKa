@@ -8,7 +8,10 @@ const basket = (shop: ShopBasket["shop"], priced: number, total: number, estimat
   shop,
   lines: [],
   total,
+  totalGrosz: Math.round(total * 100),
   priced,
+  complete: priced === 10,
+  states: {},
   onPromo: 0,
   estimated,
 });

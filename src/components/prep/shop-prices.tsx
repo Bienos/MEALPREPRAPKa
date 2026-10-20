@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   ChevronRight,
@@ -9,6 +10,8 @@ import {
   PencilLine,
   Plus,
   RefreshCw,
+  Settings2,
+  ShieldCheck,
   Smartphone,
   Truck,
 } from "lucide-react";
@@ -21,7 +24,7 @@ import { Sheet } from "@/components/ui/sheet";
 import type { RefreshFeedsResult, RefreshPromosResult, RefreshSweepResult } from "@/app/(app)/prep/zakupy/actions";
 import { formatAmount, type Unit } from "@/lib/meals/ingredients";
 import { priceSource } from "@/lib/prices/source";
-import { buildBasket, type BasketLine, type NeededItem, type PriceOption } from "@/lib/prices/basket";
+import type { BasketLine, NeededItem } from "@/lib/prices/basket";
 import {
   bestOptions,
   onlineOptions,
@@ -40,6 +43,25 @@ import {
   type ShopPromo,
 } from "@/lib/prices/types";
 import { cn } from "@/lib/utils";
+import { todayIso } from "@/lib/date";
+import { STATE_LABELS, type EligibilityState } from "@/lib/grocery/eligibility";
+import { formatGrosz } from "@/lib/grocery/money";
+import { TIER_LABELS } from "@/lib/grocery/matching";
+import { retailerForShop } from "@/lib/grocery/retailers";
+import {
+  assessAll,
+  CANNOT_DETERMINE,
+  verifiedVerdict,
+  type HeldOption,
+  type PricingContext,
+  type Verdict,
+} from "@/lib/grocery/pricing";
+import {
+  LOYALTY_LABELS,
+  LOYALTY_PROGRAMS,
+  type LoyaltyProgram,
+  type ShoppingPreferences,
+} from "@/lib/grocery/types";
 
 /** What a leaflet price is for, given with "tak" when the offer does not say. */
 export type PackAnswer = { quantity: number; unit: Unit; loose: boolean };
@@ -54,6 +76,9 @@ export type ShopPricing = {
   /** Delivery fees as I know them, and the town the comparison is for. */
   quotes: DeliveryQuote[];
   city: string;
+  /** How I shop: channel, loyalty apps, excluded brands, preferred shops. */
+  preferences: ShoppingPreferences;
+  onSavePreferences: (preferences: ShoppingPreferences) => Promise<void>;
   onSaveQuote: (quote: DeliveryQuote) => Promise<void>;
   onSetCity: (city: string) => Promise<void>;
   onRefresh: () => Promise<RefreshPromosResult>;
@@ -96,6 +121,8 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
   const [city, setCity] = useState(pricing.city);
   const [editingCity, setEditingCity] = useState(false);
   const [quoteFor, setQuoteFor] = useState<Provider | null>(null);
+  const [preferences, setPreferences] = useState(pricing.preferences);
+  const [editingPreferences, setEditingPreferences] = useState(false);
   const [refreshing, startRefresh] = useTransition();
   const [refreshNote, setRefreshNote] = useState<{
     error: boolean;
@@ -114,18 +141,18 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
   const priceFor = (shop: Shop, item: NeededItem) =>
     prices.find((price) => price.shop === shop && price.itemName === priceKey(item.name)) ?? null;
 
-  const summary = buildBasket(items, SHOPS, (item, shop) => {
-    const match = matchFor(shop, item);
-    const options: PriceOption[] = [
-      ...match.confirmed.map((promo): PriceOption => ({ kind: "promo", promo })),
-      ...match.estimates.map(
-        ({ promo, packAssumed }): PriceOption => ({ kind: "promo", promo, estimate: { packAssumed } }),
-      ),
-    ];
-    const mine = priceFor(shop, item);
-    if (mine) options.push({ kind: "mine", price: mine });
-    return options;
-  });
+  // Every price assessed (eligibility, match tier): strict prices decide the verified verdict,
+  // the rest counts in the labelled reference totals, anything not counted says why.
+  const ctx: PricingContext = {
+    today: todayIso(),
+    city,
+    channel: preferences.channel,
+    loyalty: preferences.loyalty,
+    excludedBrands: preferences.excludedBrands,
+  };
+  const { lines: assessed, strict, reference: summary } = assessAll(items, matchFor, priceFor, ctx);
+  const verdict = verifiedVerdict(strict, quotes);
+  const heldFor = (shop: Shop, item: NeededItem) => assessed.get(`${shop}|${item.id}`)?.held ?? [];
   const { compared, split } = summary;
   const online = onlineOptions(summary, quotes, city);
   const best = bestOptions(summary, online);
@@ -147,14 +174,15 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     .filter((group) => group.asks.length > 0);
 
   // The shops I go to first, in their order; the rest by how much of my list they price.
-  const favourites = SHOP_ORDER.slice(0, VISIBLE_SHOPS);
+  const preferred = SHOP_ORDER.filter((shop) => preferences.preferredRetailers.includes(shop as never));
+  const favourites = preferred.length > 0 ? preferred : SHOP_ORDER.slice(0, VISIBLE_SHOPS);
   const rows = [...summary.shops].sort((a, b) => {
     const favA = favourites.indexOf(a.shop);
     const favB = favourites.indexOf(b.shop);
     if (favA !== favB) return (favA === -1 ? 99 : favA) - (favB === -1 ? 99 : favB);
     return b.priced - a.priced || a.total - b.total;
   });
-  const shown = allShops ? rows : rows.slice(0, VISIBLE_SHOPS);
+  const shown = allShops ? rows : rows.slice(0, Math.max(VISIBLE_SHOPS, preferred.length));
 
   function refresh() {
     setRefreshNote(null);
@@ -232,6 +260,12 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     void pricing.onSaveQuote(quote);
   }
 
+  function savePreferences(next: ShoppingPreferences) {
+    setPreferences(next);
+    setEditingPreferences(false);
+    void pricing.onSavePreferences(next);
+  }
+
   function saveCity(value: string) {
     const next = value.trim();
     setEditingCity(false);
@@ -252,23 +286,31 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       <div>
         <p className="text-lg font-extrabold">Gdzie najtaniej?</p>
         <p className="text-sm text-muted-foreground">
-          Gazetki, ceny z półek i sklepy online, dla tego, co zostało do kupienia. Każda cena ma źródło i datę.
+          Dla tego, co zostało do kupienia. Każda cena ma źródło, datę i to, na ile jej ufać.
         </p>
       </div>
 
+      <VerifiedVerdict verdict={verdict} />
+
       {best.shop || best.online || best.split ? (
-        <ul className="flex flex-col gap-2 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm">
+        <p className="-mb-1 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+          Orientacyjnie, ze wszystkich danych
+        </p>
+      ) : null}
+      {best.shop || best.online || best.split ? (
+        <ul className="flex flex-col gap-2 rounded-xl border bg-muted/40 p-3 text-sm">
           {best.shop?.kind === "shop" ? (
             <li className="flex items-center gap-2">
               <span className="w-24 shrink-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">
-                W sklepie
+                {!best.shop.complete ? "Najpełniej" : retailerForShop(best.shop.shop)?.stores === false ? "Online" : "W sklepie"}
               </span>
               <span className="min-w-0 flex-1 font-semibold">
                 {SHOP_LABELS[best.shop.shop]}
                 <span className="font-normal text-muted-foreground">
                   {" "}
-                  · {summary.itemCount - best.shop.missing} z {summary.itemCount}
-                  {best.shop.estimated > 0 ? `, ${best.shop.estimated} szac.` : ""}
+                  · {best.shop.complete ? "cała lista" : "niepełny koszyk"},{" "}
+                  {summary.itemCount - best.shop.missing} z {summary.itemCount}
+                  {best.shop.estimated > 0 ? `, ${best.shop.estimated} do potwierdzenia` : ""}
                   {best.shop.missing > 0 ? `, ${best.shop.missing} bez ceny` : ""}
                 </span>
               </span>
@@ -352,8 +394,8 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
           // Only a fair claim when the comparison covers most of the list.
           const cheaper = compared.cheapest === basket.shop && compared.count >= summary.itemCount * 0.6;
           const facts = [
-            basket.priced > 0 ? `${basket.priced} z ${summary.itemCount} z ceną` : "brak w gazetce",
-            basket.estimated > 0 ? `${basket.estimated} szac.` : null,
+            basket.priced > 0 ? `${basket.priced} z ${summary.itemCount} z ceną` : "brak cen",
+            ...stateFacts(basket.states),
           ].filter(Boolean);
           return (
             <li key={basket.shop}>
@@ -424,7 +466,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
             onClick={() => setReviewing(true)}
             className="w-fit text-left font-semibold text-primary"
           >
-            Pasuje? Sprawdź {asks.length} {plural(asks.length, "szacunek", "szacunki", "szacunków")}
+            Pasuje? Potwierdź {asks.length} {plural(asks.length, "produkt", "produkty", "produktów")}
           </button>
         ) : null}
       </div>
@@ -433,6 +475,28 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
         <PencilLine className="size-4" />
         Wpisz ceny z półki
       </Button>
+
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
+        <button type="button" onClick={() => setEditingPreferences(true)} className="flex items-center gap-1 text-primary">
+          <Settings2 className="size-4" />
+          Jak robię zakupy
+        </button>
+        <Link href="/prep/zrodla" className="flex items-center gap-1 text-primary">
+          <ShieldCheck className="size-4" />
+          Źródła danych
+        </Link>
+        <Link href="/prep/paragony" className="text-primary">
+          Paragony
+        </Link>
+      </div>
+
+      {editingPreferences ? (
+        <PreferencesSheet
+          preferences={preferences}
+          onSave={savePreferences}
+          onClose={() => setEditingPreferences(false)}
+        />
+      ) : null}
 
       {quoteFor ? (
         <QuoteSheet
@@ -474,22 +538,20 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
               {detail.priced > 0
                 ? `Razem ${formatPrice(detail.total)} za ${detail.priced} z ${summary.itemCount}`
                 : "Jeszcze nic z listy nie ma tu ceny"}
-              {detail.estimated > 0 ? ` · w tym ${detail.estimated} szac.` : ""}
+              {detail.estimated > 0 ? ` · ${detail.estimated} produktów do potwierdzenia („Pasuje?”)` : ""}
             </p>
             <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
-              {detail.shop === "lidl"
-                ? "Promocje z lidl.pl."
-                : detail.shop === "biedronka"
-                  ? "Promocje z gazetki (blix.pl) i ceny z półki ze sklepu internetowego Biedronki, które w sklepie mogą się trochę różnić."
-                  : "Promocje z gazetki, przez blix.pl."}{" "}
-              Cena z oferty, która wygląda na ten produkt, to szacunek (oznaczony). „Tak” ją potwierdza, „Nie” szuka
-              następnej. Bierzemy zawsze tyle opakowań, żeby wystarczyło.
+              Przy każdej cenie: skąd jest, z którego dnia i na ile jej ufać. „Zweryfikowana” to aktualna cena ze
+              źródła, które pozwala jej używać; „źródło niezweryfikowane”, „historyczna” i „szacunek” liczą się tylko
+              orientacyjnie. „Tak” potwierdza produkt, „Nie” szuka następnego. Bierzemy tyle opakowań, żeby
+              wystarczyło.
             </p>
             <ul className="rounded-xl border bg-card">
               {detailLines.map((line) => (
                 <LineRow
                   key={line.item.id}
                   line={line}
+                  held={heldFor(detail.shop, line.item)}
                   fetched={pricing.fetchedLabel !== null}
                   onAnswer={(promo, isMatch, pack) => answer(detail.shop, line.item, promo, isMatch, pack)}
                   onEdit={() => setEditing({ shop: detail.shop, item: line.item })}
@@ -556,11 +618,14 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
 
 function LineRow({
   line,
+  held,
   fetched,
   onAnswer,
   onEdit,
 }: {
   line: BasketLine;
+  /** Prices for this item that are not counted, with why (an app I lack, a substitution to approve). */
+  held: HeldOption[];
   /** Promotions were fetched at least once, so a missing price means "not in the leaflet". */
   fetched: boolean;
   onAnswer: (promo: ShopPromo, isMatch: boolean, pack: PackAnswer | null) => void;
@@ -602,7 +667,52 @@ function LineRow({
           onAnswer={(isMatch, pack) => onAnswer(estimate, isMatch, pack)}
         />
       ) : null}
+      <HeldList held={held} item={item} onAnswer={onAnswer} />
     </li>
+  );
+}
+
+/**
+ * What is not counted for this item and why: an app-only price without the
+ * app, another town, a substitution that differs from the item (which "Tak"
+ * approves, so it is never swapped in silently).
+ */
+function HeldList({
+  held,
+  item,
+  onAnswer,
+}: {
+  held: HeldOption[];
+  item: NeededItem;
+  onAnswer: (promo: ShopPromo, isMatch: boolean, pack: PackAnswer | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  if (held.length === 0) return null;
+  const substitutions = held.filter((one) => one.substitution);
+  const others = held.filter((one) => !one.substitution);
+  return (
+    <div className="flex flex-col gap-2">
+      <button type="button" onClick={() => setOpen((value) => !value)} className="w-fit text-left text-xs font-semibold text-muted-foreground">
+        <ChevronDown className={cn("inline size-3.5 transition-transform", open && "rotate-180")} /> Niepoliczone:{" "}
+        {held.length} {plural(held.length, "oferta", "oferty", "ofert")}
+        {substitutions.length > 0 ? `, w tym ${substitutions.length} ${plural(substitutions.length, "zamiennik", "zamienniki", "zamienników")}` : ""}
+      </button>
+      {open ? (
+        <>
+          {others.slice(0, 4).map(({ promo, reasons }) => (
+            <p key={promo.productKey} className="text-xs text-muted-foreground">
+              {promo.name}, {formatPrice(promo.promoPrice)}: {reasons.join(" · ")}
+            </p>
+          ))}
+          {substitutions.slice(0, 3).map(({ promo, reasons }) => (
+            <div key={promo.productKey} className="flex flex-col gap-1">
+              <p className="text-xs font-semibold text-muted-foreground first-letter:uppercase">{reasons.join(" · ")}</p>
+              <Suggestion promo={promo} packAssumed={false} item={item} onAnswer={(isMatch, pack) => onAnswer(promo, isMatch, pack)} />
+            </div>
+          ))}
+        </>
+      ) : null}
+    </div>
   );
 }
 
@@ -623,10 +733,13 @@ function CostDetail({ line, fetched }: { line: BasketLine; fetched: boolean }) {
   if (cost.option.kind === "mine") {
     const price = cost.option.price;
     return (
-      <p className="text-sm text-muted-foreground">
-        {packsLabel(cost.packs, price.packQuantity, price.packUnit)} po {formatPrice(price.price)}
-        {price.productLabel ? ` · ${price.productLabel}` : ""}
-      </p>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-sm text-muted-foreground">
+          {packsLabel(cost.packs, price.packQuantity, price.packUnit)} po {formatPrice(price.price)}
+          {price.productLabel ? ` · ${price.productLabel}` : ""}
+        </p>
+        <StateBadge state={cost.option.state} reasons={cost.option.reasons} />
+      </div>
     );
   }
 
@@ -646,11 +759,23 @@ function CostDetail({ line, fetched }: { line: BasketLine; fetched: boolean }) {
           : packsLabel(cost.packs, promo.packQuantity, promo.packUnit)}
       </p>
       <div className="flex flex-wrap gap-1.5">
-        {cost.estimated ? <Badge tone="muted">szacunek</Badge> : null}
+        <StateBadge state={cost.option.state} reasons={null} />
+        {cost.option.match && cost.option.match !== "listing" ? (
+          <Badge tone="muted">
+            {TIER_LABELS[cost.option.match]}
+            {cost.option.matchNotes && cost.option.matchNotes.length > 0
+              ? `, nie podano: ${cost.option.matchNotes.join(", ")}`
+              : ""}
+          </Badge>
+        ) : null}
         {cost.packAssumed ? (
           <Badge tone="muted">zakładam {formatAmount(promo.packQuantity, promo.packUnit)}</Badge>
         ) : null}
-        {promo.shelf ? (
+        {promo.historical ? (
+          <Badge tone="muted">{promo.historical === "receipt" ? "z paragonu" : "z paragonu w Open Prices"}</Badge>
+        ) : promo.productKey.startsWith("lidl-everyday:") ? (
+          <Badge tone="muted">stała cena w sklepie</Badge>
+        ) : promo.shelf ? (
           <Badge tone="muted">cena z półki (sklep online)</Badge>
         ) : cost.onPromo ? (
           <Badge tone="promo">{promo.multibuy ?? discount}</Badge>
@@ -664,7 +789,121 @@ function CostDetail({ line, fetched }: { line: BasketLine; fetched: boolean }) {
           </Badge>
         ) : null}
       </div>
+      {cost.option.reasons && cost.option.reasons.length > 0 ? (
+        <p className="text-xs text-muted-foreground">{cost.option.reasons.join(" · ")}</p>
+      ) : null}
       <SourceLine promo={promo} />
+    </div>
+  );
+}
+
+const STATE_TONES: Partial<Record<EligibilityState, "verified" | "promo" | "muted" | "warn">> = {
+  verified_current: "verified",
+  published_promotion: "promo",
+  unverified: "warn",
+};
+
+/** How far a price can be trusted, in one chip. */
+function StateBadge({ state, reasons }: { state: EligibilityState | undefined; reasons: string[] | null | undefined }) {
+  if (!state) return null;
+  const tone = STATE_TONES[state] ?? "muted";
+  return (
+    <>
+      <span
+        className={cn(
+          "inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold",
+          tone === "verified" && "bg-accent/15 text-accent",
+          tone === "promo" && "bg-primary/15 text-primary",
+          tone === "warn" && "bg-destructive/10 text-destructive",
+          tone === "muted" && "bg-muted text-muted-foreground",
+        )}
+      >
+        {state === "verified_current" ? <ShieldCheck className="size-3" /> : null}
+        {STATE_LABELS[state]}
+      </span>
+      {reasons && reasons.length > 0 ? <span className="text-xs text-muted-foreground">{reasons.join(" · ")}</span> : null}
+    </>
+  );
+}
+
+/** "2 zweryf. · 5 niezweryf. · 1 hist.": what a shop's total rests on. */
+function stateFacts(states: Partial<Record<EligibilityState, number>>): string[] {
+  const count = (...keys: EligibilityState[]) => keys.reduce((sum, key) => sum + (states[key] ?? 0), 0);
+  const verified = count("verified_current", "published_promotion");
+  const unverified = count("unverified");
+  const history = count("historical", "community");
+  const estimated = count("estimated");
+  return [
+    verified > 0 ? `${verified} zweryf.` : null,
+    unverified > 0 ? `${unverified} niezweryf.` : null,
+    history > 0 ? `${history} hist.` : null,
+    estimated > 0 ? `${estimated} szac.` : null,
+  ].filter((one): one is string => one !== null);
+}
+
+/**
+ * The only claim about "the cheapest complete basket": made from verified,
+ * current prices and published offers, exactly matched, every item priced.
+ * Anything less says so.
+ */
+function VerifiedVerdict({ verdict }: { verdict: Verdict }) {
+  const ready = verdict.complete.filter((one) => one.totalGrosz !== null);
+  const best = ready[0] ?? verdict.complete[0] ?? null;
+  return (
+    <div className="flex flex-col gap-1.5 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm">
+      <p className="flex items-center gap-1 text-xs font-bold tracking-wide text-accent uppercase">
+        <ShieldCheck className="size-3.5" />
+        Pełny koszyk, ceny zweryfikowane
+      </p>
+      {best ? (
+        verdict.complete.slice(0, 3).map((one, index) => (
+          <p key={one.shop} className="flex items-center gap-2">
+            <span className="min-w-0 flex-1 font-semibold">
+              {index === 0 ? "Najtaniej: " : ""}
+              {SHOP_LABELS[one.shop]}
+              {one.online ? " (online)" : ""}
+              <span className="font-normal text-muted-foreground">
+                {" "}
+                · {verdict.itemCount} z {verdict.itemCount}
+                {one.online
+                  ? one.deliveryGrosz === null
+                    ? " · dostawa nieznana lub poniżej minimum"
+                    : ` · w tym dostawa ${formatGrosz(one.deliveryGrosz)}`
+                  : ""}
+              </span>
+            </span>
+            <span className="font-extrabold tabular-nums">
+              {one.totalGrosz === null ? `${formatGrosz(one.goodsGrosz)} + ?` : formatGrosz(one.totalGrosz)}
+            </span>
+          </p>
+        ))
+      ) : (
+        <>
+          <p className="font-semibold">{CANNOT_DETERMINE}</p>
+          <p className="text-muted-foreground">
+            {verdict.coverage.length > 0
+              ? `Zweryfikowane ceny: ${verdict.coverage
+                  .slice(0, 3)
+                  .map(
+                    (one, index) =>
+                      `${SHOP_LABELS[one.shop]} ${one.priced} z ${verdict.itemCount}${
+                        index === 0 && one.missing.length > 0 && one.missing.length <= 3
+                          ? ` (brak: ${one.missing.join(", ")})`
+                          : ""
+                      }`,
+                  )
+                  .join(" · ")}.`
+              : "Żadne źródło z potwierdzoną zgodą nie ma jeszcze cen z tej listy."}
+          </p>
+        </>
+      )}
+      {verdict.split ? (
+        <p>
+          Dwa sklepy, {SHOP_LABELS[verdict.split.shops[0]]} + {SHOP_LABELS[verdict.split.shops[1]]}:{" "}
+          <span className="font-bold">{formatGrosz(verdict.split.totalGrosz)}</span>
+          {verdict.split.savingsGrosz !== null ? ` (−${formatGrosz(verdict.split.savingsGrosz)})` : ", cała lista"}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -1193,6 +1432,104 @@ function PriceForm({
         </Button>
       ) : null}
     </form>
+  );
+}
+
+/* How I shop ------------------------------------------------------------------- */
+
+const CHANNELS: [ShoppingPreferences["channel"], string][] = [
+  ["both", "Sklep i online"],
+  ["store", "Tylko w sklepie"],
+  ["online", "Tylko online"],
+];
+
+function PreferencesSheet({
+  preferences,
+  onSave,
+  onClose,
+}: {
+  preferences: ShoppingPreferences;
+  onSave: (preferences: ShoppingPreferences) => void;
+  onClose: () => void;
+}) {
+  const [channel, setChannel] = useState(preferences.channel);
+  const [loyalty, setLoyalty] = useState<LoyaltyProgram[]>(preferences.loyalty);
+  const [preferred, setPreferred] = useState<Shop[]>(
+    SHOP_ORDER.filter((shop) => preferences.preferredRetailers.includes(shop as never)),
+  );
+  const [brands, setBrands] = useState(preferences.excludedBrands.join(", "));
+  const toggle = <T,>(list: T[], value: T) => (list.includes(value) ? list.filter((one) => one !== value) : [...list, value]);
+  const chip = (active: boolean) =>
+    cn("h-10 rounded-full border px-3 text-sm font-semibold", active ? "border-primary bg-primary/10 text-primary" : "bg-card");
+
+  return (
+    <Sheet open onClose={onClose} title="Jak robię zakupy">
+      <form
+        className="flex flex-col gap-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSave({
+            channel,
+            loyalty,
+            preferredRetailers: preferred as ShoppingPreferences["preferredRetailers"],
+            excludedBrands: brands
+              .split(",")
+              .map((brand) => brand.trim())
+              .filter((brand) => brand.length >= 2),
+          });
+        }}
+      >
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-bold">Gdzie</legend>
+          <div className="flex flex-wrap gap-2">
+            {CHANNELS.map(([value, label]) => (
+              <button key={value} type="button" aria-pressed={channel === value} onClick={() => setChannel(value)} className={chip(channel === value)}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-bold">Aplikacje i karty, które mam</legend>
+          <p className="text-xs text-muted-foreground">Ceny „tylko z aplikacją” liczą się tylko dla tych.</p>
+          <div className="flex flex-wrap gap-2">
+            {LOYALTY_PROGRAMS.map((program) => (
+              <button
+                key={program}
+                type="button"
+                aria-pressed={loyalty.includes(program)}
+                onClick={() => setLoyalty((list) => toggle(list, program))}
+                className={chip(loyalty.includes(program))}
+              >
+                {LOYALTY_LABELS[program]}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-bold">Moje sklepy (na górze listy)</legend>
+          <div className="flex flex-wrap gap-2">
+            {SHOP_ORDER.map((shop) => (
+              <button
+                key={shop}
+                type="button"
+                aria-pressed={preferred.includes(shop)}
+                onClick={() => setPreferred((list) => toggle(list, shop))}
+                className={chip(preferred.includes(shop))}
+              >
+                {SHOP_LABELS[shop]}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-bold">Marki, których nie chcę</span>
+          <Input value={brands} onChange={(event) => setBrands(event.target.value)} placeholder="np. Pilos, Mlekovita" />
+          <span className="text-xs text-muted-foreground">Po przecinku. Nie będą podpowiadane ani liczone.</span>
+        </label>
+        <Button type="submit">Zapisz</Button>
+      </form>
+    </Sheet>
   );
 }
 

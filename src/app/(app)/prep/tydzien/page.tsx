@@ -18,6 +18,7 @@ import {
   saveShopPriceAction,
   saveShopPricesAction,
   saveDeliveryQuoteAction,
+  saveShoppingPreferencesAction,
   setShoppingCityAction,
 } from "../zakupy/actions";
 import { WeekPlanner } from "./week-planner";
@@ -73,6 +74,7 @@ export default async function WeekPage({ searchParams }: { searchParams: Promise
           onAnswer: answerPromoAction,
           onSaveQuote: saveDeliveryQuoteAction,
           onSetCity: setShoppingCityAction,
+          onSavePreferences: saveShoppingPreferencesAction,
         }}
       />
     </>

@@ -31,6 +31,7 @@ import { fetchStokrotkaFeed, toShelfPrice } from "./stokrotka";
 import { SHOP_LABELS, type CategoryEntry, type ShelfPrice } from "./types";
 import { blixSearchFor, catalogCandidates, categoriesFor } from "./match";
 import { disabledNote, isSourceEnabled } from "@/lib/grocery/policy";
+import { recordRun } from "@/lib/grocery/runs";
 import type { ProviderId } from "@/lib/grocery/providers";
 
 /** Products read per shopping item: the plainest few that the rules accept. */
@@ -90,6 +91,13 @@ type ShelfCategorySource = {
  */
 async function refreshShelfCategories(source: ShelfCategorySource): Promise<FeedRefresh> {
   if (!isSourceEnabled(source.provider)) return { count: 0, skipped: true, disabled: disabledNote(source.provider) };
+  return recordRun(source.provider, () => readShelfCategories(source), (result) => ({
+    status: result.skipped ? "skipped" : result.note ? "partial" : "ok",
+    imported: result.count,
+  }));
+}
+
+async function readShelfCategories(source: ShelfCategorySource): Promise<FeedRefresh> {
   const now = new Date();
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
@@ -189,12 +197,35 @@ export async function refreshShopPromos(): Promise<RefreshResult> {
   };
 
   const [lidl, blix, shelf] = await Promise.allSettled([
-    enabled.lidl ? fetchLidlPromos(now) : Promise.resolve(null),
-    enabled.blix && searches.length > 0 ? fetchBlixPromos(searches, now) : Promise.resolve(null),
+    enabled.lidl
+      ? recordRun("lidl-web", () => fetchLidlPromos(now), (promos) => ({
+          status: "ok",
+          fetched: promos.length,
+          imported: promos.length,
+        }))
+      : Promise.resolve(null),
+    enabled.blix && searches.length > 0
+      ? recordRun("blix", () => fetchBlixPromos(searches, now), (result) => ({
+          status: result.failed > 0 ? "partial" : "ok",
+          fetched: result.searched,
+          imported: result.promos.length,
+          issues: { failed_searches: result.failed },
+        }))
+      : Promise.resolve(null),
     enabled.shelf && items.length > 0
-      ? refreshBiedronkaShelf(
-          items.map((item) => ({ name: item.name, unit: item.unit as Unit | null })),
-          now,
+      ? recordRun(
+          "biedronka-online",
+          () =>
+            refreshBiedronkaShelf(
+              items.map((item) => ({ name: item.name, unit: item.unit as Unit | null })),
+              now,
+            ),
+          (result) => ({
+            status: result.failed > 0 ? "partial" : "ok",
+            fetched: result.read,
+            imported: result.prices.length,
+            issues: { failed_pages: result.failed },
+          }),
         )
       : Promise.resolve(null),
   ]);
@@ -292,7 +323,7 @@ export async function refreshStokrotkaPrices(): Promise<FeedRefresh> {
 
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
-  const feed = await fetchStokrotkaFeed();
+  const feed = await recordRun("stokrotka-feed", fetchStokrotkaFeed, (all) => ({ status: "ok", fetched: all.length }));
   const prices = new Map<string, ShelfPrice>();
   for (const item of items) {
     const candidates = catalogCandidates(item.name, item.unit as Unit | null, feed, 40)
@@ -325,7 +356,13 @@ export async function refreshFriscoPrices(): Promise<FeedRefresh> {
 
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
-  const products = (await fetchFriscoFeed()).filter((product) => product.inStock);
+  const products = (
+    await recordRun("frisco-feed", fetchFriscoFeed, (all) => ({
+      status: "ok",
+      fetched: all.length,
+      issues: { out_of_stock: all.filter((product) => !product.inStock).length },
+    }))
+  ).filter((product) => product.inStock);
   const feed = products.map((product) => ({ name: matchName(product), product }));
   const prices = new Map<string, ShelfPrice>();
   for (const item of items) {
@@ -369,7 +406,12 @@ export async function refreshBlixSweep(): Promise<SweepRefresh> {
     return { pagesRead: 0, pagesTotal: 0, complete: true, skipped: true };
   }
   const now = new Date();
-  const result = await fetchBlixSweep(started + SWEEP_BUDGET_MS, now);
+  const result = await recordRun("blix", () => fetchBlixSweep(started + SWEEP_BUDGET_MS, now), (sweep) => ({
+    status: sweep.complete ? "ok" : "partial",
+    fetched: sweep.pagesRead,
+    imported: sweep.promos.length,
+    issues: { pages_left: sweep.pagesTotal - sweep.pagesRead },
+  }));
   await upsertShopPromos(result.promos, now.toISOString());
   await deleteExpiredPromos(todayIso());
   if (result.complete) await markRefreshed("blix-sweep", now.toISOString());

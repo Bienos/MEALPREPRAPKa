@@ -17,6 +17,7 @@ import {
   saveShopPriceAction,
   saveShopPricesAction,
   saveDeliveryQuoteAction,
+  saveShoppingPreferencesAction,
   setShoppingCityAction,
 } from "./actions";
 
@@ -96,6 +97,7 @@ export default async function ShoppingPage() {
           onAnswer: answerPromoAction,
           onSaveQuote: saveDeliveryQuoteAction,
           onSetCity: setShoppingCityAction,
+          onSavePreferences: saveShoppingPreferencesAction,
         }}
       />
     </>

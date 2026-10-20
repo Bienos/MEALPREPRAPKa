@@ -18,6 +18,8 @@ export function priceSource(promo: ShopPromo): PriceSource {
   const shop = SHOP_LABELS[promo.shop];
   const day = promo.fetchedAt ? dayOf(promo.fetchedAt) : null;
   const url = promo.sourceUrl;
+  if (promo.historical === "community") return { label: "Open Prices (paragon lub etykieta)", day, url };
+  if (promo.historical === "receipt") return { label: "Twój paragon", day, url };
   if (promo.productKey.startsWith("lidl-everyday:")) {
     return { label: "Stała cena Lidla (gazetka „Rewolucja cenowa”)", day, url };
   }

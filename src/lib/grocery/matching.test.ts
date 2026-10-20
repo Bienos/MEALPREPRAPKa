@@ -88,6 +88,8 @@ describe("matching tiers", () => {
     assert.equal(tier(need("jajka", "szt"), product("Jaja przepiórcze 18 szt")), "none");
     assert.equal(tier(need("mleko", "ml"), product("Mleko kokosowe 400 ml")), "none");
     assert.equal(tier(need("skyr"), product("Skyr szarlotka 330 g")), "none");
+    // Pickled ("małosolne") is not the fresh cucumber on the list (seen in Warsaw Open Prices data).
+    assert.equal(tier(need("ogórek"), product("Chef Select Ogórki małosolne")), "none");
   });
 
   test("a pack in another unit can never price the item", () => {

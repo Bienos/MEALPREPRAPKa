@@ -177,7 +177,16 @@ export function onlineOptions(summary: BasketSummary, quotes: DeliveryQuote[], c
 }
 
 export type BestOption =
-  | { kind: "shop"; shop: Shop; total: number; coverage: number; missing: number; estimated: number }
+  | {
+      kind: "shop";
+      shop: Shop;
+      total: number;
+      coverage: number;
+      missing: number;
+      estimated: number;
+      /** Every item priced. Without it the total is partial and must never read as "the cheapest basket". */
+      complete: boolean;
+    }
   | { kind: "online"; option: OnlineOption }
   | { kind: "split"; total: number; savings: number; count: number };
 
@@ -209,6 +218,7 @@ export function bestOptions(
           coverage: shop.priced / summary.itemCount,
           missing: summary.itemCount - shop.priced,
           estimated: shop.estimated,
+          complete: shop.priced === summary.itemCount,
         }
       : null,
     online: bestOnline ? { kind: "online", option: bestOnline } : null,

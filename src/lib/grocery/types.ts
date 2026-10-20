@@ -129,3 +129,13 @@ export type PriceFact = {
   /** The pack or the price was worked out (an assumed pack, a price from a unit price), not read. */
   derived: boolean;
 };
+
+/** How I shop: what the eligibility engine needs to know about me. */
+export type ShoppingPreferences = {
+  channel: "store" | "online" | "both";
+  loyalty: LoyaltyProgram[];
+  /** Brands never to suggest. */
+  excludedBrands: string[];
+  /** Shops shown first on the card. */
+  preferredRetailers: RetailerId[];
+};

@@ -279,7 +279,7 @@ const RULES: Rule[] = [
   {
     item: /ogork|ogorek/,
     product: /ogorek|ogorki/,
-    not: either(/kiszon|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b/, PROCESSED),
+    not: either(/kiszon|malosoln|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b/, PROCESSED),
     search: { sub: "warzywa", q: "ogórek" },
   },
   {

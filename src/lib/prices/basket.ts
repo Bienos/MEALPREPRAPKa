@@ -12,9 +12,15 @@
  * - a leaflet offer that only looks like the item counts as an estimate, and
  *   says so; the cheapest usable option wins, and buying whole packs means
  *   the amount is always covered (500 g needed, 250 g packs: two of them);
- * - an item with no usable price is "bez ceny" and stays out of the total.
+ * - an item with no usable price is "bez ceny" and stays out of the total;
+ * - money is summed in whole grosz (złoty are only what goes in and out);
+ * - an option can carry its eligibility (grocery/eligibility.ts) and a rank:
+ *   the lowest rank wins first, then the lowest cost, so a dated history
+ *   price only fills a gap and never undercuts today's offers.
  */
 
+import type { EligibilityState } from "../grocery/eligibility.ts";
+import type { MatchTier } from "../grocery/matching.ts";
 import type { Unit } from "../meals/ingredients.ts";
 import type { Shop, ShopPrice, ShopPromo } from "./types.ts";
 
@@ -25,12 +31,25 @@ export type NeededItem = { id: string; name: string; quantity: number | null; un
  * One way to buy an item at a shop: a confirmed promo, a leaflet offer the
  * rules think fits (an estimate), or my own price.
  */
-export type PriceOption =
+export type PriceOption = (
   | { kind: "promo"; promo: ShopPromo; estimate?: { packAssumed: boolean } }
-  | { kind: "mine"; price: ShopPrice };
+  | { kind: "mine"; price: ShopPrice }
+) & {
+  /** Lower is preferred before price is compared; 0 when not given. */
+  rank?: number;
+  /** What the eligibility engine said about this price, and why. */
+  state?: EligibilityState;
+  reasons?: string[];
+  /** How sure the product is the item. */
+  match?: MatchTier;
+  /** What the item names that the product does not state ("zawartość tłuszczu"). */
+  matchNotes?: string[];
+};
 
 export type ItemCost = {
+  /** Złoty, for display; `amountGrosz` is what is summed. */
   amount: number;
+  amountGrosz: number;
   /** Whole packs, or the share of a pack for loose produce. */
   packs: number;
   option: PriceOption;
@@ -52,9 +71,14 @@ export type BasketLine = {
 export type ShopBasket = {
   shop: Shop;
   lines: BasketLine[];
-  /** Sum of every priced line at this shop. */
+  /** Sum of every priced line at this shop (złoty, from `totalGrosz`). */
   total: number;
+  totalGrosz: number;
   priced: number;
+  /** Every item on the list has a price here. Only a complete basket can be "the cheapest". */
+  complete: boolean;
+  /** Priced lines by eligibility state, when the options carried one. */
+  states: Partial<Record<EligibilityState, number>>;
   onPromo: number;
   /** Of the priced items, how many rest on an unconfirmed leaflet offer. */
   estimated: number;
@@ -109,33 +133,37 @@ export function costOf(item: NeededItem, option: PriceOption): ItemCost | "unit"
     const exact = item.quantity / size;
     packs = loose ? exact : Math.ceil(exact - 1e-9);
   }
+  const cost = (grosz: number, rest: Omit<ItemCost, "amount" | "amountGrosz" | "packs" | "option">): ItemCost => ({
+    amount: grosz / 100,
+    amountGrosz: grosz,
+    packs,
+    option,
+    ...rest,
+  });
 
   if (option.kind === "mine") {
-    return {
-      amount: round(packs * option.price.price),
-      packs,
-      option,
+    return cost(times(toGrosz(option.price.price), packs), {
       onPromo: false,
       estimated: false,
       packAssumed: false,
-    };
+    });
   }
 
   const { promoPrice, regularPrice, multibuyMin } = option.promo;
   const estimated = option.estimate !== undefined;
   const packAssumed = option.estimate?.packAssumed ?? false;
-  if (option.promo.shelf) {
-    return { amount: round(packs * promoPrice), packs, option, onPromo: false, estimated, packAssumed };
+  if (option.promo.shelf || option.promo.historical) {
+    return cost(times(toGrosz(promoPrice), packs), { onPromo: false, estimated, packAssumed });
   }
   if (loose || multibuyMin <= 1) {
-    return { amount: round(packs * promoPrice), packs, option, onPromo: true, estimated, packAssumed };
+    return cost(times(toGrosz(promoPrice), packs), { onPromo: true, estimated, packAssumed });
   }
 
   const promoPacks = Math.floor(packs / multibuyMin) * multibuyMin;
   const rest = packs - promoPacks;
   if (rest > 0 && regularPrice === null) return null;
-  const amount = promoPacks * promoPrice + rest * (regularPrice ?? 0);
-  return { amount: round(amount), packs, option, onPromo: promoPacks > 0, estimated, packAssumed };
+  const grosz = promoPacks * toGrosz(promoPrice) + rest * toGrosz(regularPrice ?? 0);
+  return cost(grosz, { onPromo: promoPacks > 0, estimated, packAssumed });
 }
 
 /** The cheapest usable option for one item at one shop. */
@@ -145,9 +173,15 @@ export function priceLine(item: NeededItem, options: PriceOption[]): BasketLine 
   for (const option of options) {
     const cost = costOf(item, option);
     if (cost === "unit") unitMismatch = true;
-    else if (cost && (!best || cost.amount < best.amount)) best = cost;
+    else if (cost && (!best || better(cost, best))) best = cost;
   }
   return { item, cost: best, missing: best ? null : unitMismatch ? "unit" : "no-price" };
+}
+
+function better(a: ItemCost, b: ItemCost): boolean {
+  const rankA = a.option.rank ?? 0;
+  const rankB = b.option.rank ?? 0;
+  return rankA !== rankB ? rankA < rankB : a.amountGrosz < b.amountGrosz;
 }
 
 export function buildBasket(
@@ -158,11 +192,20 @@ export function buildBasket(
   const baskets: ShopBasket[] = shops.map((shop) => {
     const lines = items.map((item) => priceLine(item, optionsFor(item, shop)));
     const priced = lines.filter((line) => line.cost);
+    const totalGrosz = priced.reduce((sum, line) => sum + (line.cost?.amountGrosz ?? 0), 0);
+    const states: Partial<Record<EligibilityState, number>> = {};
+    for (const line of priced) {
+      const state = line.cost?.option.state;
+      if (state) states[state] = (states[state] ?? 0) + 1;
+    }
     return {
       shop,
       lines,
-      total: round(priced.reduce((sum, line) => sum + (line.cost?.amount ?? 0), 0)),
+      total: totalGrosz / 100,
+      totalGrosz,
       priced: priced.length,
+      complete: items.length > 0 && priced.length === items.length,
+      states,
       onPromo: priced.filter((line) => line.cost?.onPromo).length,
       estimated: priced.filter((line) => line.cost?.estimated).length,
     };
@@ -180,29 +223,26 @@ export function buildBasket(
   const compared = new Set(
     items.filter((_, index) => contenders.every((basket) => basket.lines[index].cost)).map((item) => item.id),
   );
-  const amountAt = (basket: ShopBasket, index: number) => basket.lines[index].cost?.amount ?? 0;
+  const amountAt = (basket: ShopBasket, index: number) => basket.lines[index].cost?.amountGrosz ?? 0;
 
   const totals: Partial<Record<Shop, number>> = {};
   for (const basket of contenders) {
-    totals[basket.shop] = round(
-      items.reduce((sum, item, index) => sum + (compared.has(item.id) ? amountAt(basket, index) : 0), 0),
-    );
+    totals[basket.shop] =
+      items.reduce((sum, item, index) => sum + (compared.has(item.id) ? amountAt(basket, index) : 0), 0) / 100;
   }
 
   let cheapest: Shop | null = null;
   let split: BasketSummary["split"] = null;
   if (compared.size > 0 && contenders.length > 1) {
     const sorted = [...contenders].sort((a, b) => totals[a.shop]! - totals[b.shop]!);
-    if (totals[sorted[1].shop]! - totals[sorted[0].shop]! >= 0.01) cheapest = sorted[0].shop;
-    const splitTotal = round(
-      items.reduce(
-        (sum, item, index) =>
-          compared.has(item.id) ? sum + Math.min(...contenders.map((basket) => amountAt(basket, index))) : sum,
-        0,
-      ),
+    if (toGrosz(totals[sorted[1].shop]!) - toGrosz(totals[sorted[0].shop]!) >= 1) cheapest = sorted[0].shop;
+    const splitGrosz = items.reduce(
+      (sum, item, index) =>
+        compared.has(item.id) ? sum + Math.min(...contenders.map((basket) => amountAt(basket, index))) : sum,
+      0,
     );
-    const savings = round(totals[sorted[0].shop]! - splitTotal);
-    if (savings >= 0.01) split = { total: splitTotal, savings };
+    const savingsGrosz = toGrosz(totals[sorted[0].shop]!) - splitGrosz;
+    if (savingsGrosz >= 1) split = { total: splitGrosz / 100, savings: savingsGrosz / 100 };
   }
 
   const comparable = contenders.length > 1 && compared.size > 0;
@@ -216,6 +256,12 @@ export function buildBasket(
   };
 }
 
-function round(value: number): number {
-  return Math.round(value * 100) / 100;
+/** Złoty to whole grosz. */
+function toGrosz(value: number): number {
+  return Math.round(value * 100);
+}
+
+/** A grosz price times a pack count; a share of a pack (loose goods) rounds like a till. */
+function times(grosz: number, packs: number): number {
+  return Math.round(grosz * packs + 1e-9);
 }
