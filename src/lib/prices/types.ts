@@ -88,6 +88,8 @@ export type ShopPromo = {
   sourceUrl: string;
   /** A regular shelf price from the shop's own catalogue, not a deal. */
   shelf?: boolean;
+  /** When this price was read from its source (ISO); the screen shows it so nothing looks guessed. */
+  fetchedAt?: string;
 };
 
 /** One product's regular shelf price from a shop's own catalogue, as stored. */
