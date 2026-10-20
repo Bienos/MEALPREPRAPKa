@@ -108,6 +108,57 @@ describe("matching tiers", () => {
     assert.equal(tier(need("kurczak gotowy"), product("Filet z kurczaka pieczony 200 g")), "attributes");
   });
 
+  test("false positives found by the Warsaw pilot audit (Frisco feed, 21.10.2026)", () => {
+    const wrong: [string, string, Need["unit"]][] = [
+      ["orzo", "Skorzonera (400g-600g)", "g"],
+      ["pesto", "Pestki dyni", "g"],
+      ["whey", "Odżywka do włosów", "g"],
+      ["kakao", "Ciasteczka kakaowe", "g"],
+      ["sos teriyaki", "Beef Jerky Teriyaki", "g"],
+      ["sos sojowy", "Produkt sojowy kokos", "ml"],
+      ["filet z indyka", "Filetki z Indykiem", "g"],
+      ["wołowina mielona", "Łój wołowy", "g"],
+      ["ser gouda w plastrach", "Ser krem", "g"],
+      ["tortilla pszenna", "Tortilla z mięsem i warzywami", "g"],
+      ["pomidor", "Pomidory całe", "g"],
+      ["masło orzechowe", "Baton healthy snack - masło orzechowe", "g"],
+      ["salsa", "Dip serowy (salsa)", "g"],
+      ["makaron spaghetti", "Spaghetti 4 sery", "g"],
+      // Open Prices, Warsaw.
+      ["papryka", "Carrefour Vegetal Hummus paprykowy 160 g", "g"],
+      ["banan", "Piątnica Koktajl białkowy Truskawka & Banan 256 g", "g"],
+      ["maliny mrożone", "Kubuś play woda & owoce o smaku malina", "g"],
+      ["curry", "Ajinomoto Japanese Curry Flavour", "g"],
+      ["jabłko", "EkaMedica jabłko pokrzywa mięta 300 ml", "g"],
+      ["whey", "Mleczna odżywka wyzwalająca blask Natural Shine", "g"],
+    ];
+    for (const [item, name, unit] of wrong) assert.equal(tier(need(item, unit), product(name)), "none", `${item} <- ${name}`);
+  });
+
+  test("a different kind in the same family is a substitution, never the item", () => {
+    const swaps: [string, string][] = [
+      ["makaron spaghetti", "Makaron penne 500 g"],
+      ["papryka czerwona", "Papryka żółta 500 g"],
+      ["truskawki mrożone", "Maliny mrożone 450 g"],
+      ["miód wielokwiatowy", "Miód leśny 400 g"],
+      ["jaja z wolnego wybiegu", "Jaja ekologiczne - 10 szt. BIO"],
+      ["jogurt naturalny", "Jogurt grecki 400 g"],
+      ["jogurt grecki naturalny", "Jogurt naturalny 400 g"],
+    ];
+    for (const [item, name] of swaps) {
+      assert.equal(tier(need(item, item.startsWith("jaja") ? "szt" : "g"), product(name)), "substitution", `${item} <- ${name}`);
+    }
+  });
+
+  test("a word the item says and the product does not keeps the match at category", () => {
+    assert.equal(tier(need("szynka z indyka w plastrach"), product("Szynka z Indyka 150 g")), "category");
+    assert.equal(tier(need("cebula czerwona"), product("Cebula 1 kg")), "category");
+    assert.equal(tier(need("chleb żytni"), product("Chleb IG 500 g")), "category");
+    assert.equal(tier(need("passata"), product("Pomidory krojone 400 g")), "category");
+    assert.equal(tier(need("pomidory koktajlowe"), product("Pomidory cherry 250 g")), "attributes");
+    assert.equal(tier(need("szynka z indyka w plastrach"), product("Szynka z indyka w plastrach 100 g")), "attributes");
+  });
+
   test("English names from open data reach the Polish rules", () => {
     assert.equal(tier(need("oliwa", "ml"), product("Virgin Olive Oil 500 ml")), "attributes");
     assert.equal(tier(need("ryż"), product("Sushi Rice 500g")), "none");

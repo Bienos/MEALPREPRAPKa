@@ -24,7 +24,7 @@ import type { Unit } from "../meals/ingredients.ts";
 import { categorize } from "../meals/ingredients.ts";
 import { ruleAccepts } from "../prices/match.ts";
 import { canonicalGtin, isRestrictedGtin } from "./gtin.ts";
-import { fatLevelOf, familyOf, fold, variantOf, withPolish, type Variant } from "./normalize.ts";
+import { compareKinds, fatLevelOf, familyOf, fold, missingWords, variantOf, withPolish, type Variant } from "./normalize.ts";
 import { convert, type Quantity } from "./units.ts";
 
 export type MatchTier = "gtin" | "listing" | "attributes" | "category" | "substitution" | "none";
@@ -74,6 +74,9 @@ export const REFERENCE_TIERS = new Set<MatchTier>(["gtin", "listing", "attribute
 
 const FAT_WORDS = { low: "chudy/light", mid: "półtłusty", full: "tłusty" } as const;
 
+/** Items that are themselves liquids (or sold by volume), so a pack in millilitres can price them. */
+const LIQUID = /mleko|mleczko|oliwa|olej|passata|\bsos\b|sok|napoj|ocet|syrop|bialka jaj|jogurt pitny|kefir|maslank|smietan/;
+
 function none(reason: string): MatchResult {
   return { tier: "none", conflicts: [reason], unknown: [], needsApproval: false };
 }
@@ -99,6 +102,10 @@ export function matchCandidate(
   // A pack in pieces cannot price grams (and the other way round): never this item's price.
   if (candidate.pack && need.unit && !convert(candidate.pack, need.unit)) {
     return none("opakowanie w innej jednostce");
+  }
+  // A solid food sold by the millilitre is a drink made of it ("jabłko pokrzywa mięta 300 ml").
+  if (candidate.pack?.unit === "ml" && need.unit === "g" && !LIQUID.test(fold(need.name))) {
+    return none("napój, a potrzebny produkt stały");
   }
 
   const needGtin = need.gtin ? canonicalGtin(need.gtin) : null;
@@ -150,6 +157,12 @@ export function compareVariants(needName: string, productName: string): { confli
   for (const flag of ["wholegrain", "lactoseFree", "organic", "extraVirgin"] as const) {
     if (need[flag] && !product[flag]) unknown.push(FLAG_LABELS[flag]);
   }
+  for (const kind of compareKinds(needName, productName)) {
+    if (kind.product === null || kind.product === "mix") unknown.push(`${kind.label}: ${kind.need}`);
+    else if (kind.product !== kind.need) conflicts.push(`${kind.label}: ${kind.product} zamiast ${kind.need}`);
+  }
+  // Every other word the item says must be in the product's name for an exact match.
+  for (const word of missingWords(needName, productName)) unknown.push(`„${word}”`);
   return { conflicts, unknown };
 }
 

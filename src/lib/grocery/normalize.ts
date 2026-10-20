@@ -63,6 +63,7 @@ const ENGLISH: [RegExp, string][] = [
   [/\bhoney\b/, "miod"],
   [/\bpeanut butter\b/, "maslo orzechowe"],
   [/\bfrozen\b/, "mrozone"],
+  [/\bsoy sauce\b/, "sos sojowy"],
 ];
 
 /** Folded text with Polish words added for English ones; Polish text comes back unchanged. */
@@ -171,3 +172,144 @@ export function variantOf(name: string): Variant {
 }
 
 export { familyOf };
+
+/* Kinds ---------------------------------------------------------------------- */
+
+/**
+ * Within a family, kinds that are different products: raspberries are not
+ * strawberries, penne is not spaghetti, a yellow pepper is not a red one.
+ * The family is read from the item; the kind from both.
+ */
+const KIND_FAMILIES: { family: RegExp; label: string; kinds: [RegExp, string][] }[] = [
+  {
+    family: /truskaw|malin|borowk|jagod/,
+    label: "owoc",
+    kinds: [[/truskaw/, "truskawki"], [/malin/, "maliny"], [/borowk/, "borówki"], [/jagod/, "jagody"]],
+  },
+  {
+    family: /makaron|spaghetti|penne|fusilli|swiderk|tagliatelle|farfalle|kokardk|rigatoni|muszel|nitk|lasagn|kolank/,
+    label: "kształt makaronu",
+    kinds: [
+      [/spaghetti/, "spaghetti"],
+      [/penne|piorka|piora/, "penne"],
+      [/fusilli|swiderk/, "świderki"],
+      [/tagliatelle|wstazk/, "tagliatelle"],
+      [/farfalle|kokardk/, "kokardki"],
+      [/rigatoni/, "rigatoni"],
+      [/muszel|conchigl/, "muszelki"],
+      [/\bnitk/, "nitki"],
+      [/lasagn/, "lasagne"],
+      [/kolank|kolanka/, "kolanka"],
+      [/udon/, "udon"],
+    ],
+  },
+  {
+    family: /\bser\b|gouda|edam|cheddar|ementa|maasdam|tylzyck|podlask|parmez/,
+    label: "rodzaj sera",
+    kinds: [
+      [/gouda/, "gouda"],
+      [/edam/, "edam"],
+      [/cheddar/, "cheddar"],
+      [/ementa/, "ementaler"],
+      [/maasdam/, "maasdam"],
+      [/tylzyck/, "tylżycki"],
+      [/podlask/, "podlaski"],
+      [/parmez|parmigian/, "parmezan"],
+      [/carsk/, "carski"],
+      [/\bkrem/, "kremowy"],
+    ],
+  },
+  {
+    family: /papryk|cebul|fasol/,
+    label: "kolor",
+    kinds: [[/czerwon/, "czerwona"], [/zolt/, "żółta"], [/zielon/, "zielona"], [/\bbial/, "biała"], [/czarn/, "czarna"]],
+  },
+  {
+    family: /pomidor/,
+    label: "odmiana pomidorów",
+    kinds: [[/koktajl|cherry|czeresn/, "koktajlowe"], [/malinow/, "malinowe"], [/bawole serce/, "bawole serce"]],
+  },
+  {
+    family: /\bmiod/,
+    label: "rodzaj miodu",
+    kinds: [
+      [/wielokwiat/, "wielokwiatowy"],
+      [/lipow/, "lipowy"],
+      [/gryczan/, "gryczany"],
+      [/\blesn/, "leśny"],
+      [/akacj/, "akacjowy"],
+      [/rzepak/, "rzepakowy"],
+      [/spadziow/, "spadziowy"],
+    ],
+  },
+  {
+    family: /\bjaj/,
+    label: "chów",
+    kinds: [
+      [/ekolog|\bbio\b|\bchow 0\b/, "ekologiczne"],
+      [/wolnego wybiegu|wolny wybieg|z wybiegu/, "z wolnego wybiegu"],
+      [/sciolk|scielk/, "ściółkowe"],
+      [/klatk/, "klatkowe"],
+    ],
+  },
+  {
+    family: /chleb|pieczyw|\bbulk/,
+    label: "mąka",
+    kinds: [[/zytn/, "żytni"], [/pszenn/, "pszenny"], [/orkisz/, "orkiszowy"], [/graham/, "graham"], [/wieloziarn/, "wieloziarnisty"]],
+  },
+  {
+    family: /jogurt/,
+    label: "rodzaj jogurtu",
+    kinds: [[/grecki|greek|typu greckiego/, "grecki"], [/naturaln/, "naturalny"]],
+  },
+];
+
+export type KindCheck = { label: string; need: string; product: string | "mix" | null };
+
+/**
+ * For each family the item belongs to and names a kind of: the product's
+ * kind (null when it names none, "mix" when it names several).
+ */
+export function compareKinds(needName: string, productName: string): KindCheck[] {
+  const need = withPolish(needName);
+  const product = withPolish(productName);
+  const checks: KindCheck[] = [];
+  for (const family of KIND_FAMILIES) {
+    if (!family.family.test(need)) continue;
+    const needKind = family.kinds.find(([pattern]) => pattern.test(need))?.[1];
+    if (!needKind) continue;
+    const found = [...new Set(family.kinds.filter(([pattern]) => pattern.test(product)).map(([, kind]) => kind))];
+    // "Jogurt grecki naturalny" is a Greek yogurt: the first kind listed wins inside one name.
+    const productKind = family.label === "rodzaj jogurtu" ? (found[0] ?? null) : found.length > 1 ? "mix" : (found[0] ?? null);
+    checks.push({ label: family.label, need: needKind, product: productKind });
+  }
+  return checks;
+}
+
+/** Words a kind, an attribute or a family already accounts for, so they are not asked for twice. */
+const ACCOUNTED =
+  /^(z|ze|w|we|do|na|i|bez|lub|typu|oraz|the|of|pieczywo|owoce|warzywa|mieso|ser|makaron|chudy|chuda|chude|light|lekki|lekka|lekkie|poltlusty|poltlusta|tlusty|tlusta|pelnotlusty|fit|gotowy|gotowa|gotowe|gotowany|microwave|mrozone|mrozony|mrozona|konserwowa|konserwowy|bio|eko|extra|virgin|pelnoziarnisty|pelnoziarnista|razowy|razowa|naturalny|naturalna|grecki|szt|kg|g|ml|l)$/;
+
+/** Start of a word, enough to catch its other forms: "kurczaka" -> "kurcz", "jajka" -> "jaj". */
+export function wordStem(word: string): string {
+  const folded = fold(word);
+  if (/^jaj/.test(folded)) return "jaj";
+  if (folded.length <= 4) return folded;
+  return folded.length <= 7 ? folded.slice(0, folded.length - 2) : folded.slice(0, folded.length - 3);
+}
+
+/** The item's own words that the product does not say ("plastrach" for "szynka z indyka w plastrach"). */
+export function missingWords(needName: string, productName: string): string[] {
+  const kindWords = new Set(
+    KIND_FAMILIES.flatMap((family) => family.kinds)
+      .map(([pattern]) => pattern)
+      .flatMap((pattern) => tokens(needName).filter((word) => pattern.test(word))),
+  );
+  const productTokens = tokens(withPolish(productName));
+  return tokens(needName)
+    .filter((word) => !ACCOUNTED.test(word) && !/\d/.test(word) && !kindWords.has(word))
+    .filter((word) => {
+      const stem = wordStem(word);
+      return !productTokens.some((token) => token.startsWith(stem));
+    });
+}

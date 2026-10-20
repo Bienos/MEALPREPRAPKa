@@ -246,3 +246,15 @@ gdy otwierasz je ze starymi danymi.
 Miasto, dla którego liczona jest dostawa, to `settings.shopping_city` (domyślnie Warszawa; zmieniasz je na karcie
 "Dostawa"). Opłaty za dostawę wpisujesz na tej samej karcie; bez wpisu aplikacja używa tylko tego, co sklep
 publikuje na swojej stronie o dostawie, i oznacza to jako szacunek. Szczegóły: `docs/SHOPPING_INTELLIGENCE.md`.
+
+## Ceny: źródła, weryfikacja, paragony (20.10.2026)
+
+1. Zastosuj migrację `supabase/migrations/20261020120000_grocery_foundation.sql` przed wdrożeniem kodu.
+2. Źródła cen bez potwierdzonej zgody (lidl.pl, Blix, sklepy online Biedronki i Auchan, plik Stokrotki) są
+   **wyłączone domyślnie**. Do użytku prywatnego włączasz je zmienną `GROCERY_UNVERIFIED_SOURCES=on`; ich ceny
+   i tak są oznaczone jako niezweryfikowane. Frisco i Open Prices działają bez zmian w konfiguracji.
+3. Opcjonalnie `OPEN_FOOD_FACTS_CONTACT` (e-mail lub adres do kontaktu w nagłówku User-Agent).
+4. Sprawdź: Prep → Zakupy → „Źródła danych” pokazuje stan każdego źródła; „Pobierz nowe ceny z Open Prices”
+   powinno zapisać ok. 1800 cen z Polski przy pierwszym uruchomieniu.
+
+Szczegóły: `docs/grocery/OPERATIONS.md`.

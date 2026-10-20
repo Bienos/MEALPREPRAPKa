@@ -32,6 +32,9 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui-style comp
    | `GOOGLE_SHEETS_TARGET_GID` | Optional; defaults to the meal-library tab (`894227705`).           |
    | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Optional: service account for a private (not link-shared) sheet. |
    | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Optional: its private key, one line with `\n` sequences.  |
+   | `GROCERY_UNVERIFIED_SOURCES` | Optional: `on` reads price sources with no permission on record (private use). |
+   | `OPEN_FOOD_FACTS_CONTACT` | Optional: contact for the Open Food Facts User-Agent.                   |
+   | `GS1_EPRODUKTY_API_KEY` | Optional placeholder; GS1 is not wired.                                  |
 
    `GOOGLE_SHEETS_SPREADSHEET_ID` is optional in development: without it the Meals screen shows
    a small built-in fixture dataset. In production it is required for the meal library. The
@@ -55,6 +58,7 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui-style comp
 | `npm test`          | Unit tests (node:test)    |
 | `npm run build`     | Production build          |
 | `npm start`         | Serve the production build|
+| `node scripts/warsaw-pilot.mts` | Measure live price/product coverage (docs/grocery/WARSAW_PILOT.md) |
 
 ## Supabase
 
@@ -120,3 +124,8 @@ Health check: `GET /api/health` returns `{"status":"ok"}` and is the only public
 ## Adding shadcn/ui components
 
 `components.json` is configured, so `npx shadcn@latest add <component>` drops new components into `src/components/ui`.
+
+## Grocery intelligence
+
+Where prices come from, what each source allows, how a price is verified and how the basket is judged:
+[docs/grocery/](./docs/grocery/) (start with ARCHITECTURE.md and DATA_SOURCES.md).
