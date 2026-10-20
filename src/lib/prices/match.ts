@@ -49,7 +49,7 @@ const PROCESSED =
 
 /** A flavoured dairy product, not the plain one the meals use. */
 const FLAVOURED =
-  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanil|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn/;
+  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanil|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn|szarlot|sernik|tiramisu|pistacj|ciastk|cookie|kawow|latte|miodow/;
 
 /** A fruit named as a flavour ("truskawkowa", "malinowy"), not the fruit itself. */
 const FRUIT_FLAVOUR =
@@ -395,6 +395,17 @@ function genericRule(itemName: string): Rule | undefined {
 function ruleFor(itemName: string): Rule | undefined {
   const name = fold(itemName);
   return RULES.find((candidate) => candidate.item.test(name)) ?? genericRule(itemName);
+}
+
+/**
+ * The keyword rules alone: could this product be the item (its kind, not yet
+ * its variant). `grocery/matching.ts` adds the variant checks on top.
+ */
+export function ruleAccepts(itemName: string, productName: string): boolean {
+  const rule = ruleFor(itemName);
+  if (!rule) return false;
+  const product = fold(productName);
+  return rule.product.test(product) && !rule.not?.test(product) && !NOT_PLAIN.test(product);
 }
 
 /** Where Blix should look for this shopping item; null when nothing can be searched. */
