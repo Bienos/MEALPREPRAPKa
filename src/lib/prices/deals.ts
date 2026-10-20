@@ -106,6 +106,9 @@ export const WATCHED: { label: string; item: string; unit: Unit }[] = [
   { label: "Twaróg", item: "twaróg", unit: "g" },
   { label: "Jogurt", item: "jogurt naturalny", unit: "g" },
   { label: "Jajka", item: "jajka", unit: "szt" },
+  { label: "Owoce mrożone", item: "owoce mrożone", unit: "g" },
+  { label: "Jabłka", item: "jabłko", unit: "g" },
+  { label: "Banany", item: "banan", unit: "g" },
 ];
 
 export type Highlight = {

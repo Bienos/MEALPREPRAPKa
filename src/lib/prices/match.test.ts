@@ -289,6 +289,19 @@ describe("fresh vegetables of the mix", () => {
     ]);
   });
 
+  test("frozen fruit: a frozen bag of strawberries, raspberries or blueberries, never fresh fruit or ice cream", () => {
+    assert.deepEqual(
+      names(
+        "owoce mrożone",
+        "Mrożone maliny Hortex 280 g",
+        "Truskawki świeże",
+        "Owoce mrożone mix 450 g",
+        "Lody truskawkowe mrożone",
+      ),
+      ["Mrożone maliny Hortex 280 g", "Owoce mrożone mix 450 g"],
+    );
+  });
+
   test("passata and tinned tomatoes are still found for their own items", () => {
     assert.deepEqual(names("passata pomidorowa", "Passata klasyczna"), ["Passata klasyczna"]);
   });

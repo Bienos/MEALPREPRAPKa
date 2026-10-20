@@ -76,6 +76,7 @@ const CATEGORY_KEYWORDS: [string, ShoppingCategory][] = [
   ["salsa", "vegetables"],
   ["kukurydza", "vegetables"],
   ["pomidor", "vegetables"],
+  ["owoce mrożone", "fruit"],
   ["owoce", "fruit"],
   ["banan", "fruit"],
   ["jabłko", "fruit"],
@@ -190,9 +191,15 @@ export type AggregatedIngredient = {
  */
 export const VEGETABLE_MIX = ["pomidor", "ogórek", "cebula", "papryka", "pieczarki"];
 const GENERIC_VEGETABLES = /^warzywa(\s*\/\s*mieszanka)?$/;
+/** The sheet's generic fruit is bought frozen (strawberries, blueberries or raspberries, whichever is cheapest). */
+const GENERIC_FRUIT = /^owoce( jagodowe| lesne| leśne| mix)?$/;
+export const FROZEN_FRUIT = "owoce mrożone";
 
 /** "warzywa 2200 g" as five named vegetables of 440 g; anything else as it is. */
 function expandVegetables(parsed: ParsedIngredient): ParsedIngredient[] {
+  if (GENERIC_FRUIT.test(parsed.name) && parsed.unit === "g" && parsed.quantity !== null) {
+    return [{ ...parsed, name: FROZEN_FRUIT }];
+  }
   if (!GENERIC_VEGETABLES.test(parsed.name) || parsed.unit !== "g" || parsed.quantity === null) return [parsed];
   const each = parsed.quantity / VEGETABLE_MIX.length;
   return VEGETABLE_MIX.map((name) => ({ ...parsed, name, quantity: each }));
