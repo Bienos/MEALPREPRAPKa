@@ -5,6 +5,7 @@ import { listProductLinks, listShelfPrices, listShopPrices, listShopPromos } fro
 import { listShoppingItems } from "@/lib/db/shopping";
 import type { Unit } from "@/lib/meals/ingredients";
 import { isPromoActive } from "./basket";
+import { LIDL_EVERYDAY } from "./lidl-everyday";
 import { relevantPromos } from "./match";
 import type { ProductLink, ShopPrice, ShopPromo } from "./types";
 
@@ -38,7 +39,7 @@ export async function loadPricing(): Promise<PricingData> {
     // Leaflet deals and shelf prices go through the same matching; a shelf price is marked `shelf`.
     promos: relevantPromos(
       items,
-      [...promos, ...shelf].filter((promo) => isPromoActive(promo, today)),
+      [...promos, ...shelf, ...LIDL_EVERYDAY].filter((promo) => isPromoActive(promo, today)),
       links,
     ),
     prices,
