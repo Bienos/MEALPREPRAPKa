@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 
 import { ShoppingList, type ShoppingRow, type StapleRow } from "@/components/prep/shopping-list";
 import { PageHeader } from "@/components/shell/page-header";
@@ -50,6 +50,19 @@ export default async function ShoppingPage() {
         Prep
       </Link>
       <PageHeader title="Zakupy" subtitle="Z planu tygodnia albo prepu, bez duplikatów" />
+      <Link
+        href="/prep/promocje"
+        className="flex min-h-14 items-center gap-3 rounded-xl border bg-card px-4 py-3 font-semibold shadow-sm hover:bg-muted"
+      >
+        <Tag className="size-5 text-primary" />
+        <span className="flex-1">
+          Promocje tygodnia
+          <span className="block text-sm font-normal text-muted-foreground">
+            Gazetki i aplikacje wszystkich sklepów
+          </span>
+        </span>
+        <ChevronRight className="size-5 text-muted-foreground" />
+      </Link>
       <ShoppingList
         items={rows}
         staples={stapleRows}

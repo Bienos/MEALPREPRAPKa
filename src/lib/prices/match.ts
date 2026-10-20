@@ -23,7 +23,7 @@ export function priceKey(name: string): string {
 }
 
 /** Lowercase ASCII: "Pierś z kurczaka" -> "piers z kurczaka". */
-function fold(value: string): string {
+export function fold(value: string): string {
   return value.toLowerCase().replace(/ł/g, "l").normalize("NFD").replace(/\p{M}/gu, "");
 }
 
