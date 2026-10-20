@@ -246,3 +246,28 @@ describe("buildBasket", () => {
     assert.equal(sparse.compared.cheapest, "biedronka");
   });
 });
+
+describe("money in whole grosz", () => {
+  test("three packs at 4,99 are exactly 14,97 and a basket total adds up to the grosz", () => {
+    const cost = costOf(item(1500), asPromo(promo({ packQuantity: 500, promoPrice: 4.99, multibuyMin: 1 })));
+    assert.ok(cost && cost !== "unit");
+    assert.equal(cost.amountGrosz, 1497);
+    assert.equal(cost.amount, 14.97);
+    const summary = buildBasket(
+      [item(1500, "g", "a"), item(1500, "g", "b"), item(1500, "g", "c")],
+      ["lidl"],
+      () => [asPromo(promo({ packQuantity: 500, promoPrice: 0.1 }))],
+    );
+    // 9 × 0,10 zł: floats would give 0.8999999999999999.
+    assert.equal(summary.shops[0].totalGrosz, 90);
+    assert.equal(summary.shops[0].total, 0.9);
+    assert.equal(summary.shops[0].complete, true);
+  });
+
+  test("a 1+1 offer applies to whole pairs; the odd pack is at the regular price", () => {
+    const offer = promo({ packQuantity: 500, promoPrice: 5, regularPrice: 10, multibuy: "1+1 gratis", multibuyMin: 2 });
+    const three = costOf(item(1500), asPromo(offer));
+    assert.ok(three && three !== "unit");
+    assert.equal(three.amountGrosz, 2 * 500 + 1000);
+  });
+});

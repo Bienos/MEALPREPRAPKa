@@ -90,6 +90,24 @@ describe("matching tiers", () => {
     assert.equal(tier(need("skyr"), product("Skyr szarlotka 330 g")), "none");
     // Pickled ("małosolne") is not the fresh cucumber on the list (seen in Warsaw Open Prices data).
     assert.equal(tier(need("ogórek"), product("Chef Select Ogórki małosolne")), "none");
+    // A bunch of spring onions or shallots is not the onion on the list (seen in Warsaw Open Prices data).
+    assert.equal(tier(need("cebula czerwona"), product("Carrefour Cebula dymka pęczek")), "none");
+    assert.equal(tier(need("cebula"), product("Szalotka 250 g")), "none");
+    // Ready food that names the ingredient (found by the Warsaw pilot's audit of Open Food Facts results).
+    assert.equal(tier(need("papryka czerwona"), product("Kebab - kebab z kurczaka, kapusta pekińska, czerwona papryka 215 g")), "none");
+    assert.equal(tier(need("banan"), product("Owsiane smoothie mango i banan 250 g")), "none");
+    assert.equal(tier(need("tuńczyk"), product("Tuńczyk Mexicans z warzywami 160 g")), "none");
+    assert.equal(tier(need("papryka"), product("Lays Papryka 140 g")), "none");
+    assert.equal(tier(need("pomidor"), product("Chrupki pomidor z serem 100 g")), "none");
+    assert.equal(tier(need("cebula czerwona"), product("Mozarella, pomidor, cebula czerwona 250 g")), "none");
+    assert.equal(tier(need("whey"), product("Premium Whey Bar Protein 50% 80 g")), "none");
+    assert.equal(tier(need("pieczywo"), product("Pieczywo Sonko Lekkie 7 Ziaren 90 g")), "none");
+    // English names from Open Prices: paprika is the spice, refried black beans are a paste, "taste" a flavour.
+    assert.equal(tier(need("papryka"), product("Smoked sweet paprika 70 g")), "none");
+    assert.equal(tier(need("fasola czerwona"), product("Isadora Refried Black Beans 430 g")), "none");
+    assert.equal(tier(need("banan"), product("Müllermilch Protein Banana Taste 400 ml")), "none");
+    assert.equal(tier(need("maliny mrożone"), product("Bifix Napar owocowy z maliną 40 g")), "none");
+    assert.equal(tier(need("ogórek"), product("Ogórek Dziadunia Różana rozkosz 860 g")), "none");
   });
 
   test("a pack in another unit can never price the item", () => {

@@ -54,7 +54,9 @@ const ENGLISH: [RegExp, string][] = [
   [/\btomato(es)?\b/, "pomidor"],
   [/\bcucumbers?\b/, "ogorek"],
   [/\bonions?\b/, "cebula"],
-  [/\bpeppers?\b|\bpaprika\b/, "papryka"],
+  [/\bpeppers?\b/, "papryka"],
+  // In English "paprika" is the spice; the vegetable is a pepper.
+  [/\bpaprika\b/, "papryka mielona"],
   [/\bmushrooms?\b/, "pieczarki"],
   [/\bbeans?\b/, "fasola"],
   [/\bcorn\b|\bsweetcorn\b/, "kukurydza"],
@@ -64,6 +66,13 @@ const ENGLISH: [RegExp, string][] = [
   [/\bpeanut butter\b/, "maslo orzechowe"],
   [/\bfrozen\b/, "mrozone"],
   [/\bsoy sauce\b/, "sos sojowy"],
+  [/\bsmoked\b/, "wedzone"],
+  [/\brefried\b/, "pasta"],
+  [/\bblack\b/, "czarna"],
+  [/\bred\b/, "czerwona"],
+  [/\bwhite\b/, "biala"],
+  [/\btaste\b|\bflavou?r(ed)?\b/, "smak"],
+  [/\btea\b|\binfusion\b/, "herbata"],
 ];
 
 /** Folded text with Polish words added for English ones; Polish text comes back unchanged. */

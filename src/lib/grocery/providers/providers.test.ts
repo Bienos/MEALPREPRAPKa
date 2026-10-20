@@ -146,3 +146,40 @@ describe("licensed partner feeds", () => {
     assert.throws(() => parseLicensedFeed(csv, providerById("licensed-feed")!), /brak licencji/);
   });
 });
+
+describe("partial provider failures", () => {
+  test("a failure on page 2 keeps page 1 and reports the error; nothing read throws nothing away", async () => {
+    const page = fixture("open-prices-2026-10-20.json");
+    const original = globalThis.fetch;
+    let calls = 0;
+    globalThis.fetch = (async () => {
+      calls++;
+      if (calls === 1) return new Response(JSON.stringify({ ...page, pages: 3 }), { status: 200 });
+      return new Response("upstream down", { status: 502 });
+    }) as typeof fetch;
+    try {
+      const { fetchOpenPrices } = await import("./open-prices.ts");
+      const result = await fetchOpenPrices(null, "2026-10-20", { userAgent: "test" });
+      assert.equal(result.pagesRead, 1);
+      assert.ok(result.records.length > 0);
+      assert.match(result.error ?? "", /502/);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  test("an unreachable source is an error message, not an exception", async () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      throw new TypeError("fetch failed");
+    }) as typeof fetch;
+    try {
+      const { fetchOpenPrices } = await import("./open-prices.ts");
+      const result = await fetchOpenPrices(null, "2026-10-20", { userAgent: "test" });
+      assert.deepEqual([result.pagesRead, result.records.length], [0, 0]);
+      assert.ok(result.error);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+});

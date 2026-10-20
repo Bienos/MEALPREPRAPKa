@@ -21,7 +21,7 @@ import {
   type DealWhen,
 } from "@/lib/prices/deals";
 import { relevantPromos } from "@/lib/prices/match";
-import { priceSource } from "@/lib/prices/source";
+import { priceSource, safeUrl } from "@/lib/prices/source";
 import { SHOPS, SHOP_LABELS, type Shop } from "@/lib/prices/types";
 import { cn } from "@/lib/utils";
 import { refreshFeedsAction, refreshPromosAction, refreshSweepAction } from "../zakupy/actions";
@@ -228,7 +228,7 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
             return (
               <li key={`${promo.shop}|${promo.productKey}`}>
                 <a
-                  href={promo.sourceUrl}
+                  href={safeUrl(promo.sourceUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className={cn(

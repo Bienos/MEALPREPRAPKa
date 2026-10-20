@@ -6,6 +6,7 @@ import { z } from "zod";
 import { listSyncRuns } from "@/lib/db/grocery";
 import { displayGtin } from "@/lib/grocery/gtin";
 import { lookupProduct, syncOpenPrices, type SyncResult } from "@/lib/grocery/sync";
+import { safeUrl } from "@/lib/prices/source";
 
 /** A manual sync is not repeated within this many minutes: the daily cron does the regular work. */
 const MANUAL_SYNC_GAP_MINUTES = 5;
@@ -58,7 +59,7 @@ export async function lookupBarcodeAction(code: string): Promise<BarcodeResult> 
     brand: product.brand,
     pack: product.pack_quantity && product.pack_unit ? `${product.pack_quantity} ${product.pack_unit}` : null,
     nutrition,
-    url: product.source_url,
+    url: product.source_url ? safeUrl(product.source_url) : null,
     from: result.from,
   };
 }

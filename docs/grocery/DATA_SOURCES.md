@@ -16,7 +16,7 @@ source of truth; this page explains it.
 | Refresh | On demand per barcode; cached 30 days in `grocery_products` |
 | Rate limits | 15 product reads/min/IP, 10 searches/min/IP (documented); the adapter spaces calls 4.1 s / 6.1 s |
 | Licensing | ODbL (database), DbCL (contents), CC BY-SA (images). Attribution shown with the data |
-| Limitations | No prices. Community-entered names and packs |
+| Limitations | No prices. Community-entered names and packs (often brand-first or a dish naming the ingredient: the pilot audit found 6 wrong name matches among 47, since fixed). The search endpoint answered 503 to 39 of 100 searches on 21.10.2026 under load; the pilot retries once after 20 s |
 | Tests | Parser on recorded v2/v3 responses, not-found answers, search answer (`providers.test.ts`); live lookup verified against a local database |
 
 ## Open Prices — community price history

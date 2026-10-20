@@ -43,12 +43,23 @@ community data:
   baton z masłem orzechowym → masło orzechowe; Dip serowy (salsa) → salsa; Spaghetti 4 sery → makaron
 - Hummus paprykowy → papryka; koktajl białkowy truskawka-banan → banan; Kubuś woda o smaku malina → maliny;
   Curry Flavour → curry; napój jabłko 300 ml → jabłko
+- Second pilot audit (Open Food Facts and Open Prices names, see WARSAW_PILOT.md): Kebab z kurczaka, … czerwona
+  papryka → papryka; Owsiane smoothie mango i banan → banan; Tuńczyk Mexicans z warzywami → tuńczyk; Lays Papryka →
+  papryka; Chrupki pomidor z serem → pomidor; "Mozarella, pomidor, cebula czerwona" → cebula; Premium Whey Bar →
+  whey; Pieczywo Sonko Lekkie (crispbread) → pieczywo; Cebula dymka (spring onions) → cebula; Ogórek Dziadunia (a
+  jar) → ogórek; Smoked sweet paprika (the spice) → papryka; Refried Black Beans → fasola; Müllermilch Banana Taste
+  → banan; Napar owocowy z maliną (tea) → maliny
 - Kinds: penne for spaghetti, yellow for red pepper, raspberries for strawberries, forest for multiflower
   honey, organic for free-range eggs, Greek for natural yogurt and the other way round
 
 ## Limits
 
-- Name rules cannot see what a name does not say: "Ogórek Dziadunia" (a jar brand) passes as a cucumber.
-  Such cases stay at most "category" when a word is missing, and community data is reference-only anyway.
+- Name rules cannot see what a name does not say: a brand-only name ("Ogórek Dziadunia", a jar; "Pieczywo Sonko",
+  crispbread) passes until someone adds the brand to the rule. Open-data names are the noisiest (English, brand
+  first, dishes listing their ingredients); retailer feeds name the product plainly. Community data is
+  reference-only anyway, and Open Food Facts gives identity, never a price.
+- English names get Polish words (`withPolish`), including the ones that change meaning: "paprika" is the spice
+  ("papryka mielona"), "smoked" → "wędzone", "refried" → "pasta", "taste/flavour" → "smak", colours.
+- A name listing several foods with commas ("mozzarella, pomidor, cebula") is a dish for the fresh produce rules.
 - A rule-accepted product for a generic item ("ryż", "jajka") is an exact match by design: the item asks for
   any rice, any eggs. Being cheaper but a different brand is expected.

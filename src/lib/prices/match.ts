@@ -45,7 +45,10 @@ function either(...patterns: RegExp[]): RegExp {
 
 /** Not the plain ingredient: ready meals, cold cuts, sauces, snacks, drinks. */
 const PROCESSED =
-  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri/;
+  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|\blays\b|crunchips|pringles|doritos|cheetos/;
+
+/** A name that lists several foods ("mozzarella, pomidor, cebula czerwona") is a dish, not the vegetable. */
+const LISTED = /,[^,]+,/;
 
 /** A flavoured dairy product, not the plain one the meals use. */
 const FLAVOURED =
@@ -126,7 +129,7 @@ const RULES: Rule[] = [
   {
     item: /tunczyk/,
     product: /tunczyk/,
-    not: either(/pasta|w oleju|w oliwie|z suszon|jalapeno|mayo/, PROCESSED),
+    not: either(/pasta|w oleju|w oliwie|z suszon|jalapeno|mayo|z warzyw|mexican|meksyk|z fasol|z ryz|z makaron|z kukurydz/, PROCESSED),
     search: { sub: "", q: "tuńczyk" },
   },
   {
@@ -239,7 +242,7 @@ const RULES: Rule[] = [
   {
     item: /chleb|pieczywo/,
     product: /chleb|pieczywo/,
-    not: either(/chlebek|tostow|przekask|slodk|chrupk|wafl|bulk|bagiet|tortill|krakers/, PROCESSED),
+    not: either(/chlebek|tostow|przekask|slodk|chrupk|wafl|bulk|bagiet|tortill|krakers|sonko|\bwasa\b|pieczywo lekk/, PROCESSED),
     search: { sub: "pieczywo", q: "chleb" },
   },
   {
@@ -263,7 +266,7 @@ const RULES: Rule[] = [
   {
     item: /fasol/,
     product: /fasol/,
-    not: either(/szparag|bretonsk|mung|edamame|makaron|danie/, PROCESSED),
+    not: either(/szparag|bretonsk|mung|edamame|makaron|danie|pasta/, PROCESSED),
     search: { sub: "", q: "fasol" },
   },
   {
@@ -279,19 +282,20 @@ const RULES: Rule[] = [
     not: either(
       /krojon|puszk|puszc|suszon|passata|przecier|koncentrat|ketchup|w oleju|salsa|pesto|\bsok\b|\bcale\b|bez skork|pelati|obran|pomidorow/,
       PROCESSED,
+      LISTED,
     ),
     search: { sub: "warzywa", q: "pomidor" },
   },
   {
     item: /ogork|ogorek/,
     product: /ogorek|ogorki/,
-    not: either(/kiszon|malosoln|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b|ogorkow/, PROCESSED),
+    not: either(/kiszon|malosoln|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b|ogorkow|dziadun/, PROCESSED, LISTED),
     search: { sub: "warzywa", q: "ogórek" },
   },
   {
     item: /cebul/,
     product: /cebul/,
-    not: either(/w oleju|prazon|kiszon|marynow|konserw|krojon|mrozon|szczypior|chrupiac|smazon|w platkach|cebulow/, PROCESSED),
+    not: either(/w oleju|prazon|kiszon|marynow|konserw|krojon|mrozon|szczypior|chrupiac|smazon|w platkach|cebulow|dymk|szalot/, PROCESSED, LISTED),
     search: { sub: "warzywa", q: "cebula" },
   },
   {
@@ -300,13 +304,14 @@ const RULES: Rule[] = [
     not: either(
       /mielon|proszek|konserw|marynow|w zalewie|ajvar|nadziew|wedzon|w oleju|pasta|mrozon|ostra|jalapeno|hummus|paprykow/,
       PROCESSED,
+      LISTED,
     ),
     search: { sub: "warzywa", q: "papryka" },
   },
   {
     item: /pieczark/,
     product: /pieczark/,
-    not: either(/konserw|marynow|puszk|puszc|w zalewie|mrozon|krem|farsz|nadziew|grillowan|suszon/, PROCESSED),
+    not: either(/konserw|marynow|puszk|puszc|w zalewie|mrozon|krem|farsz|nadziew|grillowan|suszon/, PROCESSED, LISTED),
     search: { sub: "warzywa", q: "pieczarki" },
   },
   {
@@ -324,13 +329,13 @@ const RULES: Rule[] = [
   {
     item: /banan/,
     product: /banan/,
-    not: either(/chips|suszon|baton|jogurt|chlebek|koktajl|napoj|shake|\bsmak/, FRUIT_FLAVOUR),
+    not: either(/chips|suszon|baton|jogurt|chlebek|koktajl|smoothie|\bmus\b|napoj|shake|\bsmak|mleko|milch/, FRUIT_FLAVOUR, LISTED),
     search: { sub: "owoce", q: "banan" },
   },
   {
     item: /jablk/,
     product: /jablk/,
-    not: either(/\bsok\b|\bmus\b|suszon|chips|ocet|szarlot|napoj|koktajl|\bsmak/, FRUIT_FLAVOUR),
+    not: either(/\bsok\b|\bmus\b|suszon|chips|ocet|szarlot|napoj|koktajl|smoothie|\bsmak/, FRUIT_FLAVOUR, LISTED),
     search: { sub: "owoce", q: "jabłk" },
   },
   {
@@ -344,7 +349,7 @@ const RULES: Rule[] = [
     item: /jagod|borowk|malin|truskaw/,
     product: /malin|borowk|jagod|truskaw|owoce lesne/,
     not: either(
-      /pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|owsiank|ciast|chlebek|\bsmak|o smaku|\bwoda\b|napoj|koktajl|yopro/,
+      /pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|napar|owsiank|ciast|chlebek|\bsmak|o smaku|\bwoda\b|napoj|koktajl|yopro/,
       PROCESSED,
       FRUIT_FLAVOUR,
     ),
@@ -376,7 +381,7 @@ const RULES: Rule[] = [
   {
     item: /whey|odzywk|bialko/,
     product: /whey|odzywk\w* bialk|bialko serwatk|bialko wpc|\bwpc\b|\bwpi\b/,
-    not: /wlos|kosmet|szampon|balsam|krem do|skor|twarz|roslin|nawoz|kwiat/,
+    not: /wlos|kosmet|szampon|balsam|krem do|skor|twarz|roslin|nawoz|kwiat|\bbar\b|baton|wafel|ciastk|cookie|napoj|drink|\bshake\b|pudding|jogurt|skyr|deser/,
     search: { sub: "", q: "odżywk" },
   },
 ];
