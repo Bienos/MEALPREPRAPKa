@@ -68,6 +68,10 @@ const CATEGORY_KEYWORDS: [string, ShoppingCategory][] = [
   ["ziemniaki", "carbs"],
   ["fasola", "carbs"],
   ["warzywa", "vegetables"],
+  ["ogórek", "vegetables"],
+  ["cebula", "vegetables"],
+  ["papryka", "vegetables"],
+  ["pieczarki", "vegetables"],
   ["passata", "vegetables"],
   ["salsa", "vegetables"],
   ["kukurydza", "vegetables"],
@@ -122,7 +126,10 @@ export function parseIngredient(fragment: string): ParsedIngredient {
 function parseAmount(fragment: string): ParsedIngredient {
   const raw = fragment.trim();
   // Parentheticals are notes like "(~180 g)", never the amount to buy.
-  const cleaned = raw.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+  const cleaned = raw
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   const counted = COUNTED_EGGS.exec(cleaned);
   if (counted) return { name: "jajka", quantity: Number(counted[1]), unit: "szt", raw };
@@ -177,13 +184,25 @@ export type AggregatedIngredient = {
  * Sums the same ingredient across every meal and portion.
  * Fragments without an amount survive as a single entry with no quantity.
  */
-export function aggregateIngredients(
-  entries: { text: string; portions: number }[],
-): AggregatedIngredient[] {
+/**
+ * What the sheet's "warzywa" stands for on the shopping list: these five, the
+ * amount split evenly (to 10 g), so each has a price at a shop.
+ */
+export const VEGETABLE_MIX = ["pomidor", "ogórek", "cebula", "papryka", "pieczarki"];
+const GENERIC_VEGETABLES = /^warzywa(\s*\/\s*mieszanka)?$/;
+
+/** "warzywa 2200 g" as five named vegetables of 440 g; anything else as it is. */
+function expandVegetables(parsed: ParsedIngredient): ParsedIngredient[] {
+  if (!GENERIC_VEGETABLES.test(parsed.name) || parsed.unit !== "g" || parsed.quantity === null) return [parsed];
+  const each = parsed.quantity / VEGETABLE_MIX.length;
+  return VEGETABLE_MIX.map((name) => ({ ...parsed, name, quantity: each }));
+}
+
+export function aggregateIngredients(entries: { text: string; portions: number }[]): AggregatedIngredient[] {
   const totals = new Map<string, AggregatedIngredient>();
 
   for (const entry of entries) {
-    for (const parsed of parseIngredients(entry.text)) {
+    for (const parsed of parseIngredients(entry.text).flatMap(expandVegetables)) {
       if (!parsed.name) continue;
       const key = `${parsed.name}|${parsed.unit ?? ""}`;
       const existing = totals.get(key);
@@ -202,9 +221,13 @@ export function aggregateIngredients(
     }
   }
 
-  // Pieces come whole: 11,7 eggs means 12.
   for (const total of totals.values()) {
+    // Pieces come whole: 11,7 eggs means 12.
     if (total.unit === "szt" && total.quantity !== null) total.quantity = Math.ceil(total.quantity - 1e-9);
+    // The vegetable mix is split evenly, to 10 g: 676 g is 680 g.
+    else if (VEGETABLE_MIX.includes(total.name) && total.unit === "g" && total.quantity !== null) {
+      total.quantity = Math.ceil(total.quantity / 10 - 1e-9) * 10;
+    }
   }
 
   return [...totals.values()].sort(

@@ -5,7 +5,7 @@ import { describe, test } from "node:test";
 import { parseBlixPromos } from "./blix.ts";
 import { parseLidlPromos } from "./lidl.ts";
 import { blixSearchFor, matchPromos, priceKey, promoCandidates, relevantPromos } from "./match.ts";
-import type { ProductLink } from "./types.ts";
+import type { ProductLink, ShopPromo } from "./types.ts";
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
 const monday = new Date("2026-10-19T08:00:00+02:00");
@@ -251,5 +251,45 @@ describe("relevantPromos", () => {
     // A confirmed product stays even when no rule would pick it.
     const withLink = relevantPromos([{ name: "skyr", unit: "g" }], [...leaflets, unrelated], [confirmed]);
     assert.ok(withLink.some((p) => p.productKey === biedronka[0].productKey));
+  });
+});
+
+describe("fresh vegetables of the mix", () => {
+  const promo = (name: string): ShopPromo => ({
+    shop: "biedronka",
+    productKey: `k:${name}`,
+    name,
+    packQuantity: 1000,
+    packUnit: "g",
+    loose: true,
+    promoPrice: 5,
+    regularPrice: null,
+    validFrom: "2026-10-19",
+    validTo: "2026-10-25",
+    conditions: "",
+    appOnly: false,
+    multibuy: null,
+    multibuyMin: 1,
+    sourceUrl: "x",
+  });
+  const names = (item: string, ...products: string[]) =>
+    promoCandidates(item, "g", products.map(promo)).map((candidate) => candidate.name);
+
+  test("the plain vegetable, not the tin, jar, sauce or powder", () => {
+    assert.deepEqual(names("pomidor", "Pomidory malinowe", "Pomidory krojone Pudliszki", "Ketchup pomidorowy"), [
+      "Pomidory malinowe",
+    ]);
+    assert.deepEqual(names("ogórek", "Ogórek zielony", "Ogórki kiszone Polskie", "Korniszony"), ["Ogórek zielony"]);
+    assert.deepEqual(names("cebula", "Cebula żółta", "Cebula prażona", "Cebula w oleju"), ["Cebula żółta"]);
+    assert.deepEqual(names("papryka", "Papryka czerwona", "Papryka mielona słodka", "Papryka konserwowa"), [
+      "Papryka czerwona",
+    ]);
+    assert.deepEqual(names("pieczarki", "Pieczarki białe", "Pieczarki marynowane", "Pieczarki w puszce"), [
+      "Pieczarki białe",
+    ]);
+  });
+
+  test("passata and tinned tomatoes are still found for their own items", () => {
+    assert.deepEqual(names("passata pomidorowa", "Passata klasyczna"), ["Passata klasyczna"]);
   });
 });
