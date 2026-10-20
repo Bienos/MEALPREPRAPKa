@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ChevronLeft, ExternalLink, Search, Smartphone } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Search, Smartphone } from "lucide-react";
 
+import { DealsRefresh } from "@/components/prep/deals-refresh";
 import { PageHeader } from "@/components/shell/page-header";
 import { todayIso } from "@/lib/date";
 import { listProductLinks, listShopPromos } from "@/lib/db/prices";
@@ -12,6 +13,7 @@ import {
   countByShop,
   dayLabel,
   discountPercent,
+  highlights,
   money,
   selectDeals,
   unitPriceLabel,
@@ -21,8 +23,11 @@ import {
 import { relevantPromos } from "@/lib/prices/match";
 import { SHOPS, SHOP_LABELS, type Shop } from "@/lib/prices/types";
 import { cn } from "@/lib/utils";
+import { refreshFeedsAction, refreshPromosAction, refreshSweepAction } from "../zakupy/actions";
 
 export const dynamic = "force-dynamic";
+// The refresh on this screen reads Lidl, the leaflets and the feeds, each in a call of its own.
+export const maxDuration = 60;
 
 /** Closest to me first: Lidl, Biedronka, Auchan, Żabka, then the rest. */
 const SHOP_ORDER: Shop[] = [
@@ -61,6 +66,12 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
     .map((item) => ({ name: item.name, unit: item.unit as Unit | null }));
   const mine = new Set(relevantPromos(items, promos, links).map((promo) => `${promo.shop}|${promo.productKey}`));
 
+  const lastFetch = promos.reduce<string | null>(
+    (latest, promo) => (latest === null || promo.fetchedAt > latest ? promo.fetchedAt : latest),
+    null,
+  );
+  const best = highlights(promos, today);
+
   const query: DealQuery = { today, shop, search, mineOnly, when };
   const deals = selectDeals(promos, query, mine);
   const counts = countByShop(promos, query, mine);
@@ -84,6 +95,59 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
         Zakupy
       </Link>
       <PageHeader title="Promocje tygodnia" subtitle="Gazetki i oferty z aplikacji sklepów, w jednym miejscu" />
+
+      <DealsRefresh
+        fetchedAt={lastFetch}
+        fetchedLabel={lastFetch ? fetchedLabel(lastFetch, settings.timezone) : null}
+        onRefresh={refreshPromosAction}
+        onRefreshSweep={refreshSweepAction}
+        onRefreshFeeds={refreshFeedsAction}
+      />
+
+      {best.length > 0 && !search && !shop && !mineOnly && when === "now" ? (
+        <section className="flex flex-col gap-3" aria-label="Warto kupić teraz">
+          <h2 className="text-xl font-extrabold tracking-tight">Warto kupić teraz</h2>
+          <div className="grid gap-3">
+            {best.map((group) => (
+              <div key={group.label} className="flex flex-col gap-2 rounded-xl border bg-card p-4 shadow-sm">
+                <Link
+                  href={`/prep/promocje?q=${encodeURIComponent(group.item)}`}
+                  className="flex items-center justify-between font-bold"
+                >
+                  {group.label}
+                  <ChevronRight className="size-4 text-muted-foreground" />
+                </Link>
+                <ul className="flex flex-col divide-y">
+                  {group.deals.map(({ promo, assumed }) => {
+                    const unit = unitPriceLabel(promo);
+                    const percent = discountPercent(promo);
+                    return (
+                      <li key={`${promo.shop}|${promo.productKey}`} className="flex items-center gap-3 py-2">
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <span className="text-sm leading-snug font-semibold">{promo.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {SHOP_LABELS[promo.shop]}
+                            {promo.validTo ? ` · do ${dayLabel(promo.validTo)}` : ""}
+                            {promo.appOnly ? ` · ${APP_LABEL[promo.shop] ?? "w aplikacji"}` : ""}
+                          </span>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end">
+                          <span className="font-extrabold tabular-nums">{unit ?? money(promo.promoPrice)}</span>
+                          <span className="text-xs text-muted-foreground tabular-nums">
+                            {assumed ? "ok. " : ""}
+                            {money(promo.promoPrice)}
+                            {percent ? ` · −${percent}%` : ""}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="flex gap-2" role="tablist" aria-label="Kiedy">
         <Link
@@ -221,4 +285,17 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
       ) : null}
     </>
   );
+}
+
+/** "20.10, 15:12" in the app's timezone. */
+function fetchedLabel(iso: string, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("pl-PL", {
+    timeZone,
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(new Date(iso));
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${part("day")}.${part("month")}, ${part("hour")}:${part("minute")}`;
 }
