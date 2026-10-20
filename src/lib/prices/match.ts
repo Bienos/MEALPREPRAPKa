@@ -409,6 +409,45 @@ export function catalogCandidates<T extends { name: string }>(
     .slice(0, limit);
 }
 
+/* Category pages ------------------------------------------------------------ */
+
+const CATEGORY_STOPWORDS = /^(light|zero|bio|na|do|z|ze|i|w|mix|mieszanka|swiez\w*)$/;
+
+/** Start of a word, short enough to catch its other forms ("jajka" -> "jaj", "kurczak" -> "kurcz"). */
+function stem(word: string): string {
+  return word.slice(0, Math.max(3, word.length - 2));
+}
+
+/**
+ * Category pages of a shop's online catalogue that could hold this item, best
+ * first. A page lists only its first products, so the most specific shelf (the
+ * last part of the path) that names the item wins; then the more of the item's
+ * words the path has, the better, and the deeper (narrower) shelf wins a tie.
+ */
+export function categoriesFor<T extends { path: string }>(itemName: string, categories: T[], limit: number): T[] {
+  const words = fold(itemName)
+    .split(/[^a-z]+/)
+    .filter((word) => word.length >= 3 && !CATEGORY_STOPWORDS.test(word))
+    .map(stem);
+  if (words.length === 0) return [];
+  const matching = (text: string) =>
+    words.filter((word) => text.split(/\s+/).some((part) => part.startsWith(word))).length;
+  return categories
+    .map((category) => {
+      const parts = fold(category.path).split(" / ");
+      return {
+        category,
+        last: matching(parts[parts.length - 1]),
+        score: matching(parts.join(" ")),
+        depth: parts.length,
+      };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.last - a.last || b.score - a.score || b.depth - a.depth)
+    .slice(0, limit)
+    .map((entry) => entry.category);
+}
+
 function perUnit(promo: ShopPromo): number {
   return promo.packQuantity ? promo.promoPrice / promo.packQuantity : Number.POSITIVE_INFINITY;
 }

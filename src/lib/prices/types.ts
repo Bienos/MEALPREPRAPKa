@@ -57,6 +57,9 @@ export const SHOP_IN: Record<Shop, string> = {
   frisco: "we Frisco",
 };
 
+/** A category page of a shop's online catalogue, with its path in plain words ("artykuly spozywcze nabial jaja"). */
+export type CategoryEntry = { url: string; path: string };
+
 /** One promotion, the same shape whichever shop it came from. */
 export type ShopPromo = {
   shop: Shop;

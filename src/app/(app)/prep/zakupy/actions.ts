@@ -14,6 +14,7 @@ import {
 import { priceKey } from "@/lib/prices/match";
 import {
   refreshAuchanShelf,
+  refreshBiedronkaCategoryShelf,
   refreshBlixSweep,
   refreshFriscoPrices,
   refreshShopPromos,
@@ -51,13 +52,20 @@ export async function refreshSweepAction(): Promise<RefreshSweepResult> {
   }
 }
 
-export type RefreshFeedsResult = { ok: true; count: number; skipped: boolean } | { ok: false; message: string };
+export type RefreshFeedsResult =
+  | { ok: true; count: number; skipped: boolean; notes: string[] }
+  | { ok: false; message: string };
 
-/** The second half of [ Sprawdź promocje ]: Stokrotka's and Frisco's product feeds and Auchan's shop, a request of their own (up to a minute). */
+/** The second half of [ Sprawdź promocje ]: Stokrotka's and Frisco's product feeds and the shelves of Auchan's and Biedronka's shops, a request of their own (up to a minute). */
 export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
   try {
-    // Two feeds and Auchan's shop, side by side. A failing one is logged, the others are still saved.
-    const sources = await Promise.allSettled([refreshStokrotkaPrices(), refreshFriscoPrices(), refreshAuchanShelf()]);
+    // Two feeds and two shops, side by side. A failing one is logged, the others are still saved.
+    const sources = await Promise.allSettled([
+      refreshStokrotkaPrices(),
+      refreshFriscoPrices(),
+      refreshAuchanShelf(),
+      refreshBiedronkaCategoryShelf(),
+    ]);
     refresh();
     const done = sources.flatMap((one) => (one.status === "fulfilled" ? [one.value] : []));
     const failed = sources.filter((one): one is PromiseRejectedResult => one.status === "rejected");
@@ -67,6 +75,7 @@ export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
       ok: true,
       count: done.reduce((sum, one) => sum + one.count, 0),
       skipped: done.every((one) => one.skipped),
+      notes: done.flatMap((one) => (one.note ? [one.note] : [])),
     };
   } catch (error) {
     console.error("[prices] feed refresh failed:", error);

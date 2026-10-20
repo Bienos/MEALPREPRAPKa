@@ -4,7 +4,9 @@ import { todayIso } from "@/lib/date";
 import {
   deleteExpiredPromos,
   getRefreshedAt,
+  listRefreshedAt,
   listShelfPrices,
+  markManyRefreshed,
   markRefreshed,
   replaceShopPromos,
   upsertShelfPrices,
@@ -12,14 +14,22 @@ import {
 } from "@/lib/db/prices";
 import { listShoppingItems } from "@/lib/db/shopping";
 import type { Unit } from "@/lib/meals/ingredients";
-import { fetchAuchanPrices, fetchAuchanSitemap, MAX_AUCHAN_PAGES } from "./auchan";
-import { fetchBiedronkaSitemap, fetchShelfPrices, MAX_PAGES_PER_REFRESH, type ShelfResult } from "./biedronka";
+import { fetchAuchanCategories, fetchAuchanCategoryList, MAX_AUCHAN_CATEGORIES } from "./auchan";
+import {
+  fetchBiedronkaCategories,
+  fetchBiedronkaCategoryList,
+  MAX_CATEGORIES_PER_REFRESH,
+  fetchBiedronkaSitemap,
+  fetchShelfPrices,
+  MAX_PAGES_PER_REFRESH,
+  type ShelfResult,
+} from "./biedronka";
 import { fetchBlixPromos, fetchBlixSweep } from "./blix";
 import { fetchLidlPromos } from "./lidl";
 import { fetchFriscoFeed, matchName, toFriscoShelfPrice } from "./frisco";
 import { fetchStokrotkaFeed, toShelfPrice } from "./stokrotka";
-import type { ShelfPrice } from "./types";
-import { blixSearchFor, catalogCandidates } from "./match";
+import { SHOP_LABELS, type CategoryEntry, type ShelfPrice } from "./types";
+import { blixSearchFor, catalogCandidates, categoriesFor } from "./match";
 
 /** Products read per shopping item: the plainest few that the rules accept. */
 const SHELF_CANDIDATES = 4;
@@ -50,36 +60,97 @@ async function refreshBiedronkaShelf(
   return { ...result, waiting: Math.max(0, wanted.length - MAX_PAGES_PER_REFRESH) };
 }
 
+/** A category page read less than this many days ago is not read again. */
+const CATEGORY_FRESH_DAYS = 3;
+/** Products kept per shopping item from the category pages read: the plainest, then the basket takes the cheapest. */
+const CATEGORY_PER_ITEM = 10;
+/** Category pages looked at per shopping item. */
+const CATEGORIES_PER_ITEM = 6;
+
+type ShelfCategorySource = {
+  shop: "auchan" | "biedronka";
+  list: () => Promise<CategoryEntry[]>;
+  read: (batch: CategoryEntry[]) => Promise<{
+    prices: ShelfPrice[];
+    done: CategoryEntry[];
+    failed: number;
+    limited: boolean;
+  }>;
+  maxPerTap: number;
+};
+
 /**
- * Auchan's regular prices from its online shop, the same way as Biedronka's:
- * the sitemap, then the product pages that look like my list and were not
- * read in the last two weeks (a few dozen per tap; the rest on the next one).
+ * A shop's regular prices from its category pages: for each item on my list
+ * the shelves that could hold it (not read in the last few days), a batch of
+ * them per tap; every product on them is priced, and the plainest few per item
+ * are kept, so the basket can take the cheapest brand.
  */
-export async function refreshAuchanShelf(): Promise<FeedRefresh> {
+async function refreshShelfCategories(source: ShelfCategorySource): Promise<FeedRefresh> {
   const now = new Date();
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
-  const [catalogue, stored] = await Promise.all([fetchAuchanSitemap(), listShelfPrices()]);
-  const freshSince = new Date(now.getTime() - SHELF_FRESH_DAYS * 86_400_000).toISOString();
-  const fresh = new Set(
-    stored.filter((price) => price.shop === "auchan" && price.fetchedAt >= freshSince).map((price) => price.productKey),
-  );
+  const [categories, readAt] = await Promise.all([source.list(), listRefreshedAt(`cat:${source.shop}:`)]);
+  const freshSince = new Date(now.getTime() - CATEGORY_FRESH_DAYS * 86_400_000).toISOString();
+  const key = (category: CategoryEntry) => `cat:${source.shop}:${category.url}`;
+
   const wanted = [
     ...new Map(
       items
-        .flatMap((item) => catalogCandidates(item.name, item.unit as Unit | null, catalogue, SHELF_CANDIDATES))
-        .map((entry) => [entry.productKey, entry]),
+        .flatMap((item) => categoriesFor(item.name, categories, CATEGORIES_PER_ITEM))
+        .map((category) => [category.url, category]),
     ).values(),
-  ].filter((entry) => !fresh.has(entry.productKey));
+  ].filter((category) => (readAt.get(key(category)) ?? "") < freshSince);
   if (wanted.length === 0) return { count: 0, skipped: true };
-  const result = await fetchAuchanPrices(wanted);
-  if (result.failed === result.read) throw new Error("Sklep Auchan nie pokazał żadnej strony produktu.");
-  await upsertShelfPrices("auchan", result.prices, now.toISOString());
+
+  const batch = wanted.slice(0, source.maxPerTap);
+  const result = await source.read(batch);
+  if (result.done.length === 0) {
+    throw new Error(
+      result.limited
+        ? `${SHOP_LABELS[source.shop]} prosi o zwolnienie, spróbuj za kilka minut.`
+        : `Sklep ${SHOP_LABELS[source.shop]} nie pokazał żadnej półki.`,
+    );
+  }
+
+  const products = new Map<string, ShelfPrice>();
+  for (const price of result.prices) products.set(price.productKey, price);
+  const entries = [...products.values()];
+  const kept = new Map<string, ShelfPrice>();
+  for (const item of items) {
+    for (const candidate of catalogCandidates(item.name, item.unit as Unit | null, entries, CATEGORY_PER_ITEM)) {
+      kept.set(candidate.productKey, candidate);
+    }
+  }
+  await upsertShelfPrices(source.shop, [...kept.values()], now.toISOString());
+  await markManyRefreshed(result.done.map(key), now.toISOString());
   console.info(
-    `[prices] auchan shelf: ${result.prices.length} prices from ${result.read} pages (${result.failed} failed, ${Math.max(0, wanted.length - MAX_AUCHAN_PAGES)} waiting)`,
+    `[prices] ${source.shop} categories: ${result.prices.length} products on ${result.done.length} pages (${result.failed} failed${result.limited ? ", asked to slow down" : ""}), ${kept.size} kept, ${wanted.length - result.done.length} waiting`,
   );
-  return { count: result.prices.length, skipped: false };
+  const waiting = wanted.length - result.done.length;
+  const label = SHOP_LABELS[source.shop];
+  const note = result.limited
+    ? `${label} prosi o zwolnienie: ${waiting} półek zostało, spróbuj za kilka minut.`
+    : waiting > 0
+      ? `${label}: jeszcze ${waiting} półek, kliknij ponownie.`
+      : undefined;
+  return { count: kept.size, skipped: false, note };
 }
+
+export const refreshAuchanShelf = () =>
+  refreshShelfCategories({
+    shop: "auchan",
+    list: fetchAuchanCategoryList,
+    read: fetchAuchanCategories,
+    maxPerTap: MAX_AUCHAN_CATEGORIES,
+  });
+
+export const refreshBiedronkaCategoryShelf = () =>
+  refreshShelfCategories({
+    shop: "biedronka",
+    list: fetchBiedronkaCategoryList,
+    read: fetchBiedronkaCategories,
+    maxPerTap: MAX_CATEGORIES_PER_REFRESH,
+  });
 
 export type RefreshResult = {
   /** Promotions stored, all shops together. */
@@ -175,7 +246,7 @@ const FEED_FRESH_HOURS = 12;
 /** Feed products kept per shopping item: the plainest few, in stock first. */
 const FEED_PER_ITEM = 5;
 
-export type FeedRefresh = { count: number; skipped: boolean };
+export type FeedRefresh = { count: number; skipped: boolean; note?: string };
 
 /**
  * Stokrotka's regular prices from the product feed its shop publishes (one

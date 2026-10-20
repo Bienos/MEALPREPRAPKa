@@ -353,3 +353,27 @@ export async function getRefreshedAt(source: string): Promise<string | null> {
 export async function markRefreshed(source: string, at: string): Promise<void> {
   ok(await getSupabase().from("source_refreshes").upsert({ source, finished_at: at }, { onConflict: "source" }));
 }
+
+/** When each source starting with this prefix last finished, by source ("cat:auchan:2365" -> time). */
+export async function listRefreshedAt(prefix: string): Promise<Map<string, string>> {
+  const result = await getSupabase()
+    .from("source_refreshes")
+    .select("source,finished_at")
+    .like("source", `${prefix}%`)
+    .limit(5000);
+  return new Map(
+    rows(z.object({ source: z.string(), finished_at: z.string() }), result).map((row) => [row.source, row.finished_at]),
+  );
+}
+
+export async function markManyRefreshed(sources: string[], at: string): Promise<void> {
+  if (sources.length === 0) return;
+  ok(
+    await getSupabase()
+      .from("source_refreshes")
+      .upsert(
+        sources.map((source) => ({ source, finished_at: at })),
+        { onConflict: "source" },
+      ),
+  );
+}

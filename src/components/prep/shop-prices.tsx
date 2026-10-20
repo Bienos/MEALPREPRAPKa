@@ -145,6 +145,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
       }
       const feeds = await pricing.onRefreshFeeds();
       if (!feeds.ok) notes.push(feeds.message);
+      else notes.push(...feeds.notes);
       setRefreshNote(notes.length > 0 ? { error: false, text: notes.join(" ") } : null);
     });
   }
