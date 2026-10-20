@@ -57,6 +57,13 @@ community data:
 - Kinds: penne for spaghetti, yellow for red pepper, raspberries for strawberries, forest for multiflower
   honey, organic for free-range eggs, Greek for natural yogurt and the other way round
 
+## Items that are themselves processed
+
+The rules keep sauces, dishes and snacks out ("not the plain ingredient"). An item that is itself a sauce
+("sos sojowy", "sos teriyaki", "sos bbq") is exempt from that for its own kind and keeps out only dishes
+(`DISHES`: soups, salads, "w sosie", "o smaku", …). Before the pilot no sauce item could ever be priced.
+Two short words ("sos bbq") are enough when both must be whole words in the name; one ("xyz") is not.
+
 ## Limits
 
 - Name rules cannot see what a name does not say: a brand-only name ("Ogórek Dziadunia", a jar; "Pieczywo Sonko",

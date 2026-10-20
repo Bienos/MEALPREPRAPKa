@@ -47,6 +47,9 @@ function either(...patterns: RegExp[]): RegExp {
 const PROCESSED =
   /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|krakers|\blays\b|crunchips|pringles|doritos|cheetos|\bsmak\b/;
 
+/** Ready meals: never a pantry item, even when the item is a sauce. */
+const DISHES = /zupa|pizza|salatk|zapiekank|pierog|krokiet|sushi|kebab|\bdanie\b|w sosie|z sosem|chips|o smaku/;
+
 /** A name that lists several foods ("mozzarella, pomidor, cebula czerwona", "śmietana & cebula") is a dish or a flavour, not the vegetable. */
 const LISTED = /,[^,]+,|\s&\s/;
 
@@ -402,18 +405,20 @@ function genericRule(itemName: string): Rule | undefined {
     .toLowerCase()
     .split(/[^\p{L}]+/u)
     .filter((word) => word.length >= 3 && !STOP_WORDS.has(fold(word)));
-  // Short words ("sos") must be in the offer too, but alone they say too little to look anything up.
-  if (!words.some((word) => word.length >= 4)) return undefined;
+  // Short words ("sos") must be in the offer too, as whole words; one alone says too little to look anything up.
+  if (!words.some((word) => word.length >= 4) && words.length < 2) return undefined;
   const patterns = words.map((word) => {
     const folded = fold(word);
     return folded.length <= 5 ? `\\b${folded}\\b` : folded.slice(0, folded.length - 1);
   });
   const snacks = SNACKS.test(fold(itemName));
+  // An item that is itself a sauce or a snack ("sos sojowy") keeps out only dishes, not its own kind.
+  const processed = PROCESSED.test(fold(itemName)) ? DISHES : PROCESSED;
   return {
     item: /./,
     product: new RegExp(patterns.map((pattern) => `(?=.*${pattern})`).join("")),
     // A flavour of the thing ("Curry Flavour", "o smaku curry") is not the thing.
-    not: either(PROCESSED, /\bsmak|o smaku|flavou?r/, ...(snacks ? [] : [SNACKS])),
+    not: either(processed, /\bsmak|o smaku|flavou?r/, ...(snacks ? [] : [SNACKS])),
     search: { sub: "", q: words.find((word) => word.length >= 4) ?? words[0] },
   };
 }
@@ -431,7 +436,9 @@ export function ruleAccepts(itemName: string, productName: string): boolean {
   const rule = ruleFor(itemName);
   if (!rule) return false;
   const product = fold(productName);
-  return rule.product.test(product) && !rule.not?.test(product) && !NOT_PLAIN.test(product);
+  // "Not the plain thing" does not apply to an item that is that thing ("sos sojowy" is a sauce).
+  const notPlain = NOT_PLAIN.test(fold(itemName)) ? DISHES : NOT_PLAIN;
+  return rule.product.test(product) && !rule.not?.test(product) && !notPlain.test(product);
 }
 
 /** Where Blix should look for this shopping item; null when nothing can be searched. */

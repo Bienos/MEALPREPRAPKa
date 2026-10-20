@@ -118,6 +118,16 @@ describe("matching tiers", () => {
     assert.equal(tier(need("filet z kurczaka"), product("Piratki Filet z Kurczaka 100 g")), "none");
   });
 
+  test("an item that is itself a sauce matches that sauce, never a dish in it", () => {
+    assert.equal(tier(need("sos sojowy", "ml"), product("Sos sojowy jasny 150 ml")), "attributes");
+    assert.equal(tier(need("sos teriyaki", "ml"), product("Sos teriyaki 250 ml")), "attributes");
+    assert.equal(tier(need("sos bbq"), product("Sos barbecue 300 g")), "attributes");
+    assert.equal(tier(need("sos sojowy", "ml"), product("Makaron z sosem sojowym 300 ml")), "none");
+    assert.equal(tier(need("sos sojowy", "ml"), product("Chipsy o smaku sosu sojowego 100 ml")), "none");
+    // The sheet's "pb" is peanut butter: nothing is missing from "Masło orzechowe".
+    assert.equal(tier(need("pb"), product("Masło orzechowe 340 g")), "attributes");
+  });
+
   test("a pack in another unit can never price the item", () => {
     assert.equal(tier(need("jajka", "szt"), product("Jaja kurze 600 g")), "none");
   });

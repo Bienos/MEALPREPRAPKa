@@ -66,6 +66,7 @@ const ENGLISH: [RegExp, string][] = [
   [/\bpeanut butter\b/, "maslo orzechowe"],
   [/\bfrozen\b/, "mrozone"],
   [/\bsoy sauce\b/, "sos sojowy"],
+  [/\bbarbecue\b/, "bbq"],
   [/\bsmoked\b/, "wedzone"],
   [/\brefried\b/, "pasta"],
   [/\bblack\b/, "czarna"],
@@ -297,7 +298,7 @@ export function compareKinds(needName: string, productName: string): KindCheck[]
 
 /** Words a kind, an attribute or a family already accounts for, so they are not asked for twice. */
 const ACCOUNTED =
-  /^(z|ze|w|we|do|na|i|bez|lub|typu|oraz|the|of|pieczywo|owoce|warzywa|mieso|ser|makaron|chudy|chuda|chude|light|lekki|lekka|lekkie|poltlusty|poltlusta|tlusty|tlusta|pelnotlusty|fit|gotowy|gotowa|gotowe|gotowany|microwave|mrozone|mrozony|mrozona|konserwowa|konserwowy|bio|eko|extra|virgin|pelnoziarnisty|pelnoziarnista|razowy|razowa|naturalny|naturalna|grecki|szt|kg|g|ml|l)$/;
+  /^(z|ze|w|we|do|na|i|bez|lub|typu|oraz|the|of|pieczywo|owoce|warzywa|mieso|ser|makaron|chudy|chuda|chude|light|lekki|lekka|lekkie|poltlusty|poltlusta|tlusty|tlusta|pelnotlusty|fit|gotowy|gotowa|gotowe|gotowany|microwave|mrozone|mrozony|mrozona|konserwowa|konserwowy|bio|eko|extra|virgin|pelnoziarnisty|pelnoziarnista|razowy|razowa|naturalny|naturalna|grecki|pb|szt|kg|g|ml|l)$/;
 
 /** Start of a word, enough to catch its other forms: "kurczaka" -> "kurcz", "jajka" -> "jaj". */
 export function wordStem(word: string): string {
