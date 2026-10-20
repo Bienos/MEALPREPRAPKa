@@ -5,7 +5,7 @@
 
 import type { Unit } from "../meals/ingredients.ts";
 import { fold, matchPromos } from "./match.ts";
-import { SHOPS, type Shop, type ShopPromo } from "./types.ts";
+import { SHOPS, type ProductLink, type Shop, type ShopPromo } from "./types.ts";
 
 /** The loyalty app that unlocks some of a shop's deals. */
 export const APP_LABEL: Partial<Record<Shop, string>> = {
@@ -45,10 +45,12 @@ export function discountPercent(promo: Pick<ShopPromo, "promoPrice" | "regularPr
 export function unitPriceLabel(
   promo: Pick<ShopPromo, "promoPrice" | "packQuantity" | "packUnit" | "loose">,
 ): string | null {
-  if (promo.loose) return `${money(promo.promoPrice)}/kg`;
+  // Sold by weight with no weight given: the price is per kilo.
+  if (promo.loose && !promo.packQuantity) return `${money(promo.promoPrice)}/kg`;
   if (!promo.packQuantity || !promo.packUnit) return null;
-  if (promo.packUnit === "szt")
+  if (promo.packUnit === "szt") {
     return promo.packQuantity > 1 ? `${money(promo.promoPrice / promo.packQuantity)}/szt.` : null;
+  }
   const per = (promo.promoPrice / promo.packQuantity) * 1000;
   return `${money(per)}/${promo.packUnit === "g" ? "kg" : "l"}`;
 }
@@ -120,9 +122,9 @@ export type Highlight = {
 export type HighlightGroup = { label: string; item: string; deals: Highlight[] };
 
 /** Price per kilo, litre or piece, to compare offers of one staple. */
-function perUnitValue(promo: ShopPromo): number {
-  if (promo.loose) return promo.promoPrice;
-  if (!promo.packQuantity) return Number.POSITIVE_INFINITY;
+export function perUnitValue(promo: ShopPromo): number {
+  // A loose price is for the weight given (Frisco's "(400g-600g)" is 14,99 zł for 500 g), or a kilo when none is.
+  if (!promo.packQuantity) return promo.loose ? promo.promoPrice : Number.POSITIVE_INFINITY;
   return promo.packUnit === "szt"
     ? promo.promoPrice / promo.packQuantity
     : (promo.promoPrice / promo.packQuantity) * 1000;
@@ -149,5 +151,72 @@ export function highlights(promos: ShopPromo[], today: string, perGroup = 3): Hi
       .sort((a, b) => perUnitValue(a.promo) - perUnitValue(b.promo))
       .slice(0, perGroup);
     return deals.length > 0 ? [{ label, item, deals }] : [];
+  });
+}
+
+/* "Porównaj ceny": what I typed, priced at every shop ----------------------- */
+
+export type QuickOffer = {
+  shop: Shop;
+  promo: ShopPromo;
+  /** The offer named no pack: the usual one was assumed to compare it. */
+  assumed: boolean;
+  /** Confirmed earlier with "Tak" for this item. */
+  confirmed: boolean;
+};
+
+export type QuickItem = {
+  /** As typed: "małe jaja". */
+  name: string;
+  /** The cheapest offer at each shop that has one, cheapest per kilo (or piece) first. */
+  offers: QuickOffer[];
+  /** Shops with no offer for it. */
+  missing: Shop[];
+};
+
+/** "małe jaja, chleb i mięso drobiowe" -> three items; at most 15. */
+export function parseQuickList(text: string): string[] {
+  return [
+    ...new Set(
+      text
+        .split(/[,;\n]+|\s+(?:i|oraz|plus)\s+/i)
+        .map((part) =>
+          part
+            .trim()
+            .replace(/^[-•*\d.)\s]+/, "")
+            .replace(/\s+/g, " "),
+        )
+        .filter((part) => part.length >= 2),
+    ),
+  ].slice(0, 15);
+}
+
+/**
+ * Each typed item priced at every shop: the cheapest offer per kilo (or piece)
+ * among the promos valid today and the shelf prices, by the same rules as the
+ * shopping list, a confirmed "Tak" first. Nothing guessed beyond the usual pack.
+ */
+export function quickCompare(text: string, promos: ShopPromo[], links: ProductLink[], today: string): QuickItem[] {
+  const active = promos.filter(
+    (promo) => promo.validFrom <= today && (promo.validTo === null || promo.validTo >= today),
+  );
+  return parseQuickList(text).map((name) => {
+    const unit: Unit = /jaj/i.test(name) ? "szt" : "g";
+    const offers: QuickOffer[] = [];
+    for (const shop of SHOPS) {
+      const match = matchPromos(
+        { name, unit },
+        active.filter((promo) => promo.shop === shop),
+        links.filter((link) => link.shop === shop),
+      );
+      const candidates: QuickOffer[] = [
+        ...match.confirmed.map((promo) => ({ shop, promo, assumed: false, confirmed: true })),
+        ...match.estimates.map(({ promo, packAssumed }) => ({ shop, promo, assumed: packAssumed, confirmed: false })),
+      ].filter((offer) => Number.isFinite(perUnitValue(offer.promo)));
+      const best = candidates.sort((a, b) => perUnitValue(a.promo) - perUnitValue(b.promo))[0];
+      if (best) offers.push(best);
+    }
+    offers.sort((a, b) => perUnitValue(a.promo) - perUnitValue(b.promo));
+    return { name, offers, missing: SHOPS.filter((shop) => !offers.some((offer) => offer.shop === shop)) };
   });
 }

@@ -6,6 +6,8 @@ import {
   dayLabel,
   discountPercent,
   highlights,
+  parseQuickList,
+  quickCompare,
   selectDeals,
   unitPriceLabel,
   type DealQuery,
@@ -45,7 +47,13 @@ describe("deals", () => {
     assert.equal(unitPriceLabel(deal({ packQuantity: 750, packUnit: "ml", promoPrice: 7.5 })), "10,00 zł/l");
     assert.equal(unitPriceLabel(deal({ packQuantity: 10, packUnit: "szt", promoPrice: 12 })), "1,20 zł/szt.");
     assert.equal(unitPriceLabel(deal({ packQuantity: null, packUnit: null })), null);
-    assert.equal(unitPriceLabel(deal({ loose: true, promoPrice: 8.99 })), "8,99 zł/kg");
+    assert.equal(unitPriceLabel(deal({ loose: true, promoPrice: 24.8 })), "24,80 zł/kg");
+    // Sold by weight at an average weight: 14,99 zł for about 500 g is 29,98 zł a kilo, not 14,99.
+    assert.equal(unitPriceLabel(deal({ loose: true, packQuantity: 500, promoPrice: 14.99 })), "29,98 zł/kg");
+    assert.equal(
+      unitPriceLabel(deal({ loose: true, packQuantity: null, packUnit: null, promoPrice: 8.99 })),
+      "8,99 zł/kg",
+    );
   });
 
   test("this week and the next are separate; ended deals and shelf prices are left out", () => {
@@ -154,6 +162,69 @@ describe("highlights", () => {
       !highlights(promos, "2026-10-20")
         .flatMap((group) => group.deals)
         .some((entry) => entry.promo.productKey === "e"),
+    );
+  });
+});
+
+describe("porównaj ceny", () => {
+  test("what I typed, split into items", () => {
+    assert.deepEqual(parseQuickList("małe jaja, chleb i mięso drobiowe"), ["małe jaja", "chleb", "mięso drobiowe"]);
+    assert.deepEqual(parseQuickList("- skyr\n- serek wiejski; skyr"), ["skyr", "serek wiejski"]);
+  });
+
+  test("each item: the cheapest offer per kilo at each shop, shops without one listed", () => {
+    const promos = [
+      deal({
+        productKey: "a",
+        shop: "lidl",
+        name: "Filet z piersi kurczaka 1 kg",
+        packQuantity: 1000,
+        promoPrice: 18.99,
+      }),
+      deal({
+        productKey: "b",
+        shop: "lidl",
+        name: "Filet z piersi kurczaka 500 g",
+        packQuantity: 500,
+        promoPrice: 12.99,
+      }),
+      deal({ productKey: "c", shop: "biedronka", name: "Udziec z indyka", packQuantity: 1000, promoPrice: 14.99 }),
+      deal({
+        productKey: "d",
+        shop: "auchan",
+        name: "Szynka z indyka wędzona 100 g",
+        packQuantity: 100,
+        promoPrice: 4.99,
+      }),
+      deal({
+        productKey: "e",
+        shop: "lidl",
+        name: "Jaja z wolnego wybiegu M 10 szt",
+        packQuantity: 10,
+        packUnit: "szt",
+        promoPrice: 9.99,
+      }),
+      deal({
+        productKey: "f",
+        shop: "lidl",
+        name: "Filet z piersi kurczaka stary",
+        packQuantity: 1000,
+        promoPrice: 5,
+        validTo: "2026-10-19",
+      }),
+    ];
+    const [poultry, eggs] = quickCompare("mięso drobiowe, jajka", promos, [], "2026-10-20");
+    assert.deepEqual(
+      poultry.offers.map((offer) => [offer.shop, offer.promo.productKey]),
+      [
+        ["biedronka", "c"],
+        ["lidl", "a"],
+      ],
+    );
+    assert.ok(poultry.missing.includes("auchan"), "a cold cut is not raw poultry");
+    assert.deepEqual(
+      eggs.offers.map((offer) => offer.promo.productKey),
+      ["e"],
     );
   });
 });

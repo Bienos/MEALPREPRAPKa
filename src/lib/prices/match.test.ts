@@ -302,7 +302,44 @@ describe("fresh vegetables of the mix", () => {
     );
   });
 
+  test("raw poultry for 'mięso drobiowe', never cat treats or sausages", () => {
+    assert.deepEqual(
+      names(
+        "mięso drobiowe",
+        "Świeże udo kurczaka",
+        "Filetki z Indykiem",
+        "Kiełbasa z piersią kurczaka",
+        "Filet z indyka",
+      ),
+      ["Świeże udo kurczaka", "Filet z indyka"],
+    );
+  });
+
   test("passata and tinned tomatoes are still found for their own items", () => {
     assert.deepEqual(names("passata pomidorowa", "Passata klasyczna"), ["Passata klasyczna"]);
+  });
+});
+
+describe("a pack named only in the offer's name", () => {
+  test('"... 400 g" with an empty pack field is priced at 400 g, not assumed', () => {
+    const offer: ShopPromo = {
+      shop: "lidl",
+      productKey: "k",
+      name: "Rzeźnik kurczak Biesiadny mięso mielone 400 g",
+      packQuantity: null,
+      packUnit: null,
+      loose: false,
+      promoPrice: 9.99,
+      regularPrice: null,
+      validFrom: "2026-10-19",
+      validTo: "2026-10-25",
+      conditions: "",
+      appOnly: false,
+      multibuy: null,
+      multibuyMin: 1,
+      sourceUrl: "x",
+    };
+    const [estimate] = matchPromos({ name: "mięso mielone", unit: "g" }, [offer], []).estimates;
+    assert.deepEqual([estimate.promo.packQuantity, estimate.promo.packUnit, estimate.packAssumed], [400, "g", false]);
   });
 });

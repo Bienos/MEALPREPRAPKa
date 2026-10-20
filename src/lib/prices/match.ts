@@ -66,6 +66,17 @@ const RULES: Rule[] = [
     product: /kurczak\w* (pieczon|grillowan|gotowan|wedzon)/,
   },
   {
+    // "Mięso drobiowe": any raw poultry cut, chicken or turkey, not cold cuts or ready meals.
+    item: /drobi|\bdrob\b/,
+    product:
+      /^(?=.*(kurcz|indyk|indycz|drob))(?=.*(piers|filet|udz|udo\b|podudz|skrzyd|mielon|poledwicz|tusz|cwiartk|gulasz))/,
+    not: either(
+      /szynk|wedzon|gotowan|parzon|pieczon|grillowan|panier|nugget|parowk|kielbas|pasztet|w galarecie|filetki/,
+      PROCESSED,
+    ),
+    search: { sub: "mieso", q: "drób" },
+  },
+  {
     // The meals' "kurczak" is breast: that is what the macros are counted for.
     item: /kurczak|kurczec/,
     product: /^(?=.*kurcz)(?=.*(piers|filet))/,
@@ -225,7 +236,7 @@ const RULES: Rule[] = [
   {
     item: /chleb|pieczywo/,
     product: /chleb|pieczywo/,
-    not: either(/chlebek|tostow|przekask|slodk/, PROCESSED),
+    not: either(/chlebek|tostow|przekask|slodk|chrupk|wafl|bulk|bagiet|tortill|krakers/, PROCESSED),
     search: { sub: "pieczywo", q: "chleb" },
   },
   {
@@ -523,7 +534,10 @@ const USUAL_PACKS: [RegExp, (price: number) => Pack][] = [
   [/szynk/, () => pack(150, "g")],
   [/owoce mrozon|mrozone owoce/, () => pack(450, "g")],
   [/jagod|borowk|malin|truskaw/, () => pack(250, "g")],
-  [/kurczak|indyk|indycz|wolowin|wieprzow|schab|karkowk|lopatk|mielon|losos|banan|jablk|owoce|warzyw|batat/, perKilo],
+  [
+    /kurczak|indyk|indycz|drobi|\bdrob\b|wolowin|wieprzow|schab|karkowk|lopatk|mielon|losos|banan|jablk|owoce|warzyw|batat/,
+    perKilo,
+  ],
   [/ziemniak/, (price) => (price >= 6 ? pack(2500, "g") : perKilo())],
   [/tunczyk/, () => pack(150, "g")],
   [/jajk|\bjaja\b/, () => pack(10, "szt")],
@@ -558,7 +572,7 @@ const USUAL_PACKS: [RegExp, (price: number) => Pack][] = [
  * steak, not a kilo, so it must not be priced as one.
  */
 const MIN_PER_KILO: [RegExp, number][] = [
-  [/kurczak/, 8],
+  [/kurczak|drobi|\bdrob\b/, 6],
   [/indyk|indycz/, 10],
   [/wolowin/, 18],
   [/wieprzow|schab|karkowk|lopatk|mielon/, 12],
@@ -622,6 +636,11 @@ export function matchPromos(
     .filter((promo) => !answered.has(promo.productKey))
     .flatMap((promo): Estimate[] => {
       if (promo.packQuantity !== null) return [{ promo, packAssumed: false }];
+      // The leaflet's pack field is empty but its name says "400 g": that is the pack, not an assumption.
+      const named = parsePack(promo.name);
+      if (named && packInItemUnit(named.quantity, named.unit, item.unit) !== null) {
+        return [{ promo: { ...promo, packQuantity: named.quantity, packUnit: named.unit }, packAssumed: false }];
+      }
       const usual = usualPack(item.name, promo.promoPrice);
       if (!usual || packInItemUnit(usual.quantity, usual.unit, item.unit) === null) return [];
       if (implausible(item.name, promo.promoPrice, usual)) return [];
