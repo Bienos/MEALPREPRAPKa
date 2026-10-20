@@ -19,25 +19,30 @@ export type IsoDate = z.infer<typeof isoDateSchema>;
 
 type Result<T> = { data: T | null; error: PostgrestError | null };
 
+/** The database's message, or its code when the message is empty (a rejected request can carry neither). */
+function describe(error: PostgrestError): string {
+  return error.message || error.code || error.details || "request rejected without a message";
+}
+
 /** Throws on a Supabase error, otherwise validates and returns the rows. */
 export function rows<S extends z.ZodTypeAny>(schema: S, result: Result<unknown>): z.infer<S>[] {
-  if (result.error) throw new Error(`Database error: ${result.error.message}`);
+  if (result.error) throw new Error(`Database error: ${describe(result.error)}`);
   return z.array(schema).parse(result.data ?? []);
 }
 
 /** Like `rows`, but expects exactly one row (use with `.single()`). */
 export function row<S extends z.ZodTypeAny>(schema: S, result: Result<unknown>): z.infer<S> {
-  if (result.error) throw new Error(`Database error: ${result.error.message}`);
+  if (result.error) throw new Error(`Database error: ${describe(result.error)}`);
   return schema.parse(result.data);
 }
 
 /** Like `row`, but tolerates no row (use with `.maybeSingle()`). */
 export function maybeRow<S extends z.ZodTypeAny>(schema: S, result: Result<unknown>): z.infer<S> | null {
-  if (result.error) throw new Error(`Database error: ${result.error.message}`);
+  if (result.error) throw new Error(`Database error: ${describe(result.error)}`);
   return result.data == null ? null : schema.parse(result.data);
 }
 
 /** Throws on a Supabase error for statements that return nothing. */
 export function ok(result: { error: PostgrestError | null }): void {
-  if (result.error) throw new Error(`Database error: ${result.error.message}`);
+  if (result.error) throw new Error(`Database error: ${describe(result.error)}`);
 }

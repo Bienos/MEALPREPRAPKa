@@ -73,11 +73,18 @@ export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
     const failed = sources.filter((one): one is PromiseRejectedResult => one.status === "rejected");
     if (done.length === 0) throw failed[0].reason;
     for (const one of failed) console.error("[prices] one source failed:", one.reason);
+    // Sources left off for want of permission: one line, not one per source.
+    const off = done.flatMap((one) => (one.disabled ? [one.disabled] : []));
     return {
       ok: true,
       count: done.reduce((sum, one) => sum + one.count, 0),
       skipped: done.every((one) => one.skipped),
-      notes: done.flatMap((one) => (one.note ? [one.note] : [])),
+      notes: [
+        ...done.flatMap((one) => (one.note ? [one.note] : [])),
+        ...(off.length > 1
+          ? [`Wyłączone bez potwierdzonej zgody: ${off.length} źródła cen (zob. Źródła danych).`]
+          : off),
+      ],
     };
   } catch (error) {
     console.error("[prices] feed refresh failed:", error);

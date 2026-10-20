@@ -3,6 +3,8 @@ import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { getSupabase } from "@/lib/supabase/server";
+import { RETAILER_IDS, type RetailerId } from "@/lib/grocery/retailers";
+import { LOYALTY_PROGRAMS, type LoyaltyProgram } from "@/lib/grocery/types";
 import { dayTypeSchema, macrosSchema, ok, row, rows, type DayType, type Macros } from "./helpers";
 
 const settingsSchema = z.object({
@@ -11,6 +13,20 @@ const settingsSchema = z.object({
   timezone: z.string(),
   /** The town the shopping comparison is for (online shops deliver to some towns only). */
   shopping_city: z.string().default("Warszawa"),
+  /** Shops on the corner, online delivery, or both. */
+  shopping_channel: z.enum(["store", "online", "both"]).default("both"),
+  /** Loyalty apps and cards I have: app-only prices count only for these. */
+  // Unknown values (a program renamed later) are dropped, never thrown: every screen reads settings.
+  loyalty_programs: z
+    .array(z.string())
+    .default([])
+    .transform((list) => list.filter((one): one is LoyaltyProgram => (LOYALTY_PROGRAMS as readonly string[]).includes(one))),
+  preferred_retailers: z
+    .array(z.string())
+    .default([])
+    .transform((list) => list.filter((one): one is RetailerId => (RETAILER_IDS as readonly string[]).includes(one))),
+  /** Brands never to suggest, folded. */
+  excluded_brands: z.array(z.string()).default([]),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
