@@ -27,6 +27,8 @@ import { priceSource } from "@/lib/prices/source";
 import type { BasketLine, NeededItem } from "@/lib/prices/basket";
 import {
   bestOptions,
+  handoffFor,
+  handoffLabel,
   onlineOptions,
   type DeliveryQuote,
   type OnlineOption,
@@ -1196,6 +1198,7 @@ function DeliveryPanel({
                     {option.feeStatus === "unknown" ? "Wpisz koszt dostawy" : "Popraw koszt dostawy"}
                   </button>
                 ) : null}
+                <span className="w-full font-normal text-muted-foreground">{handoffLabel(handoffFor(provider))}</span>
                 {provider.published ? (
                   <a
                     href={provider.published.source}
@@ -1214,7 +1217,8 @@ function DeliveryPanel({
       </ul>
       <p className="text-xs text-muted-foreground">
         Ceny sklepów online to ich ceny w internecie. Koszt dostawy ze strony sklepu jest szacunkiem; „potwierdzona”
-        znaczy, że wpisałeś ją z koszyka.
+        znaczy, że wpisałeś ją z koszyka. Aplikacja nie składa zamówień: daje linki do produktów i listę do
+        skopiowania, koszyk wypełniasz w sklepie.
       </p>
     </div>
   );

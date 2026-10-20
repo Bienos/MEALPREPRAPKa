@@ -97,6 +97,30 @@ export const PROVIDERS: Provider[] = [
   { id: "wolt", label: "Wolt", shop: null, url: "https://wolt.com/pl/pol", cities: "all", published: null },
 ];
 
+/**
+ * What the app can hand over to a provider, level by level: 1 links to its
+ * product pages, 2 the shopping list to copy, 3 filling its basket, 4 placing
+ * the order. Levels 3 and 4 need a documented API or the provider's
+ * permission; no provider here has either, so they are off everywhere and
+ * the screen says so rather than pretending.
+ */
+export type Handoff = { productLinks: boolean; listCopy: boolean; basket: false; checkout: false };
+
+export function handoffFor(provider: Provider): Handoff {
+  // Product pages exist where we read the shop's own catalogue (each price links to its page).
+  return { productLinks: provider.shop !== null, listCopy: true, basket: false, checkout: false };
+}
+
+export function handoffLabel(handoff: Handoff): string {
+  return [
+    handoff.productLinks ? "linki do produktów" : null,
+    handoff.listCopy ? "lista do skopiowania" : null,
+    "koszyk i zamówienie: brak udokumentowanego API, robisz to w sklepie",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 /** The fee as I know it: what I typed (confirmed or not) or what the provider's page says. */
 export type DeliveryQuote = {
   provider: string;
