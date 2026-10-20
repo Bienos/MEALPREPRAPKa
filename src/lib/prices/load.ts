@@ -1,12 +1,15 @@
 import "server-only";
 
 import { APP_TIMEZONE, todayIso } from "@/lib/date";
+import { listDeliveryQuotes } from "@/lib/db/delivery";
 import { listProductLinks, listShelfPrices, listShopPrices, listShopPromos } from "@/lib/db/prices";
+import { getSettings } from "@/lib/db/settings";
 import { listShoppingItems } from "@/lib/db/shopping";
 import type { Unit } from "@/lib/meals/ingredients";
 import { isPromoActive } from "./basket";
 import { LIDL_EVERYDAY } from "./lidl-everyday";
 import { relevantPromos } from "./match";
+import type { DeliveryQuote } from "./delivery";
 import type { ProductLink, ShopPrice, ShopPromo } from "./types";
 
 export type PricingData = {
@@ -16,16 +19,21 @@ export type PricingData = {
   links: ProductLink[];
   /** When promotions were last fetched, ready to show ("19.10, 07:02"). */
   fetchedLabel: string | null;
+  /** Delivery fees as I know them, and the town the comparison is for. */
+  quotes: DeliveryQuote[];
+  city: string;
 };
 
 /** What the "Gdzie taniej?" card needs, for any page that shows it. */
 export async function loadPricing(): Promise<PricingData> {
-  const [promos, shelf, prices, links, shopping] = await Promise.all([
+  const [promos, shelf, prices, links, shopping, quotes, settings] = await Promise.all([
     listShopPromos(),
     listShelfPrices(),
     listShopPrices(),
     listProductLinks(),
     listShoppingItems(),
+    listDeliveryQuotes(),
+    getSettings(),
   ]);
   const items = shopping
     .filter((item) => !item.checked && !item.owned)
@@ -45,6 +53,8 @@ export async function loadPricing(): Promise<PricingData> {
     prices,
     links,
     fetchedLabel: lastFetch ? fetchedLabel(lastFetch) : null,
+    quotes,
+    city: settings.shopping_city,
   };
 }
 

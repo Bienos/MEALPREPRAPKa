@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDown, ChevronRight, ExternalLink, PencilLine, Plus, RefreshCw, Smartphone } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  MapPin,
+  PencilLine,
+  Plus,
+  RefreshCw,
+  Smartphone,
+  Truck,
+} from "lucide-react";
 
 import { BulkPrices, SHOP_ORDER } from "@/components/prep/bulk-prices";
 import { Button } from "@/components/ui/button";
@@ -12,6 +22,13 @@ import type { RefreshFeedsResult, RefreshPromosResult, RefreshSweepResult } from
 import { formatAmount, type Unit } from "@/lib/meals/ingredients";
 import { priceSource } from "@/lib/prices/source";
 import { buildBasket, type BasketLine, type NeededItem, type PriceOption } from "@/lib/prices/basket";
+import {
+  bestOptions,
+  onlineOptions,
+  type DeliveryQuote,
+  type OnlineOption,
+  type Provider,
+} from "@/lib/prices/delivery";
 import { matchPromos, priceKey, type PromoMatch } from "@/lib/prices/match";
 import {
   SHOP_IN,
@@ -34,6 +51,11 @@ export type ShopPricing = {
   links: ProductLink[];
   /** When promotions were last fetched, ready to show ("19.10, 07:02"). */
   fetchedLabel: string | null;
+  /** Delivery fees as I know them, and the town the comparison is for. */
+  quotes: DeliveryQuote[];
+  city: string;
+  onSaveQuote: (quote: DeliveryQuote) => Promise<void>;
+  onSetCity: (city: string) => Promise<void>;
   onRefresh: () => Promise<RefreshPromosResult>;
   onRefreshSweep: () => Promise<RefreshSweepResult>;
   onRefreshFeeds: () => Promise<RefreshFeedsResult>;
@@ -69,6 +91,11 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     item: NeededItem;
   } | null>(null);
   const [allShops, setAllShops] = useState(false);
+  const [tab, setTab] = useState<"shops" | "delivery">("shops");
+  const [quotes, setQuotes] = useState(pricing.quotes);
+  const [city, setCity] = useState(pricing.city);
+  const [editingCity, setEditingCity] = useState(false);
+  const [quoteFor, setQuoteFor] = useState<Provider | null>(null);
   const [refreshing, startRefresh] = useTransition();
   const [refreshNote, setRefreshNote] = useState<{
     error: boolean;
@@ -100,6 +127,8 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     return options;
   });
   const { compared, split } = summary;
+  const online = onlineOptions(summary, quotes, city);
+  const best = bestOptions(summary, online);
   const onPromo = items.filter((_, index) => summary.shops.some((basket) => basket.lines[index].cost?.onPromo)).length;
 
   // The estimates in use, one per item and shop: what "Pasuje?" asks about.
@@ -197,6 +226,20 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
     void pricing.onRemovePrice(itemName, shop);
   }
 
+  function saveQuote(quote: DeliveryQuote) {
+    setQuotes((current) => [...current.filter((one) => one.provider !== quote.provider), quote]);
+    setQuoteFor(null);
+    void pricing.onSaveQuote(quote);
+  }
+
+  function saveCity(value: string) {
+    const next = value.trim();
+    setEditingCity(false);
+    if (next.length < 2 || next === city) return;
+    setCity(next);
+    void pricing.onSetCity(next);
+  }
+
   const detail = openShop ? summary.shops.find((basket) => basket.shop === openShop)! : null;
   // Exact prices first, then estimates, then what has no price.
   const detailLines = detail ? [...detail.lines].sort((a, b) => lineOrder(a) - lineOrder(b)) : [];
@@ -207,13 +250,104 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
   return (
     <Card className="gap-3 p-4">
       <div>
-        <p className="text-lg font-extrabold">Gdzie taniej?</p>
+        <p className="text-lg font-extrabold">Gdzie najtaniej?</p>
         <p className="text-sm text-muted-foreground">
-          Promocje Lidla, gazetki {SHOPS.length - 1} sieci i ceny z półki Biedronki, dla tego, co zostało do kupienia
+          Gazetki, ceny z półek i sklepy online, dla tego, co zostało do kupienia. Każda cena ma źródło i datę.
         </p>
       </div>
 
-      <ul className="flex flex-col gap-2">
+      {best.shop || best.online || best.split ? (
+        <ul className="flex flex-col gap-2 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm">
+          {best.shop?.kind === "shop" ? (
+            <li className="flex items-center gap-2">
+              <span className="w-24 shrink-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+                W sklepie
+              </span>
+              <span className="min-w-0 flex-1 font-semibold">
+                {SHOP_LABELS[best.shop.shop]}
+                <span className="font-normal text-muted-foreground">
+                  {" "}
+                  · {summary.itemCount - best.shop.missing} z {summary.itemCount}
+                  {best.shop.estimated > 0 ? `, ${best.shop.estimated} szac.` : ""}
+                  {best.shop.missing > 0 ? `, ${best.shop.missing} bez ceny` : ""}
+                </span>
+              </span>
+              <span className="font-extrabold tabular-nums">{formatTotal(best.shop.total)}</span>
+            </li>
+          ) : null}
+          {best.online?.kind === "online" ? (
+            <li className="flex items-center gap-2">
+              <span className="w-24 shrink-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+                Z dostawą
+              </span>
+              <span className="min-w-0 flex-1 font-semibold">
+                {best.online.option.provider.label}
+                <span className="font-normal text-muted-foreground">
+                  {" "}
+                  · dostawa {formatTotal(best.online.option.fee ?? 0)}
+                  {best.online.option.feeStatus === "estimate" ? " (szac.)" : ""}
+                  {best.online.option.missing > 0 ? `, ${best.online.option.missing} bez ceny` : ""}
+                </span>
+              </span>
+              <span className="font-extrabold tabular-nums">{formatTotal(best.online.option.total!)}</span>
+            </li>
+          ) : null}
+          {best.split?.kind === "split" ? (
+            <li className="flex items-center gap-2">
+              <span className="w-24 shrink-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+                Dwa sklepy
+              </span>
+              <span className="min-w-0 flex-1 font-semibold">
+                Każde tam, gdzie taniej
+                <span className="font-normal text-muted-foreground">
+                  {" "}
+                  · {best.split.count} porównanych, oszczędzasz {formatTotal(best.split.savings)}
+                </span>
+              </span>
+              <span className="font-extrabold tabular-nums">{formatTotal(best.split.total)}</span>
+            </li>
+          ) : null}
+        </ul>
+      ) : null}
+
+      <div className="flex gap-2" role="tablist" aria-label="Porównanie">
+        {(
+          [
+            ["shops", "Sklepy"],
+            ["delivery", "Dostawa"],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={tab === key}
+            onClick={() => setTab(key)}
+            className={cn(
+              "flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-bold",
+              tab === key ? "border-primary bg-primary/10 text-primary" : "bg-card",
+            )}
+          >
+            {key === "delivery" ? <Truck className="size-4" /> : null}
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "delivery" ? (
+        <DeliveryPanel
+          options={online}
+          city={city}
+          editingCity={editingCity}
+          onEditCity={() => setEditingCity(true)}
+          onSaveCity={saveCity}
+          onOpen={(shop) => setOpenShop(shop)}
+          onQuote={(provider) => setQuoteFor(provider)}
+          itemCount={summary.itemCount}
+        />
+      ) : null}
+
+      <ul className={cn("flex flex-col gap-2", tab !== "shops" && "hidden")}>
         {shown.map((basket) => {
           // Only a fair claim when the comparison covers most of the list.
           const cheaper = compared.cheapest === basket.shop && compared.count >= summary.itemCount * 0.6;
@@ -249,7 +383,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
           );
         })}
       </ul>
-      {rows.length > shown.length || allShops ? (
+      {tab === "shops" && (rows.length > shown.length || allShops) ? (
         <button
           type="button"
           onClick={() => setAllShops((value) => !value)}
@@ -260,7 +394,7 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
         </button>
       ) : null}
 
-      <div className="flex flex-col gap-1 text-sm">
+      <div className={cn("flex flex-col gap-1 text-sm", tab !== "shops" && "hidden")}>
         <p className="text-muted-foreground">
           {compared.count > 0
             ? `Porównane ${compared.shops.length === 2 ? "w obu" : `w ${compared.shops.length} sklepach`}: ${compared.count} z ${summary.itemCount}`
@@ -300,6 +434,14 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
         Wpisz ceny z półki
       </Button>
 
+      {quoteFor ? (
+        <QuoteSheet
+          provider={quoteFor}
+          quote={quotes.find((one) => one.provider === quoteFor.id)}
+          onSave={saveQuote}
+          onClose={() => setQuoteFor(null)}
+        />
+      ) : null}
       <BulkPrices
         open={bulkOpen && editing === null}
         onClose={() => setBulkOpen(false)}
@@ -702,6 +844,212 @@ function PackChooser({ unit, price, onPick }: { unit: Unit; price: string; onPic
         </Button>
       </form>
     </div>
+  );
+}
+
+/** "Dostawa": the online shops for my town, the basket at each, the delivery on top, and the links. */
+function DeliveryPanel({
+  options,
+  city,
+  editingCity,
+  onEditCity,
+  onSaveCity,
+  onOpen,
+  onQuote,
+  itemCount,
+}: {
+  options: OnlineOption[];
+  city: string;
+  editingCity: boolean;
+  onEditCity: () => void;
+  onSaveCity: (city: string) => void;
+  onOpen: (shop: Shop) => void;
+  onQuote: (provider: Provider) => void;
+  itemCount: number;
+}) {
+  const ordered = [...options].sort(
+    (a, b) =>
+      Number(b.available) - Number(a.available) ||
+      Number(b.total !== null) - Number(a.total !== null) ||
+      Number(b.goods !== null) - Number(a.goods !== null) ||
+      (a.total ?? a.goods ?? 0) - (b.total ?? b.goods ?? 0),
+  );
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-sm">
+        <MapPin className="size-4 text-muted-foreground" />
+        {editingCity ? (
+          <form
+            className="flex flex-1 gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSaveCity(new FormData(event.currentTarget).get("city") as string);
+            }}
+          >
+            <Input name="city" defaultValue={city} autoFocus className="h-10" aria-label="Miasto" />
+            <Button type="submit" size="sm">
+              Zapisz
+            </Button>
+          </form>
+        ) : (
+          <p className="flex-1">
+            Dostawa do: <span className="font-semibold">{city}</span>{" "}
+            <button type="button" onClick={onEditCity} className="font-semibold text-primary">
+              zmień
+            </button>
+          </p>
+        )}
+      </div>
+      <ul className="flex flex-col gap-2">
+        {ordered.map((option) => {
+          const { provider } = option;
+          const feeLabel =
+            option.feeStatus === "confirmed"
+              ? `dostawa ${formatTotal(option.fee!)} · potwierdzona`
+              : option.feeStatus === "estimate"
+                ? `dostawa ${formatTotal(option.fee!)} · szacunek`
+                : "koszt dostawy nieznany";
+          const facts = !option.available
+            ? [`nie dostarcza do: ${city}`]
+            : provider.shop === null
+              ? ["ceny dopiero po podaniu adresu w aplikacji"]
+              : [
+                  option.goods !== null ? `${itemCount - option.missing} z ${itemCount} z ceną` : "brak cen",
+                  feeLabel,
+                  option.belowMinimum ? `poniżej minimum ${formatTotal(option.minOrder!)}` : null,
+                ].filter(Boolean);
+          return (
+            <li
+              key={provider.id}
+              className={cn("rounded-xl border bg-card px-4 py-3", !option.available && "opacity-60")}
+            >
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={!provider.shop || !option.basket}
+                  onClick={() => provider.shop && onOpen(provider.shop)}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <span className="block font-bold">{provider.label}</span>
+                  <span className="block text-xs font-semibold text-muted-foreground">{facts.join(" · ")}</span>
+                </button>
+                {option.total !== null ? (
+                  <span className="text-lg font-extrabold tabular-nums">{formatTotal(option.total)}</span>
+                ) : option.goods !== null ? (
+                  <span className="text-right text-sm font-bold tabular-nums">
+                    {formatTotal(option.goods)}
+                    <span className="block text-xs font-semibold text-muted-foreground">+ dostawa ?</span>
+                  </span>
+                ) : null}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
+                <a
+                  href={provider.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-primary"
+                >
+                  Otwórz {provider.label}
+                  <ExternalLink className="size-3" />
+                </a>
+                {provider.shop ? (
+                  <button type="button" onClick={() => onQuote(provider)} className="text-primary">
+                    {option.feeStatus === "unknown" ? "Wpisz koszt dostawy" : "Popraw koszt dostawy"}
+                  </button>
+                ) : null}
+                {provider.published ? (
+                  <a
+                    href={provider.published.source}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-muted-foreground"
+                    title={provider.published.note}
+                  >
+                    warunki dostawy ({provider.published.day.slice(8, 10)}.{provider.published.day.slice(5, 7)})
+                  </a>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="text-xs text-muted-foreground">
+        Ceny sklepów online to ich ceny w internecie. Koszt dostawy ze strony sklepu jest szacunkiem; „potwierdzona”
+        znaczy, że wpisałeś ją z koszyka.
+      </p>
+    </div>
+  );
+}
+
+/** "Wpisz koszt dostawy": what I saw at checkout (confirmed) or on the shop's page. */
+function QuoteSheet({
+  provider,
+  quote,
+  onSave,
+  onClose,
+}: {
+  provider: Provider;
+  quote: DeliveryQuote | undefined;
+  onSave: (quote: DeliveryQuote) => void;
+  onClose: () => void;
+}) {
+  const start = quote ?? {
+    fee: provider.published?.fee ?? null,
+    freeAbove: provider.published?.freeAbove ?? null,
+    minOrder: provider.published?.minOrder ?? null,
+    confirmed: false,
+    note: "",
+  };
+  const field = (value: number | null) => (value === null ? "" : String(value).replace(".", ","));
+  const num = (value: FormDataEntryValue | null) => {
+    const parsed = Number(
+      String(value ?? "")
+        .replace(",", ".")
+        .trim(),
+    );
+    return String(value ?? "").trim() === "" || Number.isNaN(parsed) ? null : parsed;
+  };
+  return (
+    <Sheet open onClose={onClose} title={`Dostawa: ${provider.label}`}>
+      <form
+        className="flex flex-col gap-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          onSave({
+            provider: provider.id,
+            fee: num(data.get("fee")),
+            freeAbove: num(data.get("freeAbove")),
+            minOrder: num(data.get("minOrder")),
+            confirmed: data.get("confirmed") === "on",
+            note: String(data.get("note") ?? "").trim(),
+          });
+        }}
+      >
+        {provider.published ? <p className="text-sm text-muted-foreground">{provider.published.note}</p> : null}
+        <label className="flex flex-col gap-1 text-sm font-semibold">
+          Koszt dostawy (zł)
+          <Input name="fee" inputMode="decimal" defaultValue={field(start.fee)} placeholder="np. 14" />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold">
+          Darmowa od (zł)
+          <Input name="freeAbove" inputMode="decimal" defaultValue={field(start.freeAbove)} placeholder="np. 300" />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold">
+          Minimalne zamówienie (zł)
+          <Input name="minOrder" inputMode="decimal" defaultValue={field(start.minOrder)} placeholder="np. 100" />
+        </label>
+        <label className="flex items-center gap-2 text-sm font-semibold">
+          <input type="checkbox" name="confirmed" defaultChecked={start.confirmed} className="size-5" />
+          Widziałem tę kwotę w koszyku (potwierdzona)
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-semibold">
+          Notatka
+          <Input name="note" defaultValue={start.note} placeholder="np. dostawa wieczorna" maxLength={200} />
+        </label>
+        <Button type="submit">Zapisz</Button>
+      </form>
+    </Sheet>
   );
 }
 

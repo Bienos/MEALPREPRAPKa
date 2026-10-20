@@ -240,3 +240,9 @@ Home Screen so the icon points at the new address.
 `Authorization: Bearer $CRON_SECRET`; ustaw zmienną `CRON_SECRET` (dowolny długi losowy ciąg) w Vercelu dla
 Production. Bez niej trasa odpowiada 503 i nic nie dzieje się po cichu; ekrany i tak same odświeżają ceny,
 gdy otwierasz je ze starymi danymi.
+
+## Dostawa i miasto
+
+Miasto, dla którego liczona jest dostawa, to `settings.shopping_city` (domyślnie Warszawa; zmieniasz je na karcie
+"Dostawa"). Opłaty za dostawę wpisujesz na tej samej karcie; bez wpisu aplikacja używa tylko tego, co sklep
+publikuje na swojej stronie o dostawie, i oznacza to jako szacunek. Szczegóły: `docs/SHOPPING_INTELLIGENCE.md`.

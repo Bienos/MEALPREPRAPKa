@@ -377,3 +377,22 @@ export async function markManyRefreshed(sources: string[], at: string): Promise<
       ),
   );
 }
+
+const observationSchema = z.object({
+  price: z.coerce.number(),
+  observed_at: z.string(),
+  kind: z.enum(["promo", "shelf"]),
+});
+export type PriceObservation = z.infer<typeof observationSchema>;
+
+/** Every price seen for this product, newest first (filled by database triggers on each store). */
+export async function listPriceHistory(shop: Shop, productKey: string, limit = 50): Promise<PriceObservation[]> {
+  const result = await getSupabase()
+    .from("price_observations")
+    .select("price,observed_at,kind")
+    .eq("shop", shop)
+    .eq("product_key", productKey)
+    .order("observed_at", { ascending: false })
+    .limit(limit);
+  return rows(observationSchema, result);
+}
