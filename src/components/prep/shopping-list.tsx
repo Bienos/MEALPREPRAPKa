@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Check, ClipboardCopy, Home, PackageOpen, Trash2, Undo2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, ClipboardCopy, Home, PackageOpen, Share2, Trash2, Undo2 } from "lucide-react";
 
 import { ShopPrices, type ShopPricing } from "@/components/prep/shop-prices";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,21 @@ export function ShoppingList({
   const remaining = active.length - done;
   const categories = [...new Set(active.map((row) => row.category))];
 
+  // The phone's share sheet (Messages, WhatsApp), where the browser has one; known only after mount.
+  const [canShare, setCanShare] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a browser capability, known only on the client
+    setCanShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
+  }, []);
+
+  async function share() {
+    try {
+      await navigator.share({ title: "Lista zakupów", text: shoppingText(rows) });
+    } catch {
+      // Closed the share sheet: nothing to do.
+    }
+  }
+
   async function copy() {
     try {
       await navigator.clipboard.writeText(shoppingText(rows));
@@ -106,6 +121,12 @@ export function ShoppingList({
               <Button variant="outline" size="sm" className="flex-1" onClick={() => void copy()}>
                 <ClipboardCopy className="size-4" />
                 {copied === "ok" ? "Skopiowano" : copied === "failed" ? "Nie udało się" : "Skopiuj listę"}
+              </Button>
+            ) : null}
+            {remaining > 0 && canShare ? (
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => void share()}>
+                <Share2 className="size-4" />
+                Udostępnij
               </Button>
             ) : null}
             {done > 0 ? (

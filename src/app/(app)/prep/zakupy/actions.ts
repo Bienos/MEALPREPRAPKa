@@ -23,6 +23,9 @@ import {
   refreshStokrotkaPrices,
 } from "@/lib/prices/refresh";
 import { SHOPS } from "@/lib/prices/types";
+import { RETAILER_IDS } from "@/lib/grocery/retailers";
+import { LOYALTY_PROGRAMS } from "@/lib/grocery/types";
+import { fold } from "@/lib/prices/match";
 
 export type RefreshPromosResult = { ok: true; count: number; warnings: string[] } | { ok: false; message: string };
 
@@ -73,11 +76,18 @@ export async function refreshFeedsAction(): Promise<RefreshFeedsResult> {
     const failed = sources.filter((one): one is PromiseRejectedResult => one.status === "rejected");
     if (done.length === 0) throw failed[0].reason;
     for (const one of failed) console.error("[prices] one source failed:", one.reason);
+    // Sources left off for want of permission: one line, not one per source.
+    const off = done.flatMap((one) => (one.disabled ? [one.disabled] : []));
     return {
       ok: true,
       count: done.reduce((sum, one) => sum + one.count, 0),
       skipped: done.every((one) => one.skipped),
-      notes: done.flatMap((one) => (one.note ? [one.note] : [])),
+      notes: [
+        ...done.flatMap((one) => (one.note ? [one.note] : [])),
+        ...(off.length > 1
+          ? [`Wyłączone bez potwierdzonej zgody: ${off.length} źródła cen (zob. Źródła danych).`]
+          : off),
+      ],
     };
   } catch (error) {
     console.error("[prices] feed refresh failed:", error);
@@ -171,6 +181,29 @@ export async function saveDeliveryQuoteAction(input: z.input<typeof quoteSchema>
 export async function setShoppingCityAction(city: string): Promise<void> {
   const value = z.string().trim().min(2).max(60).parse(city);
   await updateSettings({ shopping_city: value });
+  updateTag("settings");
+  refresh();
+}
+
+const preferencesSchema = z.object({
+  channel: z.enum(["store", "online", "both"]),
+  loyalty: z.array(z.enum(LOYALTY_PROGRAMS)).max(LOYALTY_PROGRAMS.length),
+  excludedBrands: z.array(z.string().trim().min(2).max(40)).max(30),
+  preferredRetailers: z.array(z.enum(RETAILER_IDS)).max(RETAILER_IDS.length),
+});
+
+/**
+ * How I shop: shop or online, the loyalty apps I have (app-only prices count
+ * only for these), brands never to suggest, the shops shown first.
+ */
+export async function saveShoppingPreferencesAction(input: z.input<typeof preferencesSchema>): Promise<void> {
+  const preferences = preferencesSchema.parse(input);
+  await updateSettings({
+    shopping_channel: preferences.channel,
+    loyalty_programs: [...new Set(preferences.loyalty)],
+    excluded_brands: [...new Set(preferences.excludedBrands.map((brand) => fold(brand).trim()))],
+    preferred_retailers: [...new Set(preferences.preferredRetailers)],
+  });
   updateTag("settings");
   refresh();
 }

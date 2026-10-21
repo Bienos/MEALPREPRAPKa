@@ -1,0 +1,5557 @@
+{
+ "summary": {
+  "date": "2026-10-21",
+  "generatedAt": "2026-10-21T00:21:34.763Z",
+  "offSource": "reused from the run of 2026-10-21T00:16:45Z (off-searches-2026-10-21.json)",
+  "library": "live sheet export (2026-10-21)",
+  "libraryIngredients": 60,
+  "products": 100,
+  "offSearched": 100,
+  "offRetried": 63,
+  "offErrors": 36,
+  "offAnyResult": 63,
+  "offExactProduct": 45,
+  "offCategoryOnly": 11,
+  "offExactPack": 4,
+  "productsWithPack": 11,
+  "openPricesPolishRecords": 1841,
+  "openPricesRejected": {
+   "duplicate": 50,
+   "no_product": 257,
+   "not_poland": 25,
+   "online": 3
+  },
+  "openPricesPoland": 75,
+  "openPricesWarsaw": 43,
+  "openPricesWarsaw90": 42,
+  "openPricesGtinExact": 8,
+  "openPricesWarsaw90ByRetailer": {
+   "biedronka": 3,
+   "lidl": 8,
+   "kaufland": 0,
+   "auchan": 0,
+   "carrefour": 36,
+   "stokrotka": 5,
+   "zabka": 1,
+   "other": 3
+  },
+  "friscoInStock": 12730,
+  "friscoError": null,
+  "friscoVerifiedExact": 91,
+  "friscoAnyMatch": 96,
+  "friscoExactPack": 8,
+  "lidlPublishedExact": 8,
+  "strictByPriorityRetailer": {
+   "biedronka": 0,
+   "lidl": 8,
+   "kaufland": 0,
+   "auchan": 0,
+   "carrefour": 0
+  },
+  "byCategory": {
+   "offExact": {
+    "meat": "4/14",
+    "dairy": "15/21",
+    "eggs": "2/6",
+    "rice_pasta": "8/9",
+    "bread": "4/5",
+    "pantry": "10/19",
+    "vegetables": "2/9",
+    "canned": "0/8",
+    "fruit": "0/3",
+    "frozen": "0/3",
+    "oils": "0/3"
+   },
+   "openPricesWarsaw90": {
+    "meat": "1/14",
+    "dairy": "14/21",
+    "eggs": "6/6",
+    "rice_pasta": "3/9",
+    "bread": "3/5",
+    "pantry": "5/19",
+    "vegetables": "3/9",
+    "canned": "2/8",
+    "fruit": "0/3",
+    "frozen": "2/3",
+    "oils": "3/3"
+   },
+   "friscoVerifiedExact": {
+    "meat": "12/14",
+    "dairy": "18/21",
+    "eggs": "6/6",
+    "rice_pasta": "8/9",
+    "bread": "5/5",
+    "pantry": "17/19",
+    "vegetables": "9/9",
+    "canned": "7/8",
+    "fruit": "3/3",
+    "frozen": "3/3",
+    "oils": "3/3"
+   }
+  },
+  "basket": {
+   "items": 57,
+   "strictCoverage": [
+    {
+     "shop": "frisco",
+     "priced": 48,
+     "missing": [
+      "indyk 5%",
+      "wołowina 5%",
+      "białka jaj",
+      "feta light",
+      "ser light",
+      "ryż microwave gotowy",
+      "salsa",
+      "sos sweet chilli",
+      "whey"
+     ]
+    },
+    {
+     "shop": "lidl",
+     "priced": 5,
+     "missing": [
+      "indyk",
+      "indyk 5%",
+      "indyk/szynka",
+      "kurczak",
+      "kurczak gotowy",
+      "pierś z kurczaka",
+      "szynka z indyka",
+      "tuńczyk",
+      "wołowina",
+      "wołowina 5%",
+      "białka jaj",
+      "feta light",
+      "jajka",
+      "jogurt 2%",
+      "mozzarella light",
+      "ser light",
+      "serek wiejski",
+      "skyr",
+      "twaróg chudy",
+      "fasola",
+      "orzo",
+      "płatki",
+      "płatki owsiane",
+      "ryż microwave gotowy",
+      "tortilla",
+      "tortille",
+      "ziemniaki",
+      "cebula",
+      "kukurydza",
+      "ogórek",
+      "papryka",
+      "passata",
+      "pieczarki",
+      "pomidor",
+      "salsa",
+      "banan",
+      "jabłko",
+      "owoce mrożone",
+      "kakao",
+      "masło orzechowe",
+      "miód",
+      "mleko kokosowe light",
+      "musztarda",
+      "nasiona chia",
+      "pb",
+      "pesto",
+      "pudding proteinowy",
+      "sos bbq",
+      "sos sojowy",
+      "sos sweet chilli",
+      "teriyaki",
+      "whey"
+     ]
+    }
+   ],
+   "complete": [],
+   "verdict": "Nie da się ustalić najtańszego pełnego koszyka z dostępnych danych.",
+   "referenceCoverage": [
+    {
+     "shop": "frisco",
+     "priced": 53,
+     "states": {
+      "verified_current": 53
+     }
+    },
+    {
+     "shop": "carrefour",
+     "priced": 12,
+     "states": {
+      "community": 12
+     }
+    },
+    {
+     "shop": "lidl",
+     "priced": 7,
+     "states": {
+      "published_promotion": 6,
+      "community": 1
+     }
+    },
+    {
+     "shop": "stokrotka",
+     "priced": 3,
+     "states": {
+      "community": 3
+     }
+    },
+    {
+     "shop": "biedronka",
+     "priced": 1,
+     "states": {
+      "community": 1
+     }
+    },
+    {
+     "shop": "zabka",
+     "priced": 1,
+     "states": {
+      "community": 1
+     }
+    }
+   ]
+  },
+  "notRun": {
+   "lidl-web, blix, biedronka-online, auchan-online, stokrotka-feed": "blocked by policy: no permission on record for these sources (GROCERY_UNVERIFIED_SOURCES off)",
+   "gs1-eprodukty": "blocked: no subscription or credentials",
+   "kaufland, carrefour, dino, aldi, netto online catalogues": "no authorized source exists"
+  },
+  "seconds": 13
+ },
+ "results": [
+  {
+   "id": 1,
+   "category": "meat",
+   "ingredient": "pierś z kurczaka",
+   "product": "pierś z kurczaka",
+   "name": "pierś z kurczaka",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Filet z piersi z kurczaka (400g-600g)",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1499,
+    "perUnit": "29.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,132948/n,frisco-fresh-filet-z-piersi-z-kurczaka-(400g-600g)/stn,product",
+    "sku": "frisco:132948",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 2,
+   "category": "meat",
+   "ingredient": "pierś z kurczaka",
+   "product": "pierś z kurczaka 800 g",
+   "name": "pierś z kurczaka",
+   "unit": "g",
+   "pack": {
+    "amount": 800,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Filet z piersi z kurczaka (400g-600g)",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": false,
+    "priceGrosz": 1499,
+    "perUnit": "29.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,132948/n,frisco-fresh-filet-z-piersi-z-kurczaka-(400g-600g)/stn,product",
+    "sku": "frisco:132948",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 3,
+   "category": "meat",
+   "ingredient": "pierś z kurczaka",
+   "product": "filet z piersi kurczaka 1 kg",
+   "name": "filet z piersi kurczaka",
+   "unit": "g",
+   "pack": {
+    "amount": 1000,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Filet z piersi kurczaka",
+     "pack": {
+      "amount": 100,
+      "unit": "g"
+     },
+     "exactPack": false,
+     "gtin": "00000020902438",
+     "url": "https://world.openfoodfacts.org/product/20902438"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Filet z piersi z kurczaka (400g-600g)",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": false,
+    "priceGrosz": 1499,
+    "perUnit": "29.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,132948/n,frisco-fresh-filet-z-piersi-z-kurczaka-(400g-600g)/stn,product",
+    "sku": "frisco:132948",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 4,
+   "category": "meat",
+   "ingredient": "kurczak",
+   "product": "filet z kurczaka",
+   "name": "filet z kurczaka",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Filet z piersi kurczaka",
+     "pack": {
+      "amount": 100,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020902438",
+     "url": "https://world.openfoodfacts.org/product/20902438"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Filet z piersi z kurczaka (400g-600g)",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1499,
+    "perUnit": "29.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,132948/n,frisco-fresh-filet-z-piersi-z-kurczaka-(400g-600g)/stn,product",
+    "sku": "frisco:132948",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 5,
+   "category": "meat",
+   "ingredient": "kurczak gotowy",
+   "product": "kurczak gotowy",
+   "name": "kurczak gotowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 3,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "zabka": 2,
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 2,
+     "PRICE_TAG": 1
+    },
+    "newest": "2026-10-18",
+    "gtinExact": 0,
+    "example": {
+     "name": "Drosed Polędwiczki z kurczaka pieczone w marynacie klasycznej",
+     "store": "Żabka",
+     "date": "2026-10-18",
+     "priceGrosz": 1599,
+     "url": "https://prices.openfoodfacts.org/prices/350489",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Noga z kurczaka pieczona",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 969,
+    "perUnit": "48.45 zł/kg",
+    "url": "https://www.frisco.pl/pid,146079/n,drosed-noga-z-kurczaka-pieczona/stn,product",
+    "sku": "frisco:146079",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 6,
+   "category": "meat",
+   "ingredient": "indyk",
+   "product": "filet z indyka",
+   "name": "filet z indyka",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "category",
+     "name": "Filet Z Indyka",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "04056489185147",
+     "url": "https://world.openfoodfacts.org/product/4056489185147"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Filet z piersi indyka (800g-1200g)",
+    "pack": {
+     "amount": 1000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 5399,
+    "perUnit": "53.99 zł/kg",
+    "url": "https://www.frisco.pl/pid,122037/n,indykpol-samo-dobro-filet-z-piersi-indyka-(800g-1200g)/stn,product",
+    "sku": "frisco:122037",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 7,
+   "category": "meat",
+   "ingredient": "indyk",
+   "product": "mięso mielone z indyka",
+   "name": "mięso mielone z indyka",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 6,
+    "best": {
+     "tier": "attributes",
+     "name": "Mięso mielone z indyka",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "02876060003880",
+     "url": "https://world.openfoodfacts.org/product/2876060003880"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Mięso mielone na kotlety z indyka",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1299,
+    "perUnit": "25.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,8546/n,indykpol-mieso-mielone-na-kotlety-z-indyka/stn,product",
+    "sku": "frisco:8546",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 8,
+   "category": "meat",
+   "ingredient": "indyk 5%",
+   "product": "indyk 5%",
+   "name": "indyk 5%",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "category",
+    "name": "Filet z piersi indyka (800g-1200g)",
+    "pack": {
+     "amount": 1000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 5399,
+    "perUnit": "53.99 zł/kg",
+    "url": "https://www.frisco.pl/pid,122037/n,indykpol-samo-dobro-filet-z-piersi-indyka-(800g-1200g)/stn,product",
+    "sku": "frisco:122037",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 9,
+   "category": "meat",
+   "ingredient": "szynka z indyka",
+   "product": "szynka z indyka",
+   "name": "szynka z indyka",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Szynka Filet Z Indyk",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489185161",
+     "url": "https://world.openfoodfacts.org/product/4056489185161"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 1
+    },
+    "newest": "2026-01-10",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Szynka z Indyka (120g-180g)",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 669,
+    "perUnit": "44.60 zł/kg",
+    "url": "https://www.frisco.pl/pid,141592/n,indykpol-szynka-z-indyka-(120g-180g)/stn,product",
+    "sku": "frisco:141592",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 10,
+   "category": "meat",
+   "ingredient": "indyk/szynka",
+   "product": "szynka z indyka w plastrach",
+   "name": "szynka z indyka w plastrach",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 1
+    },
+    "newest": "2026-01-10",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Szynka z indyka - plastry",
+    "pack": {
+     "amount": 170,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1339,
+    "perUnit": "78.76 zł/kg",
+    "url": "https://www.frisco.pl/pid,89413/n,wierzejki-szynka-z-indyka---plastry/stn,product",
+    "sku": "frisco:89413",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 11,
+   "category": "meat",
+   "ingredient": "wołowina",
+   "product": "wołowina mielona",
+   "name": "wołowina mielona",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Mięso mielone wołowe",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1899,
+    "perUnit": "47.48 zł/kg",
+    "url": "https://www.frisco.pl/pid,143605/n,sokolow-mieso-mielone-wolowe/stn,product",
+    "sku": "frisco:143605",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 12,
+   "category": "meat",
+   "ingredient": "wołowina 5%",
+   "product": "wołowina 5%",
+   "name": "wołowina 5%",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "category",
+     "name": "Mięso wołowe na gulasz",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900562533143",
+     "url": "https://world.openfoodfacts.org/product/5900562533143"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "category",
+    "name": "Łata wołowa (800g-1200g)",
+    "pack": {
+     "amount": 1000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 6199,
+    "perUnit": "61.99 zł/kg",
+    "url": "https://www.frisco.pl/pid,141026/n,lukow-lata-wolowa-(800g-1200g)/stn,product",
+    "sku": "frisco:141026",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 13,
+   "category": "meat",
+   "ingredient": "tuńczyk",
+   "product": "tuńczyk w sosie własnym",
+   "name": "tuńczyk w sosie własnym",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-09-21",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Tuńczyk w sosie własnym",
+    "pack": {
+     "amount": 160,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 799,
+    "perUnit": "49.94 zł/kg",
+    "url": "https://www.frisco.pl/pid,15204/n,calvo-tunczyk-w-sosie-wlasnym/stn,product",
+    "sku": "frisco:15204",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 14,
+   "category": "meat",
+   "ingredient": "tuńczyk",
+   "product": "tuńczyk",
+   "name": "tuńczyk",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-09-21",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Tuńczyk w sosie własnym",
+    "pack": {
+     "amount": 160,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 799,
+    "perUnit": "49.94 zł/kg",
+    "url": "https://www.frisco.pl/pid,15204/n,calvo-tunczyk-w-sosie-wlasnym/stn,product",
+    "sku": "frisco:15204",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 15,
+   "category": "dairy",
+   "ingredient": "białka jaj",
+   "product": "białka jaj",
+   "name": "białka jaj",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": {
+     "tier": "category",
+     "name": "Płynne Białka Jaj",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05901947669938",
+     "url": "https://world.openfoodfacts.org/product/5901947669938"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": null,
+   "lidlEveryday": null
+  },
+  {
+   "id": 16,
+   "category": "dairy",
+   "ingredient": "feta light",
+   "product": "feta light",
+   "name": "feta light",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "category",
+    "name": "Ser feta BIO",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1909,
+    "perUnit": "127.27 zł/kg",
+    "url": "https://www.frisco.pl/pid,134350/n,kourellas-ser-feta-bio/stn,product",
+    "sku": "frisco:134350",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 17,
+   "category": "dairy",
+   "ingredient": "feta light",
+   "product": "ser feta",
+   "name": "ser feta",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Original Greek Feta",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05202258062150",
+     "url": "https://world.openfoodfacts.org/product/5202258062150"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ser feta BIO",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1909,
+    "perUnit": "127.27 zł/kg",
+    "url": "https://www.frisco.pl/pid,134350/n,kourellas-ser-feta-bio/stn,product",
+    "sku": "frisco:134350",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 18,
+   "category": "eggs",
+   "ingredient": "jajka",
+   "product": "jajka",
+   "name": "jajka",
+   "unit": "szt",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jajka M",
+     "pack": {
+      "amount": 10,
+      "unit": "szt"
+     },
+     "exactPack": null,
+     "gtin": "05907672700014",
+     "url": "https://world.openfoodfacts.org/product/5907672700014"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 40,
+    "warsaw": 4,
+    "warsaw90": 4,
+    "byRetailer90": {
+     "carrefour": 4
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 36
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Świeże jaja z wolnego wybiegu",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 1459,
+     "url": "https://prices.openfoodfacts.org/prices/336880",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jaja ekologiczne - 10 szt. BIO",
+    "pack": {
+     "amount": 10,
+     "unit": "szt"
+    },
+    "exactPack": null,
+    "priceGrosz": 1629,
+    "perUnit": "1.63 zł/szt",
+    "url": "https://www.frisco.pl/pid,104379/n,wybiegane-kury-jaja-ekologiczne---10-szt.-bio/stn,product",
+    "sku": "frisco:104379",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 19,
+   "category": "eggs",
+   "ingredient": "jajka",
+   "product": "jajka 6 szt.",
+   "name": "jajka",
+   "unit": "szt",
+   "pack": {
+    "amount": 6,
+    "unit": "szt"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jajka M",
+     "pack": {
+      "amount": 10,
+      "unit": "szt"
+     },
+     "exactPack": false,
+     "gtin": "05907672700014",
+     "url": "https://world.openfoodfacts.org/product/5907672700014"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 40,
+    "warsaw": 4,
+    "warsaw90": 4,
+    "byRetailer90": {
+     "carrefour": 4
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 36
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Świeże jaja z wolnego wybiegu",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 1459,
+     "url": "https://prices.openfoodfacts.org/prices/336880",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jaja kurze z chowu ekologicznego - 6 szt. BIO",
+    "pack": {
+     "amount": 6,
+     "unit": "szt"
+    },
+    "exactPack": true,
+    "priceGrosz": 1079,
+    "perUnit": "1.80 zł/szt",
+    "url": "https://www.frisco.pl/pid,117087/n,bio-planet-jaja-kurze-z-chowu-ekologicznego---6-szt.-bio/stn,product",
+    "sku": "frisco:117087",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 20,
+   "category": "eggs",
+   "ingredient": "jajka",
+   "product": "jajka 10 szt.",
+   "name": "jajka",
+   "unit": "szt",
+   "pack": {
+    "amount": 10,
+    "unit": "szt"
+   },
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 40,
+    "warsaw": 4,
+    "warsaw90": 4,
+    "byRetailer90": {
+     "carrefour": 4
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 36
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Świeże jaja z wolnego wybiegu",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 1459,
+     "url": "https://prices.openfoodfacts.org/prices/336880",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jaja ekologiczne - 10 szt. BIO",
+    "pack": {
+     "amount": 10,
+     "unit": "szt"
+    },
+    "exactPack": true,
+    "priceGrosz": 1629,
+    "perUnit": "1.63 zł/szt",
+    "url": "https://www.frisco.pl/pid,104379/n,wybiegane-kury-jaja-ekologiczne---10-szt.-bio/stn,product",
+    "sku": "frisco:104379",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 21,
+   "category": "eggs",
+   "ingredient": "jajka",
+   "product": "jaja L",
+   "name": "jaja L",
+   "unit": "szt",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 24,
+    "warsaw": 4,
+    "warsaw90": 4,
+    "byRetailer90": {
+     "carrefour": 4
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 20
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Świeże jaja z wolnego wybiegu",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 1459,
+     "url": "https://prices.openfoodfacts.org/prices/336880",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jaja kurze z wolnego wybiegu (rozmiar L) - 6 szt.",
+    "pack": {
+     "amount": 6,
+     "unit": "szt"
+    },
+    "exactPack": null,
+    "priceGrosz": 829,
+    "perUnit": "1.38 zł/szt",
+    "url": "https://www.frisco.pl/pid,100967/n,wybiegane-kury-jaja-kurze-z-wolnego-wybiegu-(rozmiar-l)---6-szt./stn,product",
+    "sku": "frisco:100967",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 22,
+   "category": "eggs",
+   "ingredient": "jajka",
+   "product": "jaja M",
+   "name": "jaja M",
+   "unit": "szt",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 9,
+    "best": {
+     "tier": "category",
+     "name": "Świeże jaja Ściólkowe M",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "00000020932756",
+     "url": "https://world.openfoodfacts.org/product/20932756"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 31,
+    "warsaw": 4,
+    "warsaw90": 4,
+    "byRetailer90": {
+     "carrefour": 4
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 27
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Świeże jaja z wolnego wybiegu",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 1459,
+     "url": "https://prices.openfoodfacts.org/prices/336880",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jaja kurze z wolnego wybiegu rozmiar M, 10 szt",
+    "pack": {
+     "amount": 10,
+     "unit": "szt"
+    },
+    "exactPack": null,
+    "priceGrosz": 1589,
+    "perUnit": "1.59 zł/szt",
+    "url": "https://www.frisco.pl/pid,100767/n,farmio-jaja-kurze-z-wolnego-wybiegu-rozmiar-m-10-szt/stn,product",
+    "sku": "frisco:100767",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 23,
+   "category": "eggs",
+   "ingredient": "jajka",
+   "product": "jaja z wolnego wybiegu",
+   "name": "jaja z wolnego wybiegu",
+   "unit": "szt",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 9,
+    "best": {
+     "tier": "category",
+     "name": "Polskie Świeże Jaja z Wolnego Wybiegu Klasa A",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "04056489812395",
+     "url": "https://world.openfoodfacts.org/product/4056489812395"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 28,
+    "warsaw": 4,
+    "warsaw90": 4,
+    "byRetailer90": {
+     "carrefour": 4
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 24
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 1,
+    "example": {
+     "name": "Carrefour Świeże jaja z wolnego wybiegu",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 1459,
+     "url": "https://prices.openfoodfacts.org/prices/336880",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jaja kurze z wolnego wybiegu rozmiar M, 10 szt",
+    "pack": {
+     "amount": 10,
+     "unit": "szt"
+    },
+    "exactPack": null,
+    "priceGrosz": 1589,
+    "perUnit": "1.59 zł/szt",
+    "url": "https://www.frisco.pl/pid,100767/n,farmio-jaja-kurze-z-wolnego-wybiegu-rozmiar-m-10-szt/stn,product",
+    "sku": "frisco:100767",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 24,
+   "category": "dairy",
+   "ingredient": "jogurt 2%",
+   "product": "jogurt 2%",
+   "name": "jogurt 2%",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "category",
+     "name": "Jogurt Grecki naturalny",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900512350080",
+     "url": "https://world.openfoodfacts.org/product/5900512350080"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "biedronka": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 3
+    },
+    "newest": "2026-09-21",
+    "gtinExact": 0,
+    "example": {
+     "name": "Fruvita Jogurt Grecki",
+     "store": "Biedronka",
+     "date": "2026-08-06",
+     "priceGrosz": 749,
+     "url": "https://prices.openfoodfacts.org/prices/304565",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jogurt naturalny 2%",
+    "pack": {
+     "amount": 170,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 289,
+    "perUnit": "17.00 zł/kg",
+    "url": "https://www.frisco.pl/pid,134926/n,czarnocin-jogurt-naturalny-2/stn,product",
+    "sku": "frisco:134926",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 25,
+   "category": "dairy",
+   "ingredient": "jogurt 2%",
+   "product": "jogurt naturalny",
+   "name": "jogurt naturalny",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt naturalny",
+     "pack": {
+      "amount": 330,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489745518",
+     "url": "https://world.openfoodfacts.org/product/4056489745518"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-21",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jogurt naturalny",
+    "pack": {
+     "amount": 180,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 189,
+    "perUnit": "10.50 zł/kg",
+    "url": "https://www.frisco.pl/pid,142615/n,kanka-jogurt-naturalny/stn,product",
+    "sku": "frisco:142615",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 26,
+   "category": "dairy",
+   "ingredient": "jogurt 2%",
+   "product": "jogurt grecki",
+   "name": "jogurt grecki",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt Grecki naturalny",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900512350080",
+     "url": "https://world.openfoodfacts.org/product/5900512350080"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "biedronka": 1
+    },
+    "proofs": {
+     "RECEIPT": 2
+    },
+    "newest": "2026-08-06",
+    "gtinExact": 0,
+    "example": {
+     "name": "Fruvita Jogurt Grecki",
+     "store": "Biedronka",
+     "date": "2026-08-06",
+     "priceGrosz": 749,
+     "url": "https://prices.openfoodfacts.org/prices/304565",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jogurt grecki",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1809,
+    "perUnit": "36.18 zł/kg",
+    "url": "https://www.frisco.pl/pid,147871/n,kolios-jogurt-grecki/stn,product",
+    "sku": "frisco:147871",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 27,
+   "category": "dairy",
+   "ingredient": "jogurt 2%",
+   "product": "jogurt grecki naturalny 400 g",
+   "name": "jogurt grecki naturalny",
+   "unit": "g",
+   "pack": {
+    "amount": 400,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt Grecki naturalny",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05900512350080",
+     "url": "https://world.openfoodfacts.org/product/5900512350080"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "biedronka": 1
+    },
+    "proofs": {
+     "RECEIPT": 2
+    },
+    "newest": "2026-08-06",
+    "gtinExact": 0,
+    "example": {
+     "name": "Fruvita Jogurt Grecki",
+     "store": "Biedronka",
+     "date": "2026-08-06",
+     "priceGrosz": 749,
+     "url": "https://prices.openfoodfacts.org/prices/304565",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jogurt grecki 10%",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": true,
+    "priceGrosz": 369,
+    "perUnit": "9.23 zł/kg",
+    "url": "https://www.frisco.pl/pid,140815/n,osm-lowicz-jogurt-grecki-10/stn,product",
+    "sku": "frisco:140815",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 28,
+   "category": "dairy",
+   "ingredient": "mozzarella light",
+   "product": "mozzarella light",
+   "name": "mozzarella light",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 7,
+    "best": {
+     "tier": "attributes",
+     "name": "Mozzarella light",
+     "pack": {
+      "amount": 125,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489124481",
+     "url": "https://world.openfoodfacts.org/product/4056489124481"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ser Mozzarella light (kulka)",
+    "pack": {
+     "amount": 125,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 589,
+    "perUnit": "47.12 zł/kg",
+    "url": "https://www.frisco.pl/pid,82489/n,galbani-ser-mozzarella-light-(kulka)/stn,product",
+    "sku": "frisco:82489",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 29,
+   "category": "dairy",
+   "ingredient": "mozzarella light",
+   "product": "mozzarella",
+   "name": "mozzarella",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Mozzarella light",
+     "pack": {
+      "amount": 125,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489124481",
+     "url": "https://world.openfoodfacts.org/product/4056489124481"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ser Mozzarella",
+    "pack": {
+     "amount": 125,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 619,
+    "perUnit": "49.52 zł/kg",
+    "url": "https://www.frisco.pl/pid,81343/n,jager-ser-mozzarella/stn,product",
+    "sku": "frisco:81343",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 30,
+   "category": "dairy",
+   "ingredient": "ser light",
+   "product": "ser light",
+   "name": "ser light",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": {
+     "tier": "attributes",
+     "name": "Ser Królewski Light",
+     "pack": {
+      "amount": 135,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05901753000642",
+     "url": "https://world.openfoodfacts.org/product/5901753000642"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 26,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "carrefour": 3
+    },
+    "proofs": {
+     "RECEIPT": 11,
+     "PRICE_TAG": 15
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mlekovita Ser Wysokobiałkowy",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 685,
+     "url": "https://prices.openfoodfacts.org/prices/336957",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "category",
+    "name": "Ser kozi",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 2099,
+    "perUnit": "104.95 zł/kg",
+    "url": "https://www.frisco.pl/pid,151673/n,mevgal-ser-kozi/stn,product",
+    "sku": "frisco:151673",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "category",
+    "name": "Pilos Ser Carski w plastrach 130 g",
+    "pack": {
+     "amount": 130,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 399,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 31,
+   "category": "dairy",
+   "ingredient": "ser light",
+   "product": "ser gouda w plastrach",
+   "name": "ser gouda w plastrach",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 19,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "carrefour": 3
+    },
+    "proofs": {
+     "RECEIPT": 8,
+     "PRICE_TAG": 11
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mlekovita Ser Wysokobiałkowy",
+     "store": "Carrefour Market",
+     "date": "2026-09-28",
+     "priceGrosz": 685,
+     "url": "https://prices.openfoodfacts.org/prices/336957",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ser Gouda (plastry)",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 2129,
+    "perUnit": "141.93 zł/kg",
+    "url": "https://www.frisco.pl/pid,15303/n,old-amsterdam-ser-gouda-(plastry)/stn,product",
+    "sku": "frisco:15303",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Pilos Ser gouda w plastrach 300 g",
+    "pack": {
+     "amount": 300,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 849,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 32,
+   "category": "dairy",
+   "ingredient": "serek wiejski",
+   "product": "serek wiejski",
+   "name": "serek wiejski",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "SEREK WIEJSKI",
+     "pack": {
+      "amount": 200,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900531000010",
+     "url": "https://world.openfoodfacts.org/product/5900531000010"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 9,
+    "warsaw": 3,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 2
+    },
+    "proofs": {
+     "RECEIPT": 7,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 1,
+    "example": {
+     "name": "PIĄTNICA Serek Wiejski wysokobiałkowy",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 445,
+     "url": "https://prices.openfoodfacts.org/prices/342732",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Serek Wiejski",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 259,
+    "perUnit": "12.95 zł/kg",
+    "url": "https://www.frisco.pl/pid,144123/n,kanka-serek-wiejski/stn,product",
+    "sku": "frisco:144123",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 33,
+   "category": "dairy",
+   "ingredient": "serek wiejski",
+   "product": "serek wiejski lekki",
+   "name": "serek wiejski lekki",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 9,
+    "warsaw": 3,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 2
+    },
+    "proofs": {
+     "RECEIPT": 7,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 0,
+    "example": {
+     "name": "PIĄTNICA Serek Wiejski wysokobiałkowy",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 445,
+     "url": "https://prices.openfoodfacts.org/prices/342732",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Serek wiejski lekki",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 319,
+    "perUnit": "21.27 zł/kg",
+    "url": "https://www.frisco.pl/pid,7654/n,piatnica-serek-wiejski-lekki/stn,product",
+    "sku": "frisco:7654",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 34,
+   "category": "dairy",
+   "ingredient": "serek wiejski",
+   "product": "serek wiejski 200 g",
+   "name": "serek wiejski",
+   "unit": "g",
+   "pack": {
+    "amount": 200,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 9,
+    "warsaw": 3,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 2
+    },
+    "proofs": {
+     "RECEIPT": 7,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 0,
+    "example": {
+     "name": "PIĄTNICA Serek Wiejski wysokobiałkowy",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 445,
+     "url": "https://prices.openfoodfacts.org/prices/342732",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Serek Wiejski",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": true,
+    "priceGrosz": 259,
+    "perUnit": "12.95 zł/kg",
+    "url": "https://www.frisco.pl/pid,144123/n,kanka-serek-wiejski/stn,product",
+    "sku": "frisco:144123",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 35,
+   "category": "dairy",
+   "ingredient": "skyr",
+   "product": "skyr",
+   "name": "skyr",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Skyr w Stylu Islandzkim Naturalny",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020692230",
+     "url": "https://world.openfoodfacts.org/product/20692230"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 2,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 5,
+     "PRICE_TAG": 5
+    },
+    "newest": "2026-09-26",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mlekovita Skyr naturalny",
+     "store": "Carrefour Market",
+     "date": "2026-09-26",
+     "priceGrosz": 599,
+     "url": "https://prices.openfoodfacts.org/prices/335882",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Skyr Jogurt typu islandzkiego naturalny",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 359,
+    "perUnit": "23.93 zł/kg",
+    "url": "https://www.frisco.pl/pid,155080/n,bakoma-skyr-jogurt-typu-islandzkiego-naturalny/stn,product",
+    "sku": "frisco:155080",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 36,
+   "category": "dairy",
+   "ingredient": "skyr",
+   "product": "skyr naturalny",
+   "name": "skyr naturalny",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt typu islandzkiego SKYR Naturalny 0% tłuszczu",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05902409703887",
+     "url": "https://world.openfoodfacts.org/product/5902409703887"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 2,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 5,
+     "PRICE_TAG": 5
+    },
+    "newest": "2026-09-26",
+    "gtinExact": 1,
+    "example": {
+     "name": "Mlekovita Skyr naturalny",
+     "store": "Carrefour Market",
+     "date": "2026-09-26",
+     "priceGrosz": 599,
+     "url": "https://prices.openfoodfacts.org/prices/335882",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Skyr Jogurt typu islandzkiego naturalny",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 359,
+    "perUnit": "23.93 zł/kg",
+    "url": "https://www.frisco.pl/pid,155080/n,bakoma-skyr-jogurt-typu-islandzkiego-naturalny/stn,product",
+    "sku": "frisco:155080",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 37,
+   "category": "dairy",
+   "ingredient": "skyr",
+   "product": "skyr naturalny 450 g",
+   "name": "skyr naturalny",
+   "unit": "g",
+   "pack": {
+    "amount": 450,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt typu islandzkiego SKYR Naturalny 0% tłuszczu",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": false,
+     "gtin": "05902409703887",
+     "url": "https://world.openfoodfacts.org/product/5902409703887"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 2,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 5,
+     "PRICE_TAG": 5
+    },
+    "newest": "2026-09-26",
+    "gtinExact": 1,
+    "example": {
+     "name": "Mlekovita Skyr naturalny",
+     "store": "Carrefour Market",
+     "date": "2026-09-26",
+     "priceGrosz": 599,
+     "url": "https://prices.openfoodfacts.org/prices/335882",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Skyr Jogurt typu islandzkiego naturalny",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": false,
+    "priceGrosz": 359,
+    "perUnit": "23.93 zł/kg",
+    "url": "https://www.frisco.pl/pid,155080/n,bakoma-skyr-jogurt-typu-islandzkiego-naturalny/stn,product",
+    "sku": "frisco:155080",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 38,
+   "category": "dairy",
+   "ingredient": "skyr",
+   "product": "skyr naturalny 150 g",
+   "name": "skyr naturalny",
+   "unit": "g",
+   "pack": {
+    "amount": 150,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt typu islandzkiego SKYR Naturalny 0% tłuszczu",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05902409703887",
+     "url": "https://world.openfoodfacts.org/product/5902409703887"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 2,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 5,
+     "PRICE_TAG": 5
+    },
+    "newest": "2026-09-26",
+    "gtinExact": 1,
+    "example": {
+     "name": "Mlekovita Skyr naturalny",
+     "store": "Carrefour Market",
+     "date": "2026-09-26",
+     "priceGrosz": 599,
+     "url": "https://prices.openfoodfacts.org/prices/335882",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Skyr Jogurt typu islandzkiego naturalny",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": true,
+    "priceGrosz": 359,
+    "perUnit": "23.93 zł/kg",
+    "url": "https://www.frisco.pl/pid,155080/n,bakoma-skyr-jogurt-typu-islandzkiego-naturalny/stn,product",
+    "sku": "frisco:155080",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 39,
+   "category": "dairy",
+   "ingredient": "twaróg chudy",
+   "product": "twaróg chudy",
+   "name": "twaróg chudy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Twaróg Klinek chudy",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900820021962",
+     "url": "https://world.openfoodfacts.org/product/5900820021962"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 3,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "lidl": 1,
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 6,
+     "PRICE_TAG": 1
+    },
+    "newest": "2026-10-05",
+    "gtinExact": 0,
+    "example": {
+     "name": "Pilos Twaróg Chudy",
+     "store": "Lidl",
+     "date": "2026-10-05",
+     "priceGrosz": 359,
+     "url": "https://prices.openfoodfacts.org/prices/341363",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Twaróg chudy",
+    "pack": {
+     "amount": 250,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 429,
+    "perUnit": "17.16 zł/kg",
+    "url": "https://www.frisco.pl/pid,142602/n,kanka-twarog-chudy/stn,product",
+    "sku": "frisco:142602",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 40,
+   "category": "dairy",
+   "ingredient": "twaróg chudy",
+   "product": "twaróg chudy 250 g",
+   "name": "twaróg chudy",
+   "unit": "g",
+   "pack": {
+    "amount": 250,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Twaróg Klinek chudy",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05900820021962",
+     "url": "https://world.openfoodfacts.org/product/5900820021962"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 3,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "lidl": 1,
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 6,
+     "PRICE_TAG": 1
+    },
+    "newest": "2026-10-05",
+    "gtinExact": 0,
+    "example": {
+     "name": "Pilos Twaróg Chudy",
+     "store": "Lidl",
+     "date": "2026-10-05",
+     "priceGrosz": 359,
+     "url": "https://prices.openfoodfacts.org/prices/341363",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Twaróg chudy",
+    "pack": {
+     "amount": 250,
+     "unit": "g"
+    },
+    "exactPack": true,
+    "priceGrosz": 429,
+    "perUnit": "17.16 zł/kg",
+    "url": "https://www.frisco.pl/pid,142602/n,kanka-twarog-chudy/stn,product",
+    "sku": "frisco:142602",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 41,
+   "category": "dairy",
+   "ingredient": "twaróg chudy",
+   "product": "twaróg półtłusty",
+   "name": "twaróg półtłusty",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 6,
+    "best": {
+     "tier": "attributes",
+     "name": "Twaróg półtłusty",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05908235957814",
+     "url": "https://world.openfoodfacts.org/product/5908235957814"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 3,
+    "warsaw": 1,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 1,
+     "RECEIPT": 2
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Twaróg półtłusty",
+    "pack": {
+     "amount": 250,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 599,
+    "perUnit": "23.96 zł/kg",
+    "url": "https://www.frisco.pl/pid,14186/n,bieluch-twarog-poltlusty/stn,product",
+    "sku": "frisco:14186",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 42,
+   "category": "rice_pasta",
+   "ingredient": "ryż",
+   "product": "ryż",
+   "name": "ryż",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż Brązowy - Długoziarnisty",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020983734",
+     "url": "https://world.openfoodfacts.org/product/20983734"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 7
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ryż biały",
+    "pack": {
+     "amount": 1000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 739,
+    "perUnit": "7.39 zł/kg",
+    "url": "https://www.frisco.pl/pid,131313/n,sotto-ryz-bialy/stn,product",
+    "sku": "frisco:131313",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Kuchnia Lidla Ryż biały długoziarnisty 4 x 150 g",
+    "pack": {
+     "amount": 600,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 299,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 43,
+   "category": "rice_pasta",
+   "ingredient": "ryż",
+   "product": "ryż basmati",
+   "name": "ryż basmati",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż biały długoziarnisty basmati",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020983758",
+     "url": "https://world.openfoodfacts.org/product/20983758"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 7
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ryż basmati (4x100g)",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 839,
+    "perUnit": "20.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,14522/n,britta-ryz-basmati-(4x100g)/stn,product",
+    "sku": "frisco:14522",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 44,
+   "category": "rice_pasta",
+   "ingredient": "ryż",
+   "product": "ryż jaśminowy",
+   "name": "ryż jaśminowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż Jaśminowy",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900977005525",
+     "url": "https://world.openfoodfacts.org/product/5900977005525"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 7
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ryż jaśminowy XXL",
+    "pack": {
+     "amount": 2000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 2249,
+    "perUnit": "11.25 zł/kg",
+    "url": "https://www.frisco.pl/pid,146310/n,kresto-horeca-ryz-jasminowy-xxl/stn,product",
+    "sku": "frisco:146310",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 45,
+   "category": "rice_pasta",
+   "ingredient": "ryż",
+   "product": "ryż brązowy",
+   "name": "ryż brązowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż Brązowy - Długoziarnisty",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020983734",
+     "url": "https://world.openfoodfacts.org/product/20983734"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 7,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 7
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ryż brązowy (4x100g)",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 599,
+    "perUnit": "14.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,14523/n,britta-ryz-brazowy-(4x100g)/stn,product",
+    "sku": "frisco:14523",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 46,
+   "category": "rice_pasta",
+   "ingredient": "ryż microwave gotowy",
+   "product": "ryż microwave gotowy",
+   "name": "ryż microwave gotowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": null,
+   "lidlEveryday": null
+  },
+  {
+   "id": 47,
+   "category": "rice_pasta",
+   "ingredient": "makaron",
+   "product": "makaron spaghetti",
+   "name": "makaron spaghetti",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Makaron Spaghetti",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "07904852000399",
+     "url": "https://world.openfoodfacts.org/product/7904852000399"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 9,
+    "warsaw": 2,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 1,
+     "lidl": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 5,
+     "RECEIPT": 4
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": {
+     "name": "Lubella Makaron pełnoziarnisty z orkiszem",
+     "store": "Carrefour Market",
+     "date": "2026-09-08",
+     "priceGrosz": 615,
+     "url": "https://prices.openfoodfacts.org/prices/328667",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Makaron spaghetti",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 469,
+    "perUnit": "11.73 zł/kg",
+    "url": "https://www.frisco.pl/pid,139567/n,lubella-makaron-spaghetti/stn,product",
+    "sku": "frisco:139567",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Combino Makaron spaghetti 500 g",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 199,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 48,
+   "category": "rice_pasta",
+   "ingredient": "makaron",
+   "product": "makaron penne",
+   "name": "makaron penne",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Penne",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "08594002273439",
+     "url": "https://world.openfoodfacts.org/product/8594002273439"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 2,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 1,
+     "lidl": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 6,
+     "RECEIPT": 4
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": {
+     "name": "Lubella Makaron pełnoziarnisty z orkiszem",
+     "store": "Carrefour Market",
+     "date": "2026-09-08",
+     "priceGrosz": 615,
+     "url": "https://prices.openfoodfacts.org/prices/328667",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Makaron pióra",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 529,
+    "perUnit": "13.23 zł/kg",
+    "url": "https://www.frisco.pl/pid,146471/n,makarony-polskie-makaron-piora/stn,product",
+    "sku": "frisco:146471",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Lubella Makaron pióra 400 g",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 449,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 49,
+   "category": "rice_pasta",
+   "ingredient": "makaron",
+   "product": "makaron pełnoziarnisty",
+   "name": "makaron pełnoziarnisty",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 8,
+    "best": {
+     "tier": "attributes",
+     "name": "Makaron pełnoziarnisty świderki",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900049005521",
+     "url": "https://world.openfoodfacts.org/product/5900049005521"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 11,
+    "warsaw": 2,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 1,
+     "lidl": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 7,
+     "RECEIPT": 4
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": {
+     "name": "Lubella Makaron pełnoziarnisty z orkiszem",
+     "store": "Carrefour Market",
+     "date": "2026-09-08",
+     "priceGrosz": 615,
+     "url": "https://prices.openfoodfacts.org/prices/328667",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Makaron razowy - świderki",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 479,
+    "perUnit": "11.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,144788/n,novelle-makaron-razowy---swiderki/stn,product",
+    "sku": "frisco:144788",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "category",
+    "name": "Combino Makaron bez glutenu 500 g",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 399,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 50,
+   "category": "rice_pasta",
+   "ingredient": "orzo",
+   "product": "orzo",
+   "name": "orzo",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 5,
+    "best": {
+     "tier": "attributes",
+     "name": "Orzo medium",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05201193118298",
+     "url": "https://world.openfoodfacts.org/product/5201193118298"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Makaron Orzo Medium - w formie ryżu",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 599,
+    "perUnit": "11.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,4228/n,melissa-primo-gusto-makaron-orzo-medium---w-formie-ryzu/stn,product",
+    "sku": "frisco:4228",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 51,
+   "category": "bread",
+   "ingredient": "chleb",
+   "product": "chleb żytni",
+   "name": "chleb żytni",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Chleb żytni z ziarnami żyta, razowy",
+     "pack": {
+      "amount": 450,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020859688",
+     "url": "https://world.openfoodfacts.org/product/20859688"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 11,
+    "warsaw": 7,
+    "warsaw90": 7,
+    "byRetailer90": {
+     "carrefour": 7
+    },
+    "proofs": {
+     "RECEIPT": 9,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-10-15",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mestemacher Chleb proteinowy",
+     "store": "Carrefour Market",
+     "date": "2026-10-15",
+     "priceGrosz": 735,
+     "url": "https://prices.openfoodfacts.org/prices/347765",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Chleb żytni",
+    "pack": {
+     "amount": 560,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1889,
+    "perUnit": "33.73 zł/kg",
+    "url": "https://www.frisco.pl/pid,154284/n,vincent-chleb-zytni/stn,product",
+    "sku": "frisco:154284",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Chleb żytni bez drożdży, z niskim indeksem glikemicznym 450 g",
+    "pack": {
+     "amount": 450,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 345,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 52,
+   "category": "bread",
+   "ingredient": "pieczywo",
+   "product": "chleb pełnoziarnisty",
+   "name": "chleb pełnoziarnisty",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Chleb żytni pełnoziarnisty",
+     "pack": {
+      "amount": 300,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900340017100",
+     "url": "https://world.openfoodfacts.org/product/5900340017100"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 11,
+    "warsaw": 7,
+    "warsaw90": 7,
+    "byRetailer90": {
+     "carrefour": 7
+    },
+    "proofs": {
+     "RECEIPT": 9,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-10-15",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mestemacher Chleb proteinowy",
+     "store": "Carrefour Market",
+     "date": "2026-10-15",
+     "priceGrosz": 735,
+     "url": "https://prices.openfoodfacts.org/prices/347765",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Chleb Razowy",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 589,
+    "perUnit": "11.78 zł/kg",
+    "url": "https://www.frisco.pl/pid,81547/n,putka-chleb-razowy/stn,product",
+    "sku": "frisco:81547",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "category",
+    "name": "Chleb żytni bez drożdży, z niskim indeksem glikemicznym 450 g",
+    "pack": {
+     "amount": 450,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 345,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 53,
+   "category": "bread",
+   "ingredient": "pieczywo",
+   "product": "pieczywo",
+   "name": "pieczywo",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Pieczywo z pełnoziarnistej mąki żytniej",
+     "pack": {
+      "amount": 210,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "07300400122054",
+     "url": "https://world.openfoodfacts.org/product/7300400122054"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 12,
+    "warsaw": 7,
+    "warsaw90": 7,
+    "byRetailer90": {
+     "carrefour": 7
+    },
+    "proofs": {
+     "RECEIPT": 9,
+     "PRICE_TAG": 3
+    },
+    "newest": "2026-10-15",
+    "gtinExact": 1,
+    "example": {
+     "name": "Mestemacher Chleb proteinowy",
+     "store": "Carrefour Market",
+     "date": "2026-10-15",
+     "priceGrosz": 735,
+     "url": "https://prices.openfoodfacts.org/prices/347765",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Chleb IG",
+    "pack": {
+     "amount": 300,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 979,
+    "perUnit": "32.63 zł/kg",
+    "url": "https://www.frisco.pl/pid,101733/n,putka-chleb-ig/stn,product",
+    "sku": "frisco:101733",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Chleb żytni bez drożdży, z niskim indeksem glikemicznym 450 g",
+    "pack": {
+     "amount": 450,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 345,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 54,
+   "category": "bread",
+   "ingredient": "tortilla",
+   "product": "tortilla pszenna",
+   "name": "tortilla pszenna",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Tortilla pszenna",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05905784344591",
+     "url": "https://world.openfoodfacts.org/product/5905784344591"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 1,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-02",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Tortilla pszenna - 25 cm (4 szt.)",
+    "pack": {
+     "amount": 250,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 619,
+    "perUnit": "24.76 zł/kg",
+    "url": "https://www.frisco.pl/pid,42167/n,funtastic-tortilla-pszenna---25-cm-(4-szt.)/stn,product",
+    "sku": "frisco:42167",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 55,
+   "category": "bread",
+   "ingredient": "tortille",
+   "product": "tortilla pełnoziarnista",
+   "name": "tortilla pełnoziarnista",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 1,
+    "best": {
+     "tier": "category",
+     "name": "Tortilla Wraps with whole wheat",
+     "pack": {
+      "amount": 740,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489506829",
+     "url": "https://world.openfoodfacts.org/product/4056489506829"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 1,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-02",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Tortilla pełnoziarnista - 25 cm (4 szt.)",
+    "pack": {
+     "amount": 240,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 429,
+    "perUnit": "17.88 zł/kg",
+    "url": "https://www.frisco.pl/pid,142192/n,tortilove-tortilla-pelnoziarnista---25-cm-(4-szt.)/stn,product",
+    "sku": "frisco:142192",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 56,
+   "category": "pantry",
+   "ingredient": "płatki owsiane",
+   "product": "płatki owsiane",
+   "name": "płatki owsiane",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Crownfield Płatki owsiane górskie",
+     "pack": {
+      "amount": 1000,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489180968",
+     "url": "https://world.openfoodfacts.org/product/4056489180968"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 8,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "stokrotka": 1,
+     "other": 1,
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 4
+    },
+    "newest": "2026-10-16",
+    "gtinExact": 0,
+    "example": {
+     "name": "Melvit Płatki owsiane Górskie",
+     "store": "Stokrotka",
+     "date": "2026-10-16",
+     "priceGrosz": 629,
+     "url": "https://prices.openfoodfacts.org/prices/349079",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Płatki owsiane",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 549,
+    "perUnit": "10.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,2537/n,sante-platki-owsiane/stn,product",
+    "sku": "frisco:2537",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 57,
+   "category": "pantry",
+   "ingredient": "płatki owsiane",
+   "product": "płatki owsiane górskie",
+   "name": "płatki owsiane górskie",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": {
+     "tier": "category",
+     "name": "Płatki owsiane górskie",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05906827011937",
+     "url": "https://world.openfoodfacts.org/product/5906827011937"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 8,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "stokrotka": 1,
+     "other": 1,
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 4
+    },
+    "newest": "2026-10-16",
+    "gtinExact": 0,
+    "example": {
+     "name": "Melvit Płatki owsiane Górskie",
+     "store": "Stokrotka",
+     "date": "2026-10-16",
+     "priceGrosz": 629,
+     "url": "https://prices.openfoodfacts.org/prices/349079",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Płatki owsiane górskie",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 479,
+    "perUnit": "9.58 zł/kg",
+    "url": "https://www.frisco.pl/pid,134932/n,melvit-platki-owsiane-gorskie/stn,product",
+    "sku": "frisco:134932",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 58,
+   "category": "pantry",
+   "ingredient": "płatki",
+   "product": "płatki owsiane 500 g",
+   "name": "płatki owsiane",
+   "unit": "g",
+   "pack": {
+    "amount": 500,
+    "unit": "g"
+   },
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Płatki owsiane Górskie",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05906827003802",
+     "url": "https://world.openfoodfacts.org/product/5906827003802"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 8,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "stokrotka": 1,
+     "other": 1,
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 4,
+     "PRICE_TAG": 4
+    },
+    "newest": "2026-10-16",
+    "gtinExact": 2,
+    "example": {
+     "name": "Melvit Płatki owsiane górskie",
+     "store": "Carrefour Market",
+     "date": "2026-09-23",
+     "priceGrosz": 539,
+     "url": "https://prices.openfoodfacts.org/prices/335557",
+     "tier": "gtin"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Płatki owsiane",
+    "pack": {
+     "amount": 500,
+     "unit": "g"
+    },
+    "exactPack": true,
+    "priceGrosz": 549,
+    "perUnit": "10.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,2537/n,sante-platki-owsiane/stn,product",
+    "sku": "frisco:2537",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 59,
+   "category": "vegetables",
+   "ingredient": "ziemniaki",
+   "product": "ziemniaki",
+   "name": "ziemniaki",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 3,
+    "warsaw90": 3,
+    "byRetailer90": {
+     "carrefour": 3
+    },
+    "proofs": {
+     "PRICE_TAG": 8,
+     "RECEIPT": 2
+    },
+    "newest": "2026-09-09",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Ziemniaki do gotowania",
+     "store": "Carrefour Market",
+     "date": "2026-09-09",
+     "priceGrosz": 699,
+     "url": "https://prices.openfoodfacts.org/prices/329624",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ziemniaki BIO",
+    "pack": {
+     "amount": 2000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 2479,
+    "perUnit": "12.40 zł/kg",
+    "url": "https://www.frisco.pl/pid,43663/n,frisco-organic-ziemniaki-bio/stn,product",
+    "sku": "frisco:43663",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 60,
+   "category": "vegetables",
+   "ingredient": "cebula",
+   "product": "cebula",
+   "name": "cebula",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Piramidki proteinowe Ser cebula",
+     "pack": {
+      "amount": 60,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05904730218344",
+     "url": "https://world.openfoodfacts.org/product/5904730218344"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 6,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 2,
+     "PRICE_TAG": 4
+    },
+    "newest": "2026-06-08",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Cebula 6-12 szt. (800g-1200g)",
+    "pack": {
+     "amount": 1000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 299,
+    "perUnit": "2.99 zł/kg",
+    "url": "https://www.frisco.pl/pid,3409/n,frisco-fresh-cebula-6-12-szt.-(800g-1200g)/stn,product",
+    "sku": "frisco:3409",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 61,
+   "category": "vegetables",
+   "ingredient": "cebula",
+   "product": "cebula czerwona",
+   "name": "cebula czerwona",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 1,
+    "best": null,
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 2,
+     "PRICE_TAG": 3
+    },
+    "newest": "2026-06-08",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Cebula czerwona 3-7 szt. (520g-780g)",
+    "pack": {
+     "amount": 650,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 289,
+    "perUnit": "4.45 zł/kg",
+    "url": "https://www.frisco.pl/pid,4087/n,frisco-fresh-cebula-czerwona-3-7-szt.-(520g-780g)/stn,product",
+    "sku": "frisco:4087",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 62,
+   "category": "vegetables",
+   "ingredient": "ogórek",
+   "product": "ogórek",
+   "name": "ogórek",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": null,
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 1
+    },
+    "newest": "2024-12-27",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Ogórki krótkie 2-4 szt. (480g-720g)",
+    "pack": {
+     "amount": 600,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 599,
+    "perUnit": "9.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,95329/n,frisco-fresh-ogorki-krotkie-2-4-szt.-(480g-720g)/stn,product",
+    "sku": "frisco:95329",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 63,
+   "category": "vegetables",
+   "ingredient": "papryka",
+   "product": "papryka",
+   "name": "papryka",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Max karbowane papryka",
+     "pack": {
+      "amount": 120,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900259133281",
+     "url": "https://world.openfoodfacts.org/product/5900259133281"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 3,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 1,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Papryka żółta 1-2 szt. (240g-360g)",
+    "pack": {
+     "amount": 300,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 519,
+    "perUnit": "17.30 zł/kg",
+    "url": "https://www.frisco.pl/pid,3448/n,frisco-fresh-papryka-zolta-1-2-szt.-(240g-360g)/stn,product",
+    "sku": "frisco:3448",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 64,
+   "category": "vegetables",
+   "ingredient": "papryka",
+   "product": "papryka czerwona",
+   "name": "papryka czerwona",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 7,
+    "best": {
+     "tier": "category",
+     "name": "Pesto (czerwona papryka)",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "00000080340058",
+     "url": "https://world.openfoodfacts.org/product/80340058"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 3,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 1,
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Papryka czerwona 2-4 szt.(480g-720g)",
+    "pack": {
+     "amount": 600,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 859,
+    "perUnit": "14.32 zł/kg",
+    "url": "https://www.frisco.pl/pid,12076/n,frisco-fresh-papryka-czerwona-2-4-szt.(480g-720g)/stn,product",
+    "sku": "frisco:12076",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 65,
+   "category": "vegetables",
+   "ingredient": "pieczarki",
+   "product": "pieczarki",
+   "name": "pieczarki",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 6,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 6
+    },
+    "newest": "2026-04-15",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Pieczarki brązowe",
+    "pack": {
+     "amount": 250,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 539,
+    "perUnit": "21.56 zł/kg",
+    "url": "https://www.frisco.pl/pid,94933/n,frisco-fresh-pieczarki-brazowe/stn,product",
+    "sku": "frisco:94933",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 66,
+   "category": "vegetables",
+   "ingredient": "pomidor",
+   "product": "pomidor",
+   "name": "pomidor",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 14,
+    "warsaw": 6,
+    "warsaw90": 6,
+    "byRetailer90": {
+     "carrefour": 5,
+     "stokrotka": 1
+    },
+    "proofs": {
+     "RECEIPT": 7,
+     "PRICE_TAG": 7
+    },
+    "newest": "2026-10-20",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mularski Pomidor cherry kids",
+     "store": "Carrefour Market",
+     "date": "2026-10-20",
+     "priceGrosz": 699,
+     "url": "https://prices.openfoodfacts.org/prices/351044",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Pomidory 3-4 szt. tacka (480g-720g)",
+    "pack": {
+     "amount": 600,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 609,
+    "perUnit": "10.15 zł/kg",
+    "url": "https://www.frisco.pl/pid,3429/n,frisco-fresh-pomidory-3-4-szt.-tacka-(480g-720g)/stn,product",
+    "sku": "frisco:3429",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 67,
+   "category": "vegetables",
+   "ingredient": "pomidor",
+   "product": "pomidory koktajlowe",
+   "name": "pomidory koktajlowe",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 14,
+    "warsaw": 6,
+    "warsaw90": 6,
+    "byRetailer90": {
+     "carrefour": 5,
+     "stokrotka": 1
+    },
+    "proofs": {
+     "RECEIPT": 7,
+     "PRICE_TAG": 7
+    },
+    "newest": "2026-10-20",
+    "gtinExact": 0,
+    "example": {
+     "name": "Mularski Pomidor cherry kids",
+     "store": "Carrefour Market",
+     "date": "2026-10-20",
+     "priceGrosz": 699,
+     "url": "https://prices.openfoodfacts.org/prices/351044",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Pomidory koktajlowe",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 649,
+    "perUnit": "16.23 zł/kg",
+    "url": "https://www.frisco.pl/pid,105639/n,melissa-primo-gusto-pomidory-koktajlowe/stn,product",
+    "sku": "frisco:105639",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 68,
+   "category": "canned",
+   "ingredient": "passata",
+   "product": "passata",
+   "name": "passata",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 2,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 2
+    },
+    "proofs": {
+     "RECEIPT": 2
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Passata pomidorowa",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 685,
+     "url": "https://prices.openfoodfacts.org/prices/342740",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Passata klasyczna",
+    "pack": {
+     "amount": 690,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 699,
+    "perUnit": "10.13 zł/kg",
+    "url": "https://www.frisco.pl/pid,152169/n,dawtona-passata-klasyczna/stn,product",
+    "sku": "frisco:152169",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 69,
+   "category": "canned",
+   "ingredient": "passata",
+   "product": "pomidory krojone",
+   "name": "pomidory krojone",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 2,
+    "warsaw90": 2,
+    "byRetailer90": {
+     "carrefour": 2
+    },
+    "proofs": {
+     "RECEIPT": 2
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Passata pomidorowa",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 685,
+     "url": "https://prices.openfoodfacts.org/prices/342740",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Pomidory krojone",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 489,
+    "perUnit": "12.23 zł/kg",
+    "url": "https://www.frisco.pl/pid,88927/n,happy-frucht-pomidory-krojone/stn,product",
+    "sku": "frisco:88927",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 70,
+   "category": "canned",
+   "ingredient": "kukurydza",
+   "product": "kukurydza konserwowa",
+   "name": "kukurydza konserwowa",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 4,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 3,
+     "RECEIPT": 1
+    },
+    "newest": "2026-02-12",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Kukurydza konserwowa",
+    "pack": {
+     "amount": 150,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 579,
+    "perUnit": "38.60 zł/kg",
+    "url": "https://www.frisco.pl/pid,152792/n,pudliszki-kukurydza-konserwowa/stn,product",
+    "sku": "frisco:152792",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 71,
+   "category": "canned",
+   "ingredient": "fasola",
+   "product": "fasola czerwona",
+   "name": "fasola czerwona",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Fasola czerwona",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 549,
+    "perUnit": "13.73 zł/kg",
+    "url": "https://www.frisco.pl/pid,80957/n,dawtona-fasola-czerwona/stn,product",
+    "sku": "frisco:80957",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 72,
+   "category": "canned",
+   "ingredient": "fasola",
+   "product": "fasola biała",
+   "name": "fasola biała",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 3,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 2,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Fasola biała",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 439,
+    "perUnit": "10.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,80955/n,dawtona-fasola-biala/stn,product",
+    "sku": "frisco:80955",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 73,
+   "category": "canned",
+   "ingredient": "salsa",
+   "product": "salsa",
+   "name": "salsa",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": null,
+   "lidlEveryday": null
+  },
+  {
+   "id": 74,
+   "category": "canned",
+   "ingredient": "mleko kokosowe light",
+   "product": "mleko kokosowe light",
+   "name": "mleko kokosowe light",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Mleczko kokosowe light (tł. 11%)",
+    "pack": {
+     "amount": 200,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 709,
+    "perUnit": "35.45 zł/l",
+    "url": "https://www.frisco.pl/pid,132221/n,kara-mleczko-kokosowe-light-(tl.-11)/stn,product",
+    "sku": "frisco:132221",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 75,
+   "category": "canned",
+   "ingredient": "mleko kokosowe light",
+   "product": "mleko kokosowe",
+   "name": "mleko kokosowe",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Mleczko kokosowe",
+    "pack": {
+     "amount": 150,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 469,
+    "perUnit": "31.27 zł/l",
+    "url": "https://www.frisco.pl/pid,147816/n,aroy-d-mleczko-kokosowe/stn,product",
+    "sku": "frisco:147816",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 76,
+   "category": "fruit",
+   "ingredient": "banan",
+   "product": "banan",
+   "name": "banan",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 4,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 1,
+     "PRICE_TAG": 3
+    },
+    "newest": "2026-09-28",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Banany kiść 4-6 szt. (800g-1200g)",
+    "pack": {
+     "amount": 1000,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 599,
+    "perUnit": "5.99 zł/kg",
+    "url": "https://www.frisco.pl/pid,4094/n,frisco-fresh-banany-kisc-4-6-szt.-(800g-1200g)/stn,product",
+    "sku": "frisco:4094",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 77,
+   "category": "fruit",
+   "ingredient": "jabłko",
+   "product": "jabłko",
+   "name": "jabłko",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 13,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 2,
+     "PRICE_TAG": 11
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Jabłka Gala (480g-720g)",
+    "pack": {
+     "amount": 600,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 279,
+    "perUnit": "4.65 zł/kg",
+    "url": "https://www.frisco.pl/pid,39675/n,frisco-fresh-jablka-gala-(480g-720g)/stn,product",
+    "sku": "frisco:39675",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 78,
+   "category": "frozen",
+   "ingredient": "owoce mrożone",
+   "product": "owoce mrożone",
+   "name": "owoce mrożone",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 1
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Truskawki Mrożone",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 705,
+     "url": "https://prices.openfoodfacts.org/prices/342742",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Maliny mrożone",
+    "pack": {
+     "amount": 280,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1799,
+    "perUnit": "64.25 zł/kg",
+    "url": "https://www.frisco.pl/pid,98189/n,hortex-maliny-mrozone/stn,product",
+    "sku": "frisco:98189",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 79,
+   "category": "frozen",
+   "ingredient": "owoce mrożone",
+   "product": "truskawki mrożone",
+   "name": "truskawki mrożone",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 2,
+    "best": {
+     "tier": "category",
+     "name": "Truskawki Mrożone",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05905784303697",
+     "url": "https://world.openfoodfacts.org/product/5905784303697"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 6,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 1,
+     "PRICE_TAG": 5
+    },
+    "newest": "2026-10-08",
+    "gtinExact": 1,
+    "example": {
+     "name": "Carrefour Truskawki Mrożone",
+     "store": "Carrefour Market",
+     "date": "2026-10-08",
+     "priceGrosz": 705,
+     "url": "https://prices.openfoodfacts.org/prices/342742",
+     "tier": "gtin"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Truskawki mrożone",
+    "pack": {
+     "amount": 450,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 799,
+    "perUnit": "17.76 zł/kg",
+    "url": "https://www.frisco.pl/pid,2651/n,hortex-truskawki-mrozone/stn,product",
+    "sku": "frisco:2651",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 80,
+   "category": "frozen",
+   "ingredient": "owoce mrożone",
+   "product": "maliny mrożone",
+   "name": "maliny mrożone",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 5
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Maliny mrożone",
+    "pack": {
+     "amount": 280,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1799,
+    "perUnit": "64.25 zł/kg",
+    "url": "https://www.frisco.pl/pid,98189/n,hortex-maliny-mrozone/stn,product",
+    "sku": "frisco:98189",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 81,
+   "category": "fruit",
+   "ingredient": "owoce mrożone",
+   "product": "borówki",
+   "name": "borówki",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 4,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 2,
+     "RECEIPT": 2
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Borówka",
+    "pack": {
+     "amount": 280,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1509,
+    "perUnit": "53.89 zł/kg",
+    "url": "https://www.frisco.pl/pid,120027/n,hortex-borowka/stn,product",
+    "sku": "frisco:120027",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 82,
+   "category": "oils",
+   "ingredient": "oliwa",
+   "product": "oliwa z oliwek",
+   "name": "oliwa z oliwek",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "lidl": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": {
+     "name": "Ondoliva Virgin Olive Oil",
+     "store": "Lidl",
+     "date": "2026-08-22",
+     "priceGrosz": 1798,
+     "url": "https://prices.openfoodfacts.org/prices/317504",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Oliwa z oliwek Classic",
+    "pack": {
+     "amount": 500,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 2479,
+    "perUnit": "49.58 zł/l",
+    "url": "https://www.frisco.pl/pid,106381/n,borges-oliwa-z-oliwek-classic/stn,product",
+    "sku": "frisco:106381",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Deluxe Oliwa z oliwek Chania Kritis 500 ml",
+    "pack": {
+     "amount": 500,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 2499,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 83,
+   "category": "oils",
+   "ingredient": "oliwa",
+   "product": "oliwa z oliwek extra virgin",
+   "name": "oliwa z oliwek extra virgin",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "lidl": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": {
+     "name": "Ondoliva Virgin Olive Oil",
+     "store": "Lidl",
+     "date": "2026-08-22",
+     "priceGrosz": 1798,
+     "url": "https://prices.openfoodfacts.org/prices/317504",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Oliwa z oliwek extra virgin",
+    "pack": {
+     "amount": 500,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 3159,
+    "perUnit": "63.18 zł/l",
+    "url": "https://www.frisco.pl/pid,148388/n,terra-creta-oliwa-z-oliwek-extra-virgin/stn,product",
+    "sku": "frisco:148388",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "category",
+    "name": "Deluxe Oliwa z oliwek Chania Kritis 500 ml",
+    "pack": {
+     "amount": 500,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 2499,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 84,
+   "category": "oils",
+   "ingredient": "oliwa",
+   "product": "oliwa z oliwek 500 ml",
+   "name": "oliwa z oliwek",
+   "unit": "ml",
+   "pack": {
+    "amount": 500,
+    "unit": "ml"
+   },
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "lidl": 1
+    },
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-29",
+    "gtinExact": 0,
+    "example": {
+     "name": "Ondoliva Virgin Olive Oil",
+     "store": "Lidl",
+     "date": "2026-08-22",
+     "priceGrosz": 1798,
+     "url": "https://prices.openfoodfacts.org/prices/317504",
+     "tier": "attributes"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Oliwa z oliwek Classic",
+    "pack": {
+     "amount": 500,
+     "unit": "ml"
+    },
+    "exactPack": true,
+    "priceGrosz": 2479,
+    "perUnit": "49.58 zł/l",
+    "url": "https://www.frisco.pl/pid,106381/n,borges-oliwa-z-oliwek-classic/stn,product",
+    "sku": "frisco:106381",
+    "state": "verified_current"
+   },
+   "lidlEveryday": {
+    "tier": "attributes",
+    "name": "Deluxe Oliwa z oliwek Chania Kritis 500 ml",
+    "pack": {
+     "amount": 500,
+     "unit": "ml"
+    },
+    "exactPack": true,
+    "priceGrosz": 2499,
+    "state": "published_promotion"
+   }
+  },
+  {
+   "id": 85,
+   "category": "pantry",
+   "ingredient": "masło orzechowe",
+   "product": "masło orzechowe",
+   "name": "masło orzechowe",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Masło z orzechów arachidowych (100% orzechów arachidowych)",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 2399,
+    "perUnit": "119.95 zł/kg",
+    "url": "https://www.frisco.pl/pid,152309/n,deseo-maslo-z-orzechow-arachidowych-(100-orzechow-arachidowych)/stn,product",
+    "sku": "frisco:152309",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 86,
+   "category": "pantry",
+   "ingredient": "pb",
+   "product": "masło orzechowe kremowe",
+   "name": "masło orzechowe kremowe",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 1,
+    "best": {
+     "tier": "attributes",
+     "name": "Masło orzechowe kremowe",
+     "pack": {
+      "amount": 350,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900571050020",
+     "url": "https://world.openfoodfacts.org/product/5900571050020"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 5,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 4,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Masło z orzechów arachidowych (100% orzechów arachidowych)",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 2399,
+    "perUnit": "119.95 zł/kg",
+    "url": "https://www.frisco.pl/pid,152309/n,deseo-maslo-z-orzechow-arachidowych-(100-orzechow-arachidowych)/stn,product",
+    "sku": "frisco:152309",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 87,
+   "category": "pantry",
+   "ingredient": "miód",
+   "product": "miód",
+   "name": "miód",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": {
+     "name": "Carrefour Miód gryczany",
+     "store": "Carrefour Market",
+     "date": "2026-09-25",
+     "priceGrosz": 2419,
+     "url": "https://prices.openfoodfacts.org/prices/335819",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Miód leśny",
+    "pack": {
+     "amount": 900,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 5599,
+    "perUnit": "62.21 zł/kg",
+    "url": "https://www.frisco.pl/pid,118035/n,miody-polskie-miod-lesny/stn,product",
+    "sku": "frisco:118035",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 88,
+   "category": "pantry",
+   "ingredient": "miód",
+   "product": "miód wielokwiatowy",
+   "name": "miód wielokwiatowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 4,
+    "best": {
+     "tier": "attributes",
+     "name": "Huzar Miod Wielokwiatowy",
+     "pack": {
+      "amount": 350,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05907707117350",
+     "url": "https://world.openfoodfacts.org/product/5907707117350"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Miód wielokwiatowy",
+    "pack": {
+     "amount": 400,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1479,
+    "perUnit": "36.98 zł/kg",
+    "url": "https://www.frisco.pl/pid,47323/n,miody-polskie-miod-wielokwiatowy/stn,product",
+    "sku": "frisco:47323",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 89,
+   "category": "pantry",
+   "ingredient": "kakao",
+   "product": "kakao",
+   "name": "kakao",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 1
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Kakao w proszku BIO",
+    "pack": {
+     "amount": 75,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1899,
+    "perUnit": "253.20 zł/kg",
+    "url": "https://www.frisco.pl/pid,87409/n,alce-nero-kakao-w-proszku-bio/stn,product",
+    "sku": "frisco:87409",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 90,
+   "category": "pantry",
+   "ingredient": "cynamon",
+   "product": "cynamon",
+   "name": "cynamon",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Cynamon mielony",
+     "pack": {
+      "amount": 15,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05901135000178",
+     "url": "https://world.openfoodfacts.org/product/5901135000178"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 1,
+    "warsaw90": 1,
+    "byRetailer90": {
+     "carrefour": 1
+    },
+    "proofs": {
+     "RECEIPT": 2
+    },
+    "newest": "2026-09-19",
+    "gtinExact": 0,
+    "example": {
+     "name": "Prymat Cynamon cały",
+     "store": "Carrefour Market",
+     "date": "2026-09-19",
+     "priceGrosz": 275,
+     "url": "https://prices.openfoodfacts.org/prices/332855",
+     "tier": "category"
+    }
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Cynamon cały",
+    "pack": {
+     "amount": 17,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 449,
+    "perUnit": "264.12 zł/kg",
+    "url": "https://www.frisco.pl/pid,40115/n,kotanyi-cynamon-caly/stn,product",
+    "sku": "frisco:40115",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 91,
+   "category": "pantry",
+   "ingredient": "curry",
+   "product": "curry",
+   "name": "curry",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 4,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 3,
+     "RECEIPT": 1
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Curry",
+    "pack": {
+     "amount": 20,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 189,
+    "perUnit": "94.50 zł/kg",
+    "url": "https://www.frisco.pl/pid,9866/n,prymat-curry/stn,product",
+    "sku": "frisco:9866",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 92,
+   "category": "pantry",
+   "ingredient": "musztarda",
+   "product": "musztarda",
+   "name": "musztarda",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 14,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 14
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Musztarda sarepska",
+    "pack": {
+     "amount": 180,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 999,
+    "perUnit": "55.50 zł/kg",
+    "url": "https://www.frisco.pl/pid,142352/n,krokus-musztarda-sarepska/stn,product",
+    "sku": "frisco:142352",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 93,
+   "category": "pantry",
+   "ingredient": "nasiona chia",
+   "product": "nasiona chia",
+   "name": "nasiona chia",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Nasiona Chia",
+     "pack": {
+      "amount": 125,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900587046765",
+     "url": "https://world.openfoodfacts.org/product/5900587046765"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 1,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 1
+    },
+    "newest": "2026-09-23",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Chia - nasiona szałwii hiszpańskiej",
+    "pack": {
+     "amount": 300,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 899,
+    "perUnit": "29.97 zł/kg",
+    "url": "https://www.frisco.pl/pid,134749/n,big-nature-chia---nasiona-szalwii-hiszpanskiej/stn,product",
+    "sku": "frisco:134749",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 94,
+   "category": "pantry",
+   "ingredient": "pesto",
+   "product": "pesto",
+   "name": "pesto",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 10,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "RECEIPT": 1,
+     "PRICE_TAG": 9
+    },
+    "newest": "2026-09-11",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Pesto Rosso",
+    "pack": {
+     "amount": 190,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1319,
+    "perUnit": "69.42 zł/kg",
+    "url": "https://www.frisco.pl/pid,103683/n,melissa-primo-gusto-pesto-rosso/stn,product",
+    "sku": "frisco:103683",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 95,
+   "category": "pantry",
+   "ingredient": "sos bbq",
+   "product": "sos bbq",
+   "name": "sos bbq",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 2,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {
+     "PRICE_TAG": 2
+    },
+    "newest": "2026-09-25",
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Sos barbecue Original",
+    "pack": {
+     "amount": 510,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 1699,
+    "perUnit": "33.31 zł/kg",
+    "url": "https://www.frisco.pl/pid,14880/n,mississippi-sos-barbecue-original/stn,product",
+    "sku": "frisco:14880",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 96,
+   "category": "pantry",
+   "ingredient": "sos sojowy",
+   "product": "sos sojowy",
+   "name": "sos sojowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Sos sojowy bezglutenowy o obniżonej zawartości soli",
+     "pack": {
+      "amount": 150,
+      "unit": "ml"
+     },
+     "exactPack": null,
+     "gtin": "05907501001091",
+     "url": "https://world.openfoodfacts.org/product/5907501001091"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Sos sojowy",
+    "pack": {
+     "amount": 150,
+     "unit": "ml"
+    },
+    "exactPack": null,
+    "priceGrosz": 1499,
+    "perUnit": "99.93 zł/l",
+    "url": "https://www.frisco.pl/pid,6498/n,kikkoman-sos-sojowy/stn,product",
+    "sku": "frisco:6498",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 97,
+   "category": "pantry",
+   "ingredient": "sos sweet chilli",
+   "product": "sos sweet chilli",
+   "name": "sos sweet chilli",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 2,
+    "best": {
+     "tier": "category",
+     "name": "sos sweet chilli",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05900783010058",
+     "url": "https://world.openfoodfacts.org/product/5900783010058"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": null,
+   "lidlEveryday": null
+  },
+  {
+   "id": 98,
+   "category": "pantry",
+   "ingredient": "teriyaki",
+   "product": "sos teriyaki",
+   "name": "sos teriyaki",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 5,
+    "best": {
+     "tier": "attributes",
+     "name": "Sos Teriyaki",
+     "pack": {
+      "amount": 165,
+      "unit": "ml"
+     },
+     "exactPack": null,
+     "gtin": "08594065960413",
+     "url": "https://world.openfoodfacts.org/product/8594065960413"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Sos Teriyaki",
+    "pack": {
+     "amount": 355,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 869,
+    "perUnit": "24.48 zł/kg",
+    "url": "https://www.frisco.pl/pid,150965/n,winiary-sos-teriyaki/stn,product",
+    "sku": "frisco:150965",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 99,
+   "category": "pantry",
+   "ingredient": "pudding proteinowy",
+   "product": "pudding proteinowy",
+   "name": "pudding proteinowy",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 6,
+    "best": {
+     "tier": "attributes",
+     "name": "Pudding proteinowy",
+     "pack": {
+      "amount": 200,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "08595588200758",
+     "url": "https://world.openfoodfacts.org/product/8595588200758"
+    },
+    "error": null,
+    "retried": false
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "attributes",
+    "name": "Pudding proteinowy waniliowy",
+    "pack": {
+     "amount": 200,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 679,
+    "perUnit": "33.95 zł/kg",
+    "url": "https://www.frisco.pl/pid,144982/n,ehrmann-high-protein-pudding-proteinowy-waniliowy/stn,product",
+    "sku": "frisco:144982",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  },
+  {
+   "id": 100,
+   "category": "pantry",
+   "ingredient": "whey",
+   "product": "whey",
+   "name": "whey",
+   "unit": "g",
+   "pack": null,
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Whey Protein Vanilla Sky",
+     "pack": {
+      "amount": 700,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05902837747040",
+     "url": "https://world.openfoodfacts.org/product/5902837747040"
+    },
+    "error": null,
+    "retried": true
+   },
+   "openPrices": {
+    "poland": 0,
+    "warsaw": 0,
+    "warsaw90": 0,
+    "byRetailer90": {},
+    "proofs": {},
+    "newest": null,
+    "gtinExact": 0,
+    "example": null
+   },
+   "frisco": {
+    "tier": "category",
+    "name": "Sojowa odżywka białkowa (izolat) o sm. czekoladowym",
+    "pack": {
+     "amount": 750,
+     "unit": "g"
+    },
+    "exactPack": null,
+    "priceGrosz": 6999,
+    "perUnit": "93.32 zł/kg",
+    "url": "https://www.frisco.pl/pid,153986/n,trec-soy-protein-sojowa-odzywka-bialkowa-(izolat)-o-sm.-czekoladowym/stn,product",
+    "sku": "frisco:153986",
+    "state": "verified_current"
+   },
+   "lidlEveryday": null
+  }
+ ]
+}

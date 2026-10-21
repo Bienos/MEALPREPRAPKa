@@ -30,6 +30,9 @@ import { fetchFriscoFeed, matchName, toFriscoShelfPrice } from "./frisco";
 import { fetchStokrotkaFeed, toShelfPrice } from "./stokrotka";
 import { SHOP_LABELS, type CategoryEntry, type ShelfPrice } from "./types";
 import { blixSearchFor, catalogCandidates, categoriesFor } from "./match";
+import { disabledNote, isSourceEnabled } from "@/lib/grocery/policy";
+import { recordRun } from "@/lib/grocery/runs";
+import type { ProviderId } from "@/lib/grocery/providers";
 
 /** Products read per shopping item: the plainest few that the rules accept. */
 const SHELF_CANDIDATES = 4;
@@ -69,6 +72,7 @@ const CATEGORIES_PER_ITEM = 6;
 
 type ShelfCategorySource = {
   shop: "auchan" | "biedronka";
+  provider: ProviderId;
   list: () => Promise<CategoryEntry[]>;
   read: (batch: CategoryEntry[]) => Promise<{
     prices: ShelfPrice[];
@@ -86,6 +90,14 @@ type ShelfCategorySource = {
  * are kept, so the basket can take the cheapest brand.
  */
 async function refreshShelfCategories(source: ShelfCategorySource): Promise<FeedRefresh> {
+  if (!isSourceEnabled(source.provider)) return { count: 0, skipped: true, disabled: disabledNote(source.provider) };
+  return recordRun(source.provider, () => readShelfCategories(source), (result) => ({
+    status: result.skipped ? "skipped" : result.note ? "partial" : "ok",
+    imported: result.count,
+  }));
+}
+
+async function readShelfCategories(source: ShelfCategorySource): Promise<FeedRefresh> {
   const now = new Date();
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
@@ -139,6 +151,7 @@ async function refreshShelfCategories(source: ShelfCategorySource): Promise<Feed
 export const refreshAuchanShelf = () =>
   refreshShelfCategories({
     shop: "auchan",
+    provider: "auchan-online",
     list: fetchAuchanCategoryList,
     read: fetchAuchanCategories,
     maxPerTap: MAX_AUCHAN_CATEGORIES,
@@ -147,6 +160,7 @@ export const refreshAuchanShelf = () =>
 export const refreshBiedronkaCategoryShelf = () =>
   refreshShelfCategories({
     shop: "biedronka",
+    provider: "biedronka-online",
     list: fetchBiedronkaCategoryList,
     read: fetchBiedronkaCategories,
     maxPerTap: MAX_CATEGORIES_PER_REFRESH,
@@ -175,14 +189,43 @@ export async function refreshShopPromos(): Promise<RefreshResult> {
   const fetchedAt = now.toISOString();
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   const searches = items.flatMap((item) => blixSearchFor(item.name) ?? []);
+  // Sources without permission on record are read only when the owner turned them on (grocery/policy.ts).
+  const enabled = {
+    lidl: isSourceEnabled("lidl-web"),
+    blix: isSourceEnabled("blix"),
+    shelf: isSourceEnabled("biedronka-online"),
+  };
 
   const [lidl, blix, shelf] = await Promise.allSettled([
-    fetchLidlPromos(now),
-    searches.length > 0 ? fetchBlixPromos(searches, now) : Promise.resolve(null),
-    items.length > 0
-      ? refreshBiedronkaShelf(
-          items.map((item) => ({ name: item.name, unit: item.unit as Unit | null })),
-          now,
+    enabled.lidl
+      ? recordRun("lidl-web", () => fetchLidlPromos(now), (promos) => ({
+          status: "ok",
+          fetched: promos.length,
+          imported: promos.length,
+        }))
+      : Promise.resolve(null),
+    enabled.blix && searches.length > 0
+      ? recordRun("blix", () => fetchBlixPromos(searches, now), (result) => ({
+          status: result.failed > 0 ? "partial" : "ok",
+          fetched: result.searched,
+          imported: result.promos.length,
+          issues: { failed_searches: result.failed },
+        }))
+      : Promise.resolve(null),
+    enabled.shelf && items.length > 0
+      ? recordRun(
+          "biedronka-online",
+          () =>
+            refreshBiedronkaShelf(
+              items.map((item) => ({ name: item.name, unit: item.unit as Unit | null })),
+              now,
+            ),
+          (result) => ({
+            status: result.failed > 0 ? "partial" : "ok",
+            fetched: result.read,
+            imported: result.prices.length,
+            issues: { failed_pages: result.failed },
+          }),
         )
       : Promise.resolve(null),
   ]);
@@ -190,12 +233,14 @@ export async function refreshShopPromos(): Promise<RefreshResult> {
   let count = 0;
   const warnings: string[] = [];
   const errors: unknown[] = [];
+  const disabled = (["lidl-web", "blix", "biedronka-online"] as const).filter((id) => !isSourceEnabled(id));
+  if (disabled.length > 0) warnings.push(disabledSummary(disabled));
 
-  if (lidl.status === "fulfilled") {
+  if (lidl.status === "fulfilled" && lidl.value) {
     await replaceShopPromos(["lidl"], lidl.value, fetchedAt, "lidl:");
     count += lidl.value.length;
     console.info(`[prices] lidl: ${lidl.value.length} promos`);
-  } else {
+  } else if (lidl.status === "rejected") {
     errors.push(lidl.reason);
     warnings.push(messageOf(lidl.reason, "Lidl: nie udało się pobrać promocji."));
   }
@@ -225,15 +270,23 @@ export async function refreshShopPromos(): Promise<RefreshResult> {
     warnings.push(messageOf(shelf.reason, "Biedronka: nie udało się odczytać cen z półki."));
   }
 
-  // Nothing could be read at all: say why instead of "0 promocji".
-  if (
-    lidl.status === "rejected" &&
-    (blix.status === "rejected" || searches.length === 0) &&
-    shelf.status !== "fulfilled"
-  ) {
+  // Every source that was tried failed: say why instead of "0 promocji". Expired offers still go.
+  const tried = [lidl, blix, shelf].filter((one) => one.status === "rejected" || one.value !== null);
+  if (tried.length > 0 && tried.every((one) => one.status === "rejected")) {
     throw errors[0] instanceof Error ? errors[0] : new Error(warnings.join(" "));
   }
+  if (tried.length === 0) await deleteExpiredPromos(todayIso());
   return { count, warnings };
+}
+
+/** One line for every source left off this time, instead of one per source. */
+function disabledSummary(ids: ProviderId[]): string {
+  if (ids.length === 1) return disabledNote(ids[0]);
+  return `Bez potwierdzonej zgody, więc wyłączone: ${ids.map((id) => sourceName(id)).join(", ")} (zob. Źródła danych).`;
+}
+
+function sourceName(id: ProviderId): string {
+  return { "lidl-web": "lidl.pl", blix: "gazetki Blix", "biedronka-online": "sklep online Biedronki" }[id as string] ?? id;
 }
 
 function messageOf(error: unknown, fallback: string): string {
@@ -246,7 +299,13 @@ const FEED_FRESH_HOURS = 12;
 /** Feed products kept per shopping item: the plainest few, in stock first. */
 const FEED_PER_ITEM = 5;
 
-export type FeedRefresh = { count: number; skipped: boolean; note?: string };
+export type FeedRefresh = {
+  count: number;
+  skipped: boolean;
+  note?: string;
+  /** The source is off (no permission on record or not configured): why, in Polish. */
+  disabled?: string;
+};
 
 /**
  * Stokrotka's regular prices from the product feed its shop publishes (one
@@ -254,6 +313,7 @@ export type FeedRefresh = { count: number; skipped: boolean; note?: string };
  * promocje"). The products that look like my list are kept in shelf_prices.
  */
 export async function refreshStokrotkaPrices(): Promise<FeedRefresh> {
+  if (!isSourceEnabled("stokrotka-feed")) return { count: 0, skipped: true, disabled: disabledNote("stokrotka-feed") };
   const now = new Date();
   const stored = (await listShelfPrices()).filter((price) => price.shop === "stokrotka");
   const newest = stored.reduce((latest, price) => (price.fetchedAt > latest ? price.fetchedAt : latest), "");
@@ -263,7 +323,7 @@ export async function refreshStokrotkaPrices(): Promise<FeedRefresh> {
 
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
-  const feed = await fetchStokrotkaFeed();
+  const feed = await recordRun("stokrotka-feed", fetchStokrotkaFeed, (all) => ({ status: "ok", fetched: all.length }));
   const prices = new Map<string, ShelfPrice>();
   for (const item of items) {
     const candidates = catalogCandidates(item.name, item.unit as Unit | null, feed, 40)
@@ -285,6 +345,8 @@ export async function refreshStokrotkaPrices(): Promise<FeedRefresh> {
  * in-stock products per item on my list go to shelf_prices.
  */
 export async function refreshFriscoPrices(): Promise<FeedRefresh> {
+  // Frisco allows its feed for personal, non-commercial use (robots.txt); this checks the app still is that.
+  if (!isSourceEnabled("frisco-feed")) return { count: 0, skipped: true, disabled: disabledNote("frisco-feed") };
   const now = new Date();
   const stored = (await listShelfPrices()).filter((price) => price.shop === "frisco");
   const newest = stored.reduce((latest, price) => (price.fetchedAt > latest ? price.fetchedAt : latest), "");
@@ -294,7 +356,13 @@ export async function refreshFriscoPrices(): Promise<FeedRefresh> {
 
   const items = (await listShoppingItems()).filter((item) => !item.checked && !item.owned);
   if (items.length === 0) return { count: 0, skipped: false };
-  const products = (await fetchFriscoFeed()).filter((product) => product.inStock);
+  const products = (
+    await recordRun("frisco-feed", fetchFriscoFeed, (all) => ({
+      status: "ok",
+      fetched: all.length,
+      issues: { out_of_stock: all.filter((product) => !product.inStock).length },
+    }))
+  ).filter((product) => product.inStock);
   const feed = products.map((product) => ({ name: matchName(product), product }));
   const prices = new Map<string, ShelfPrice>();
   for (const item of items) {
@@ -313,7 +381,14 @@ const SWEEP_FRESH_HOURS = 12;
 /** The sweep gives up starting new pages this long after it began (the request limit is 60 s). */
 const SWEEP_BUDGET_MS = 50_000;
 
-export type SweepRefresh = { pagesRead: number; pagesTotal: number; complete: boolean; skipped: boolean };
+export type SweepRefresh = {
+  pagesRead: number;
+  pagesTotal: number;
+  complete: boolean;
+  skipped: boolean;
+  /** The source is off: why, in Polish. */
+  disabled?: string;
+};
 
 /**
  * Every grocery offer of the priced chains from the Blix leaflets (about 115
@@ -322,13 +397,21 @@ export type SweepRefresh = { pagesRead: number; pagesTotal: number; complete: bo
  * next tap does it again.
  */
 export async function refreshBlixSweep(): Promise<SweepRefresh> {
+  if (!isSourceEnabled("blix")) {
+    return { pagesRead: 0, pagesTotal: 0, complete: true, skipped: true, disabled: disabledNote("blix") };
+  }
   const started = Date.now();
   const last = await getRefreshedAt("blix-sweep");
   if (last && started - new Date(last).getTime() < SWEEP_FRESH_HOURS * 3_600_000) {
     return { pagesRead: 0, pagesTotal: 0, complete: true, skipped: true };
   }
   const now = new Date();
-  const result = await fetchBlixSweep(started + SWEEP_BUDGET_MS, now);
+  const result = await recordRun("blix", () => fetchBlixSweep(started + SWEEP_BUDGET_MS, now), (sweep) => ({
+    status: sweep.complete ? "ok" : "partial",
+    fetched: sweep.pagesRead,
+    imported: sweep.promos.length,
+    issues: { pages_left: sweep.pagesTotal - sweep.pagesRead },
+  }));
   await upsertShopPromos(result.promos, now.toISOString());
   await deleteExpiredPromos(todayIso());
   if (result.complete) await markRefreshed("blix-sweep", now.toISOString());

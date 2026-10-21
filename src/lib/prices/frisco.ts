@@ -41,6 +41,13 @@ type RawProduct = {
   productUrl?: unknown;
 };
 
+/**
+ * The feed's names leave out the brand, which the product URL keeps
+ * ("…/n,winiary-pomysl-na...-spaghetti-napoli/…" is "Spaghetti Napoli"): seasoning
+ * mixes and snack lines that would read as the plain ingredient are left out.
+ */
+const NOT_AN_INGREDIENT = /\/n,[^/]*(?:pomysl-na|knorr-fix|-fix-|bake-rolls|7-days|lay-s|\blays|crunchips|chipsy|przekask)/;
+
 /** The feed's products. Throws when it no longer looks like the feed. */
 export function parseFriscoFeed(json: unknown): FriscoItem[] {
   const products = (json as { products?: unknown } | null)?.products;
@@ -57,11 +64,13 @@ export function parseFriscoFeed(json: unknown): FriscoItem[] {
     if (unit !== "Kilogram" && unit !== "Litre" && unit !== "Piece") continue;
     // packSize > 1 is a carton (12 packs of rice for one price): not what I buy on a shelf.
     if (Number(raw.packSize) > 1) continue;
+    const url = typeof raw.productUrl === "string" ? raw.productUrl : "https://www.frisco.pl/";
+    if (NOT_AN_INGREDIENT.test(url)) continue;
     const grammage = Number(raw.grammage);
     items.push({
       productKey: `frisco:${String(raw.id)}`,
       name,
-      url: typeof raw.productUrl === "string" ? raw.productUrl : "https://www.frisco.pl/",
+      url,
       price,
       inStock: raw.isAvailable === true,
       grammage: grammage > 0 ? grammage : null,
@@ -80,6 +89,8 @@ const BY_WEIGHT = /\d+\s?g?\s*-\s*\d+\s?g\b|\bok\.\s*\d/i;
  * nothing about what it is, and "szt." would keep it from pricing grams.
  */
 export function matchName(item: FriscoItem): string {
+  // Weighed by the feed, counted in the name ("Tortilla pszenna - 25 cm (4 szt.)", 0.25 kg): the weight is the pack.
+  if (countedButWeighed(item)) return item.name.replace(/\(?\s*\d+\s*szt\.?\s*\)?/gi, "").replace(/\s+/g, " ").trim();
   if (item.unit === "Piece" || !BY_WEIGHT.test(item.name)) return item.name;
   return item.name
     .replace(/\(?\s*\d+\s?g?\s*-\s*\d+\s?g\s*\)?/gi, "")
@@ -87,6 +98,12 @@ export function matchName(item: FriscoItem): string {
     .replace(/\d+\s*-\s*\d+\s*szt\.?/gi, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** A product the feed sells by weight while its name counts pieces: the feed's weight is what the pack holds. */
+function countedButWeighed(item: FriscoItem): boolean {
+  if (item.unit === "Piece" || item.grammage === null || BY_WEIGHT.test(item.name)) return false;
+  return parsePack(item.name)?.unit === "szt";
 }
 
 /**
@@ -101,7 +118,7 @@ export function toFriscoShelfPrice(item: FriscoItem): ShelfPrice | null {
     const packUnit = item.unit === "Litre" ? "ml" : "g";
     return { ...base, packQuantity: Math.round(item.grammage * 1000), packUnit, loose: true };
   }
-  const named = parsePack(item.name);
+  const named = countedButWeighed(item) ? null : parsePack(item.name);
   if (named) return { ...base, packQuantity: named.quantity, packUnit: named.unit, loose: false };
   if (item.unit === "Piece") return null;
   if (item.grammage === null) return null;

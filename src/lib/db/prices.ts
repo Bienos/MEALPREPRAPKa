@@ -124,6 +124,7 @@ const priceRowSchema = z.object({
   pack_quantity: z.coerce.number(),
   pack_unit: packUnitSchema,
   price: z.coerce.number(),
+  updated_at: z.string().optional(),
 });
 
 export async function listShopPrices(): Promise<ShopPrice[]> {
@@ -135,6 +136,7 @@ export async function listShopPrices(): Promise<ShopPrice[]> {
     packQuantity: row.pack_quantity,
     packUnit: row.pack_unit,
     price: row.price,
+    updatedAt: row.updated_at,
   }));
 }
 

@@ -90,6 +90,10 @@ export type ShopPromo = {
   shelf?: boolean;
   /** When this price was read from its source (ISO); the screen shows it so nothing looks guessed. */
   fetchedAt?: string;
+  /** A dated observation (Open Prices, my receipt), never today's price: it only fills gaps, labelled. */
+  historical?: "community" | "receipt";
+  /** For a dated observation: the town of the shop it was seen in. */
+  city?: string | null;
 };
 
 /** One product's regular shelf price from a shop's own catalogue, as stored. */
@@ -112,6 +116,8 @@ export type ShopPrice = {
   packQuantity: number;
   packUnit: Unit;
   price: number;
+  /** When I typed it (ISO); older rows may not say. */
+  updatedAt?: string;
 };
 
 /** A "pasuje?" answer: this promo product is (or is not) the shopping item. */

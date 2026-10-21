@@ -162,3 +162,32 @@ export function hasAnthropicKey(): boolean {
 export function getCronSecret(): string | null {
   return firstOf("CRON_SECRET") ?? null;
 }
+
+/* Grocery data sources --------------------------------------------------------- */
+
+/**
+ * Web sources with no permission on record (`authorization` "unverified" in
+ * src/lib/grocery/providers.ts: lidl.pl, Blix, Biedronka and Auchan online,
+ * Stokrotka's feed) are not read unless the owner sets
+ * GROCERY_UNVERIFIED_SOURCES=on, accepting that for private use. Even then
+ * their prices are labelled unverified and never enter the verified verdict.
+ */
+export function unverifiedSourcesEnabled(): boolean {
+  return /^(on|true|1|yes)$/i.test(firstOf("GROCERY_UNVERIFIED_SOURCES") ?? "");
+}
+
+/**
+ * Optional contact (an e-mail or URL) put in the User-Agent Open Food Facts
+ * asks every app to send. Without it the repository URL is used.
+ */
+export function getOpenFoodFactsContact(): string | null {
+  return firstOf("OPEN_FOOD_FACTS_CONTACT") ?? null;
+}
+
+/**
+ * GS1 Polska eProdukty is not wired: no endpoint is called. The key is only
+ * checked for presence so the sources screen can say what is missing.
+ */
+export function hasGs1Credentials(): boolean {
+  return Boolean(firstOf("GS1_EPRODUKTY_API_KEY"));
+}

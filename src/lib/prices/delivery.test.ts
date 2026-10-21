@@ -2,13 +2,16 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
 import type { BasketSummary, ShopBasket } from "./basket.ts";
-import { bestOptions, feeFor, onlineOptions, PROVIDERS } from "./delivery.ts";
+import { bestOptions, feeFor, handoffFor, handoffLabel, onlineOptions, PROVIDERS } from "./delivery.ts";
 
 const basket = (shop: ShopBasket["shop"], priced: number, total: number, estimated = 0): ShopBasket => ({
   shop,
   lines: [],
   total,
+  totalGrosz: Math.round(total * 100),
   priced,
+  complete: priced === 10,
+  states: {},
   onPromo: 0,
   estimated,
 });
@@ -93,5 +96,19 @@ describe("best options", () => {
   test("no prices at all: nothing is claimed", () => {
     const sum = summary([], 10);
     assert.deepEqual(bestOptions(sum, onlineOptions(sum, [], "Warszawa")), { shop: null, online: null, split: null });
+  });
+});
+
+describe("handoff", () => {
+  test("no provider claims basket filling or ordering", () => {
+    for (const provider of PROVIDERS) {
+      const handoff = handoffFor(provider);
+      assert.equal(handoff.basket, false);
+      assert.equal(handoff.checkout, false);
+      assert.equal(handoff.listCopy, true);
+    }
+    assert.equal(handoffFor(PROVIDERS.find((one) => one.id === "frisco")!).productLinks, true);
+    assert.equal(handoffFor(PROVIDERS.find((one) => one.id === "glovo")!).productLinks, false);
+    assert.match(handoffLabel(handoffFor(PROVIDERS[0])), /brak udokumentowanego API/);
   });
 });

@@ -1,5 +1,11 @@
 # Shopping intelligence
 
+> **21.10.2026:** ten dokument opisuje źródła z 20.10. Aktualny stan uprawnień, weryfikacji cen, koszyka i
+> paragonów jest w `docs/grocery/` (ARCHITECTURE, DATA_SOURCES, LICENSING). Najważniejsze zmiany: źródła bez
+> potwierdzonej zgody (lidl.pl, Blix, Biedronka i Auchan online, Stokrotka) są domyślnie wyłączone
+> (`GROCERY_UNVERIFIED_SOURCES`), Frisco ma zgodę na użytek osobisty (robots.txt), a Open Prices ma jednak
+> polskie dane (ok. 1800 cen, głównie Warszawa) i jest używane jako historia.
+
 Jak MealPrep liczy, gdzie zakupy z planu wychodzą najtaniej, skąd bierze ceny i czego nie wie.
 Stan na 20.10.2026. To dokument o faktach: każda pozycja poniżej była sprawdzona zwykłym publicznym
 zapytaniem z tego projektu, bez logowania, captchy i przeglądarki. Niczego, co blokuje dostęp, nie obchodzimy.
@@ -52,7 +58,7 @@ Google Sheets (dania)  ->  lista zakupów (ingredients.ts, prep.ts)
 | Wolt | wolt.com | 429/404 dla sklepów spożywczych; API tylko restauracje | - | - | - | - | PARTNER ACCESS REQUIRED (tylko link) |
 | Uber Eats | ubereats.com | 403 | - | - | - | - | NOT FEASIBLE |
 | Pyszne.pl | pyszne.pl | 403 | - | - | - | - | NOT FEASIBLE |
-| Open Prices (OFF) | prices.openfoodfacts.org | REST API, ODbL | społecznościowe | 332 tys. cen, Polska praktycznie nieobecna | - | ODbL (wymaga udostępnienia na tej licencji) | NOT FEASIBLE dziś (brak danych PL) |
+| Open Prices (OFF) | prices.openfoodfacts.org | REST API, ODbL | społecznościowe (historia) | 2176 cen w PLN (20.10.2026), 538 w promieniu 25 km od Warszawy | codziennie | ODbL | SUPPORTED jako historia (docs/grocery) |
 | openfoodfacts/open-prices (HF) | huggingface.co/datasets/openfoodfacts/open-prices | parquet, ODbL | jw. | jw. | dziennie | ODbL | NOT FEASIBLE dziś |
 | Open Food Facts (produkty) | world.openfoodfacts.org | REST, ODbL | brak cen; EAN i nazwy | świat | - | ODbL | możliwe do dopasowań po EAN (nie wdrożone) |
 | jjwallace/polski-price | GitHub | kod (Bun + Gemini) uśredniający gazetki | średnie z gazetek | PL | - | zależny od Gemini; inne podejście niż nasze reguły | UNVERIFIED (nie reużyte) |

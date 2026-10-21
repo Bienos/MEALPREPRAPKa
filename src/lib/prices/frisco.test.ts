@@ -37,11 +37,42 @@ describe("Frisco feed", () => {
     assert.deepEqual([turkey?.packQuantity, turkey?.packUnit, turkey?.loose, turkey?.price], [1000, "g", true, 53.99]);
   });
 
+  test("a product weighed by the feed but counted in its name is priced by the weight", () => {
+    const tortilla = { ...items[0], name: "Tortilla pszenna - 25 cm (4 szt.)", unit: "Kilogram" as const, grammage: 0.25, price: 4.99 };
+    const shelf = toFriscoShelfPrice(tortilla);
+    assert.deepEqual([shelf?.packQuantity, shelf?.packUnit, shelf?.loose], [250, "g", false]);
+    assert.equal(matchName(tortilla), "Tortilla pszenna - 25 cm");
+    // Eggs are sold by the piece in the feed: the count stays the pack.
+    const eggs = priceOf("Jaja kurze z chowu ściółkowego");
+    assert.deepEqual([eggs?.packQuantity, eggs?.packUnit], [10, "szt"]);
+  });
+
   test("the weight range is left out of the name the matching reads", () => {
     const item = (name: string) => ({ ...items[0], name, unit: "Kilogram" as const });
     assert.equal(matchName(item("Banany kiść 4-6 szt. (800g-1200g)")), "Banany kiść");
     assert.equal(matchName(item("Filet z piersi z kurczaka 480-720g")), "Filet z piersi z kurczaka");
     assert.equal(matchName(item("Mleko 2% UHT")), "Mleko 2% UHT");
+  });
+
+  test("seasoning mixes and snacks, whose brand only the URL names, are left out", () => {
+    const product = (id: number, name: string, slug: string) => ({
+      id,
+      name: { pl: name },
+      unitOfMeasure: "Kilogram",
+      packSize: 1,
+      grammage: 0.4,
+      price: { price: 5 },
+      isAvailable: true,
+      productUrl: `https://www.frisco.pl/pid,${id}/n,${slug}/stn,product`,
+    });
+    const parsed = parseFriscoFeed({
+      products: [
+        product(1, "Spaghetti Napoli", "winiary-pomysl-na...-spaghetti-napoli"),
+        product(2, "pomidor oliwki", "bake-rolls-pomidor-oliwki"),
+        product(3, "Makaron spaghetti", "barilla-makaron-spaghetti"),
+      ],
+    });
+    assert.deepEqual(parsed.map((item) => item.name), ["Makaron spaghetti"]);
   });
 
   test("a carton of many packs for one price is left out", () => {

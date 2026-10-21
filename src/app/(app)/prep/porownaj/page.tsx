@@ -40,6 +40,13 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         Zakupy
       </Link>
       <PageHeader title="Porównaj ceny" subtitle="Wpisz albo podyktuj, co chcesz kupić, po przecinku" />
+      <p className="text-sm text-muted-foreground">
+        Oferty z gazetek (Blix, lidl.pl) i sklepów internetowych bez potwierdzonej zgody na użycie danych są tu
+        orientacyjne.{" "}
+        <Link href="/prep/zrodla" className="font-semibold text-primary">
+          Źródła danych
+        </Link>
+      </p>
 
       <form action="/prep/porownaj" className="flex flex-col gap-2">
         <label className="relative">

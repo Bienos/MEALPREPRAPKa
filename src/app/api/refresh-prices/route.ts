@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCronSecret } from "@/lib/env";
+import { syncOpenPrices } from "@/lib/grocery/sync";
 import {
   refreshAuchanShelf,
   refreshBiedronkaCategoryShelf,
@@ -17,7 +18,9 @@ import {
  * wrong or a missing secret gets 401, no secret configured gets 503.
  *
  * The same sources as a tap on "Sprawdź promocje", side by side, each inside
- * its own budget; one failing never stops the others.
+ * its own budget; one failing never stops the others. Sources without
+ * permission on record report "disabled" unless GROCERY_UNVERIFIED_SOURCES=on.
+ * Open Prices (Poland, community history) is synced here once a day.
  */
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -37,6 +40,7 @@ export async function GET(request: Request) {
     frisco: refreshFriscoPrices(),
     auchan: refreshAuchanShelf(),
     biedronka: refreshBiedronkaCategoryShelf(),
+    openPrices: syncOpenPrices(),
   };
   const settled = await Promise.allSettled(Object.values(sources));
   const report = Object.fromEntries(

@@ -1,0 +1,1548 @@
+{
+ "summary": {
+  "date": "2026-10-21",
+  "generatedAt": "2026-10-21T00:16:45Z",
+  "note": "Open Food Facts search answers of the full pilot run (live, 10/min, one retry on 503), kept so a later run can reuse them with --reuse-off.",
+  "offSearched": 100,
+  "offRetried": 63,
+  "offErrors": 36
+ },
+ "results": [
+  {
+   "product": "pierś z kurczaka",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "pierś z kurczaka 800 g",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "filet z piersi kurczaka 1 kg",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Filet z piersi kurczaka",
+     "pack": {
+      "amount": 100,
+      "unit": "g"
+     },
+     "exactPack": false,
+     "gtin": "00000020902438",
+     "url": "https://world.openfoodfacts.org/product/20902438"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "filet z kurczaka",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Filet z piersi kurczaka",
+     "pack": {
+      "amount": 100,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020902438",
+     "url": "https://world.openfoodfacts.org/product/20902438"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "kurczak gotowy",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "filet z indyka",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "category",
+     "name": "Filet Z Indyka",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "04056489185147",
+     "url": "https://world.openfoodfacts.org/product/4056489185147"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "mięso mielone z indyka",
+   "off": {
+    "searched": true,
+    "results": 6,
+    "best": {
+     "tier": "attributes",
+     "name": "Mięso mielone z indyka",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "02876060003880",
+     "url": "https://world.openfoodfacts.org/product/2876060003880"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "indyk 5%",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "szynka z indyka",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Szynka Filet Z Indyk",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489185161",
+     "url": "https://world.openfoodfacts.org/product/4056489185161"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "szynka z indyka w plastrach",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "wołowina mielona",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "wołowina 5%",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "category",
+     "name": "Mięso wołowe na gulasz",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900562533143",
+     "url": "https://world.openfoodfacts.org/product/5900562533143"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "tuńczyk w sosie własnym",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "tuńczyk",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "białka jaj",
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": {
+     "tier": "category",
+     "name": "Płynne Białka Jaj",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05901947669938",
+     "url": "https://world.openfoodfacts.org/product/5901947669938"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "feta light",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "ser feta",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Original Greek Feta",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05202258062150",
+     "url": "https://world.openfoodfacts.org/product/5202258062150"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "jajka",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jajka M",
+     "pack": {
+      "amount": 10,
+      "unit": "szt"
+     },
+     "exactPack": null,
+     "gtin": "05907672700014",
+     "url": "https://world.openfoodfacts.org/product/5907672700014"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "jajka 6 szt.",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jajka M",
+     "pack": {
+      "amount": 10,
+      "unit": "szt"
+     },
+     "exactPack": false,
+     "gtin": "05907672700014",
+     "url": "https://world.openfoodfacts.org/product/5907672700014"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "jajka 10 szt.",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "jaja L",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "jaja M",
+   "off": {
+    "searched": true,
+    "results": 9,
+    "best": {
+     "tier": "category",
+     "name": "Świeże jaja Ściólkowe M",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "00000020932756",
+     "url": "https://world.openfoodfacts.org/product/20932756"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "jaja z wolnego wybiegu",
+   "off": {
+    "searched": true,
+    "results": 9,
+    "best": {
+     "tier": "category",
+     "name": "Polskie Świeże Jaja z Wolnego Wybiegu Klasa A",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "04056489812395",
+     "url": "https://world.openfoodfacts.org/product/4056489812395"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "jogurt 2%",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "category",
+     "name": "Jogurt Grecki naturalny",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900512350080",
+     "url": "https://world.openfoodfacts.org/product/5900512350080"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "jogurt naturalny",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt naturalny",
+     "pack": {
+      "amount": 330,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489745518",
+     "url": "https://world.openfoodfacts.org/product/4056489745518"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "jogurt grecki",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt Grecki naturalny",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900512350080",
+     "url": "https://world.openfoodfacts.org/product/5900512350080"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "jogurt grecki naturalny 400 g",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt Grecki naturalny",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05900512350080",
+     "url": "https://world.openfoodfacts.org/product/5900512350080"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "mozzarella light",
+   "off": {
+    "searched": true,
+    "results": 7,
+    "best": {
+     "tier": "attributes",
+     "name": "Mozzarella light",
+     "pack": {
+      "amount": 125,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489124481",
+     "url": "https://world.openfoodfacts.org/product/4056489124481"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "mozzarella",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Mozzarella light",
+     "pack": {
+      "amount": 125,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489124481",
+     "url": "https://world.openfoodfacts.org/product/4056489124481"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "ser light",
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": {
+     "tier": "attributes",
+     "name": "Ser Królewski Light",
+     "pack": {
+      "amount": 135,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05901753000642",
+     "url": "https://world.openfoodfacts.org/product/5901753000642"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "ser gouda w plastrach",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "serek wiejski",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "SEREK WIEJSKI",
+     "pack": {
+      "amount": 200,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900531000010",
+     "url": "https://world.openfoodfacts.org/product/5900531000010"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "serek wiejski lekki",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "serek wiejski 200 g",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "skyr",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Skyr w Stylu Islandzkim Naturalny",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020692230",
+     "url": "https://world.openfoodfacts.org/product/20692230"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "skyr naturalny",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt typu islandzkiego SKYR Naturalny 0% tłuszczu",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05902409703887",
+     "url": "https://world.openfoodfacts.org/product/5902409703887"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "skyr naturalny 450 g",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt typu islandzkiego SKYR Naturalny 0% tłuszczu",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": false,
+     "gtin": "05902409703887",
+     "url": "https://world.openfoodfacts.org/product/5902409703887"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "skyr naturalny 150 g",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Jogurt typu islandzkiego SKYR Naturalny 0% tłuszczu",
+     "pack": {
+      "amount": 150,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05902409703887",
+     "url": "https://world.openfoodfacts.org/product/5902409703887"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "twaróg chudy",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Twaróg Klinek chudy",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900820021962",
+     "url": "https://world.openfoodfacts.org/product/5900820021962"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "twaróg chudy 250 g",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Twaróg Klinek chudy",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05900820021962",
+     "url": "https://world.openfoodfacts.org/product/5900820021962"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "twaróg półtłusty",
+   "off": {
+    "searched": true,
+    "results": 6,
+    "best": {
+     "tier": "attributes",
+     "name": "Twaróg półtłusty",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05908235957814",
+     "url": "https://world.openfoodfacts.org/product/5908235957814"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "ryż",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż Brązowy - Długoziarnisty",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020983734",
+     "url": "https://world.openfoodfacts.org/product/20983734"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "ryż basmati",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż biały długoziarnisty basmati",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020983758",
+     "url": "https://world.openfoodfacts.org/product/20983758"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "ryż jaśminowy",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż Jaśminowy",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900977005525",
+     "url": "https://world.openfoodfacts.org/product/5900977005525"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "ryż brązowy",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Ryż Brązowy - Długoziarnisty",
+     "pack": {
+      "amount": 400,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020983734",
+     "url": "https://world.openfoodfacts.org/product/20983734"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "ryż microwave gotowy",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "makaron spaghetti",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Makaron Spaghetti",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "07904852000399",
+     "url": "https://world.openfoodfacts.org/product/7904852000399"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "makaron penne",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Penne",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "08594002273439",
+     "url": "https://world.openfoodfacts.org/product/8594002273439"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "makaron pełnoziarnisty",
+   "off": {
+    "searched": true,
+    "results": 8,
+    "best": {
+     "tier": "attributes",
+     "name": "Makaron pełnoziarnisty świderki",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900049005521",
+     "url": "https://world.openfoodfacts.org/product/5900049005521"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "orzo",
+   "off": {
+    "searched": true,
+    "results": 5,
+    "best": {
+     "tier": "attributes",
+     "name": "Orzo medium",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05201193118298",
+     "url": "https://world.openfoodfacts.org/product/5201193118298"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "chleb żytni",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Chleb żytni z ziarnami żyta, razowy",
+     "pack": {
+      "amount": 450,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "00000020859688",
+     "url": "https://world.openfoodfacts.org/product/20859688"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "chleb pełnoziarnisty",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Chleb żytni pełnoziarnisty",
+     "pack": {
+      "amount": 300,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900340017100",
+     "url": "https://world.openfoodfacts.org/product/5900340017100"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "pieczywo",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Pieczywo z pełnoziarnistej mąki żytniej",
+     "pack": {
+      "amount": 210,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "07300400122054",
+     "url": "https://world.openfoodfacts.org/product/7300400122054"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "tortilla pszenna",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Tortilla pszenna",
+     "pack": {
+      "amount": 250,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05905784344591",
+     "url": "https://world.openfoodfacts.org/product/5905784344591"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "tortilla pełnoziarnista",
+   "off": {
+    "searched": true,
+    "results": 1,
+    "best": {
+     "tier": "category",
+     "name": "Tortilla Wraps with whole wheat",
+     "pack": {
+      "amount": 740,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489506829",
+     "url": "https://world.openfoodfacts.org/product/4056489506829"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "płatki owsiane",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Crownfield Płatki owsiane górskie",
+     "pack": {
+      "amount": 1000,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "04056489180968",
+     "url": "https://world.openfoodfacts.org/product/4056489180968"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "płatki owsiane górskie",
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": {
+     "tier": "category",
+     "name": "Płatki owsiane górskie",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05906827011937",
+     "url": "https://world.openfoodfacts.org/product/5906827011937"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "płatki owsiane 500 g",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Płatki owsiane Górskie",
+     "pack": {
+      "amount": 500,
+      "unit": "g"
+     },
+     "exactPack": true,
+     "gtin": "05906827003802",
+     "url": "https://world.openfoodfacts.org/product/5906827003802"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "ziemniaki",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "cebula",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Piramidki proteinowe Ser cebula",
+     "pack": {
+      "amount": 60,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05904730218344",
+     "url": "https://world.openfoodfacts.org/product/5904730218344"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "cebula czerwona",
+   "off": {
+    "searched": true,
+    "results": 1,
+    "best": null,
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "ogórek",
+   "off": {
+    "searched": true,
+    "results": 3,
+    "best": null,
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "papryka",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Max karbowane papryka",
+     "pack": {
+      "amount": 120,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900259133281",
+     "url": "https://world.openfoodfacts.org/product/5900259133281"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "papryka czerwona",
+   "off": {
+    "searched": true,
+    "results": 7,
+    "best": {
+     "tier": "category",
+     "name": "Pesto (czerwona papryka)",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "00000080340058",
+     "url": "https://world.openfoodfacts.org/product/80340058"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "pieczarki",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "pomidor",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "pomidory koktajlowe",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   }
+  },
+  {
+   "product": "passata",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   }
+  },
+  {
+   "product": "pomidory krojone",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   }
+  },
+  {
+   "product": "kukurydza konserwowa",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   }
+  },
+  {
+   "product": "fasola czerwona",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Nie udało się połączyć z Open Food Facts.",
+    "retried": true
+   }
+  },
+  {
+   "product": "fasola biała",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "salsa",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "mleko kokosowe light",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "mleko kokosowe",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "banan",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "jabłko",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "owoce mrożone",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": null,
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "truskawki mrożone",
+   "off": {
+    "searched": true,
+    "results": 2,
+    "best": {
+     "tier": "category",
+     "name": "Truskawki Mrożone",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05905784303697",
+     "url": "https://world.openfoodfacts.org/product/5905784303697"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "maliny mrożone",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "borówki",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "oliwa z oliwek",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "oliwa z oliwek extra virgin",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "oliwa z oliwek 500 ml",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "masło orzechowe",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "masło orzechowe kremowe",
+   "off": {
+    "searched": true,
+    "results": 1,
+    "best": {
+     "tier": "attributes",
+     "name": "Masło orzechowe kremowe",
+     "pack": {
+      "amount": 350,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900571050020",
+     "url": "https://world.openfoodfacts.org/product/5900571050020"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "miód",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "miód wielokwiatowy",
+   "off": {
+    "searched": true,
+    "results": 4,
+    "best": {
+     "tier": "attributes",
+     "name": "Huzar Miod Wielokwiatowy",
+     "pack": {
+      "amount": 350,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05907707117350",
+     "url": "https://world.openfoodfacts.org/product/5907707117350"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "kakao",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "cynamon",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Cynamon mielony",
+     "pack": {
+      "amount": 15,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05901135000178",
+     "url": "https://world.openfoodfacts.org/product/5901135000178"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "curry",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "musztarda",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "nasiona chia",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Nasiona Chia",
+     "pack": {
+      "amount": 125,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05900587046765",
+     "url": "https://world.openfoodfacts.org/product/5900587046765"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "pesto",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "sos bbq",
+   "off": {
+    "searched": true,
+    "results": 0,
+    "best": null,
+    "error": "Open Food Facts odpowiedziało błędem 503.",
+    "retried": true
+   }
+  },
+  {
+   "product": "sos sojowy",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Sos sojowy bezglutenowy o obniżonej zawartości soli",
+     "pack": {
+      "amount": 150,
+      "unit": "ml"
+     },
+     "exactPack": null,
+     "gtin": "05907501001091",
+     "url": "https://world.openfoodfacts.org/product/5907501001091"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "sos sweet chilli",
+   "off": {
+    "searched": true,
+    "results": 2,
+    "best": {
+     "tier": "category",
+     "name": "sos sweet chilli",
+     "pack": null,
+     "exactPack": null,
+     "gtin": "05900783010058",
+     "url": "https://world.openfoodfacts.org/product/5900783010058"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "sos teriyaki",
+   "off": {
+    "searched": true,
+    "results": 5,
+    "best": {
+     "tier": "attributes",
+     "name": "Sos Teriyaki",
+     "pack": {
+      "amount": 165,
+      "unit": "ml"
+     },
+     "exactPack": null,
+     "gtin": "08594065960413",
+     "url": "https://world.openfoodfacts.org/product/8594065960413"
+    },
+    "error": null,
+    "retried": true
+   }
+  },
+  {
+   "product": "pudding proteinowy",
+   "off": {
+    "searched": true,
+    "results": 6,
+    "best": {
+     "tier": "attributes",
+     "name": "Pudding proteinowy",
+     "pack": {
+      "amount": 200,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "08595588200758",
+     "url": "https://world.openfoodfacts.org/product/8595588200758"
+    },
+    "error": null,
+    "retried": false
+   }
+  },
+  {
+   "product": "whey",
+   "off": {
+    "searched": true,
+    "results": 10,
+    "best": {
+     "tier": "attributes",
+     "name": "Whey Protein Vanilla Sky",
+     "pack": {
+      "amount": 700,
+      "unit": "g"
+     },
+     "exactPack": null,
+     "gtin": "05902837747040",
+     "url": "https://world.openfoodfacts.org/product/5902837747040"
+    },
+    "error": null,
+    "retried": true
+   }
+  }
+ ]
+}

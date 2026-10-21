@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { priceSource } from "./source.ts";
+import { priceSource, safeUrl } from "./source.ts";
 import type { ShopPromo } from "./types.ts";
 
 const promo = (over: Partial<ShopPromo>): ShopPromo => ({
@@ -47,5 +47,15 @@ describe("priceSource", () => {
 
   test("no fetch time: no day, never a made-up one", () => {
     assert.equal(priceSource(promo({ fetchedAt: undefined })).day, null);
+  });
+});
+
+describe("links from outside", () => {
+  test("only http(s) and the app's own paths are linked", () => {
+    assert.equal(safeUrl("https://www.frisco.pl/pid,1"), "https://www.frisco.pl/pid,1");
+    assert.equal(safeUrl("/prep/paragony"), "/prep/paragony");
+    assert.equal(safeUrl("javascript:alert(1)"), "#");
+    assert.equal(safeUrl("//evil.example"), "#");
+    assert.equal(safeUrl("data:text/html,x"), "#");
   });
 });

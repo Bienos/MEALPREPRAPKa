@@ -45,11 +45,17 @@ function either(...patterns: RegExp[]): RegExp {
 
 /** Not the plain ingredient: ready meals, cold cuts, sauces, snacks, drinks. */
 const PROCESSED =
-  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri/;
+  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|krakers|\blays\b|crunchips|pringles|doritos|cheetos|karbowan|piramidk|\bsmak\b/;
+
+/** Ready meals: never a pantry item, even when the item is a sauce. */
+const DISHES = /zupa|pizza|salatk|zapiekank|pierog|krokiet|sushi|kebab|\bdanie\b|w sosie|z sosem|chips|o smaku/;
+
+/** A name that lists several foods ("mozzarella, pomidor, cebula czerwona", "śmietana & cebula") is a dish or a flavour, not the vegetable. */
+const LISTED = /,[^,]+,|\s&\s/;
 
 /** A flavoured dairy product, not the plain one the meals use. */
 const FLAVOURED =
-  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanil|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn/;
+  /pitn|do picia|deser|lody|baton|musli|platki|owoc|truskaw|brzoskw|wisni|malin|borowk|jagod|mango|banan|wanili|czekolad|kokos|karmel|matcha|smak|jogobella|na dnie|ze skyrem|z dodatkiem|strawberr|raspberr|blueberr|vanil|filling|porzeczk|marakuj|cytryn|morel|grusz|pomarancz|wisni|jablk|cynamon|ananas|orzech|kakao|pomidor|szczypior|ziol|czosn|szarlot|sernik|tiramisu|pistacj|ciastk|cookie|kawow|latte|miodow/;
 
 /** A fruit named as a flavour ("truskawkowa", "malinowy"), not the fruit itself. */
 const FRUIT_FLAVOUR =
@@ -80,7 +86,7 @@ const RULES: Rule[] = [
     // The meals' "kurczak" is breast: that is what the macros are counted for.
     item: /kurczak|kurczec/,
     product: /^(?=.*kurcz)(?=.*(piers|filet))/,
-    not: either(/kaczk|indyk|indycz|w galarecie|marynowan|pieczon|szynk|wedzon|gotowan|parzon|grillowan/, PROCESSED),
+    not: either(/kaczk|indyk|indycz|w galarecie|marynowan|pieczon|szynk|wedzon|gotowan|parzon|grillowan|piratk/, PROCESSED),
     search: { sub: "mieso", q: "filet" },
   },
   {
@@ -99,13 +105,13 @@ const RULES: Rule[] = [
   {
     item: /indyk|indycz/,
     product: /^(?=.*(indyk|indycz))(?=.*(filet|piers|mielon|mieso|uda|udziec|gulasz|kotlet|sznycl|medalion|pask))/,
-    not: either(/golonk|skrzyd|podudz|rosol|zestaw|szyj|wedzon|parzon|pieczon/, PROCESSED),
+    not: either(/golonk|skrzyd|podudz|rosol|zestaw|szyj|wedzon|parzon|pieczon|filetk|z indykiem|szynk|wedlin|w plastrach/, PROCESSED),
     search: { sub: "mieso", q: "indyk" },
   },
   {
     item: /wolowin/,
     product: /wolow/,
-    not: either(/wieprzow|burger|tatar|flaki|szponder|rosol|kosci|ozor/, PROCESSED),
+    not: either(/wieprzow|burger|tatar|flaki|szponder|rosol|kosci|ozor|\bloj\b|smalec|tluszcz/, PROCESSED),
     search: { sub: "mieso", q: "wołow" },
   },
   {
@@ -126,7 +132,7 @@ const RULES: Rule[] = [
   {
     item: /tunczyk/,
     product: /tunczyk/,
-    not: either(/pasta|w oleju|w oliwie|z suszon|jalapeno|mayo/, PROCESSED),
+    not: either(/pasta|w oleju|w oliwie|z suszon|jalapeno|mayo|z warzyw|mexican|meksyk|z fasol|z ryz|z makaron|z kukurydz/, PROCESSED),
     search: { sub: "", q: "tuńczyk" },
   },
   {
@@ -182,7 +188,7 @@ const RULES: Rule[] = [
   {
     item: /\bser\b/,
     product: /\bser\b|gouda|edam|cheddar|ementaler|podlaski|maasdam|salami ser/,
-    not: either(/serek|twarog|sernik|feta|mozzarell|kremow|topion|plesn/, PROCESSED),
+    not: either(/serek|twarog|sernik|feta|mozzarell|kremow|\bkrem\b|topion|plesn|smarow/, PROCESSED),
     search: { sub: "nabial", q: "w plastrach" },
   },
   {
@@ -223,26 +229,29 @@ const RULES: Rule[] = [
     search: { sub: "kasza", q: "" },
   },
   {
-    item: /orzo/,
-    product: /orzo/,
+    item: /\borzo\b/,
+    product: /\borzo\b/,
     search: { sub: "makaron", q: "orzo" },
   },
   {
     item: /makaron/,
     product: /makaron|spaghetti|penne|fusilli|tagliatelle|farfalle|rigatoni/,
-    not: either(/ryzow|vermicel|mung|instant|chinsk|zupk/, PROCESSED),
+    not: either(
+      /ryzow|vermicel|mung|instant|chinsk|zupk|udon|soba|ramen|sojow|konjac|\bsery\b|bolognes|carbonar|napolitan|z mies|z sosem/,
+      PROCESSED,
+    ),
     search: { sub: "makaron", q: "" },
   },
   {
     item: /chleb|pieczywo/,
     product: /chleb|pieczywo/,
-    not: either(/chlebek|tostow|przekask|slodk|chrupk|wafl|bulk|bagiet|tortill|krakers/, PROCESSED),
+    not: either(/chlebek|tostow|przekask|slodk|chrupk|wafl|bulk|bagiet|tortill|krakers|sonko|\bwasa\b|pieczywo lekk/, PROCESSED),
     search: { sub: "pieczywo", q: "chleb" },
   },
   {
     item: /tortill/,
     product: /tortill|placki pszenne/,
-    not: PROCESSED,
+    not: either(/z mies|z kurcz|z warzyw|z wolow|z indyk|z serem|wrap z|danie|gotow/, PROCESSED),
     search: { sub: "", q: "tortill" },
   },
   {
@@ -260,7 +269,7 @@ const RULES: Rule[] = [
   {
     item: /fasol/,
     product: /fasol/,
-    not: either(/szparag|bretonsk|mung|edamame|makaron|danie/, PROCESSED),
+    not: either(/szparag|bretonsk|mung|edamame|makaron|danie|pasta/, PROCESSED),
     search: { sub: "", q: "fasol" },
   },
   {
@@ -273,34 +282,39 @@ const RULES: Rule[] = [
     // Fresh vegetables of the mix that stands in for "warzywa": the plain vegetable, not the jar, tin or sauce.
     item: /^(?!.*(passata|krojon|puszk|puszc|suszon|przecier)).*pomidor/,
     product: /pomidor/,
-    not: either(/krojon|puszk|puszc|suszon|passata|przecier|koncentrat|ketchup|w oleju|salsa|pesto|\bsok\b/, PROCESSED),
+    not: either(
+      /krojon|puszk|puszc|suszon|passata|przecier|koncentrat|ketchup|w oleju|salsa|pesto|\bsok\b|\bcale\b|bez skork|pelati|obran|pomidorow/,
+      PROCESSED,
+      LISTED,
+    ),
     search: { sub: "warzywa", q: "pomidor" },
   },
   {
     item: /ogork|ogorek/,
     product: /ogorek|ogorki/,
-    not: either(/kiszon|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b/, PROCESSED),
+    not: either(/kiszon|malosoln|konserw|korniszon|marynow|w zalewie|kanapk|\bsos\b|ogorkow|dziadun/, PROCESSED, LISTED),
     search: { sub: "warzywa", q: "ogórek" },
   },
   {
     item: /cebul/,
     product: /cebul/,
-    not: either(/w oleju|prazon|kiszon|marynow|konserw|krojon|mrozon|szczypior|chrupiac|smazon|w platkach/, PROCESSED),
+    not: either(/w oleju|prazon|kiszon|marynow|konserw|krojon|mrozon|szczypior|chrupiac|smazon|w platkach|cebulow|dymk|szalot/, PROCESSED, LISTED),
     search: { sub: "warzywa", q: "cebula" },
   },
   {
     item: /papryk/,
     product: /papryk/,
     not: either(
-      /mielon|proszek|konserw|marynow|w zalewie|ajvar|nadziew|wedzon|w oleju|pasta|mrozon|ostra|jalapeno/,
+      /mielon|proszek|konserw|marynow|w zalewie|ajvar|nadziew|wedzon|w oleju|pasta|pesto|mrozon|ostra|jalapeno|hummus|paprykow/,
       PROCESSED,
+      LISTED,
     ),
     search: { sub: "warzywa", q: "papryka" },
   },
   {
     item: /pieczark/,
     product: /pieczark/,
-    not: either(/konserw|marynow|puszk|puszc|w zalewie|mrozon|krem|farsz|nadziew|grillowan|suszon/, PROCESSED),
+    not: either(/konserw|marynow|puszk|puszc|w zalewie|mrozon|krem|farsz|nadziew|grillowan|suszon/, PROCESSED, LISTED),
     search: { sub: "warzywa", q: "pieczarki" },
   },
   {
@@ -308,7 +322,7 @@ const RULES: Rule[] = [
     product: /passata|przecier pomidor|pomidory (krojone|w puszce)/,
     search: { sub: "", q: "passata" },
   },
-  { item: /salsa/, product: /salsa/, search: { sub: "", q: "salsa" } },
+  { item: /salsa/, product: /salsa/, not: /\bdip\b|serow|hummus|chips|nachos|tortilla/, search: { sub: "", q: "salsa" } },
   {
     item: /warzyw/,
     product: /brokul|kalafior|marchew|papryk|cukini|szpinak|warzyw|fasolka szparag|brukselk|kapust/,
@@ -318,13 +332,13 @@ const RULES: Rule[] = [
   {
     item: /banan/,
     product: /banan/,
-    not: either(/chips|suszon|baton|jogurt|chlebek/, FRUIT_FLAVOUR),
+    not: either(/chips|suszon|baton|jogurt|chlebek|koktajl|smoothie|\bmus\b|napoj|shake|\bsmak|mleko|milch|kokos|truskaw|mango|malin|jagod|borowk|ananas|jablk|gruszk/, FRUIT_FLAVOUR, LISTED),
     search: { sub: "owoce", q: "banan" },
   },
   {
     item: /jablk/,
     product: /jablk/,
-    not: either(/\bsok\b|\bmus\b|suszon|chips|ocet|szarlot/, FRUIT_FLAVOUR),
+    not: either(/\bsok\b|\bmus\b|suszon|chips|ocet|szarlot|napoj|koktajl|smoothie|\bsmak/, FRUIT_FLAVOUR, LISTED),
     search: { sub: "owoce", q: "jabłk" },
   },
   {
@@ -338,7 +352,7 @@ const RULES: Rule[] = [
     item: /jagod|borowk|malin|truskaw/,
     product: /malin|borowk|jagod|truskaw|owoce lesne/,
     not: either(
-      /pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|owsiank|ciast|chlebek/,
+      /pomidor|dzem|jogurt|serek|\bsok\b|czekolad|syrop|herbat|napar|owsiank|ciast|chlebek|\bsmak|o smaku|\bwoda\b|napoj|koktajl|yopro/,
       PROCESSED,
       FRUIT_FLAVOUR,
     ),
@@ -348,7 +362,7 @@ const RULES: Rule[] = [
     item: /owoce/,
     product: /jablk|banan|gruszk|winogron|pomarancz|mandaryn|kiwi|malin|borowk|truskaw|pomelo/,
     not: either(
-      /pomidor|\bsok\b|\bmus\b|suszon|chips|dzem|jogurt|serek|czekolad|baton|ciast|deser|lody|owsiank/,
+      /pomidor|\bsok\b|\bmus\b|suszon|chips|dzem|jogurt|serek|czekolad|baton|ciast|deser|lody|owsiank|\bsmak|o smaku|\bwoda\b|napoj|koktajl/,
       PROCESSED,
       FRUIT_FLAVOUR,
     ),
@@ -357,6 +371,7 @@ const RULES: Rule[] = [
   {
     item: /maslo orzechowe|\bpb\b/,
     product: /maslo orzechowe|maslo z orzech|krem\b.*\borzech/,
+    not: either(/baton|snack|ciastk|wafel|wafl|czekolad|drazet/, PROCESSED),
     search: { sub: "", q: "masło orzechowe" },
   },
   { item: /oliwa/, product: /oliwa/, search: { sub: "oleje", q: "oliwa" } },
@@ -368,33 +383,64 @@ const RULES: Rule[] = [
   },
   {
     item: /whey|odzywk|bialko/,
-    product: /whey|odzywk|bialko serwatk|bialko wpc/,
+    product: /whey|odzywk\w* bialk|bialko serwatk|bialko wpc|\bwpc\b|\bwpi\b/,
+    not: /wlos|kosmet|szampon|balsam|krem do|skor|twarz|roslin|nawoz|kwiat|\bbar\b|baton|wafel|ciastk|cookie|napoj|drink|\bshake\b|pudding|jogurt|skyr|deser/,
     search: { sub: "", q: "odżywk" },
   },
 ];
 
-/** Words too general to look an item up by. */
-const STOP_WORDS = new Set(["light", "gotowy", "mieszanka", "microwave", "chudy", "naturalny", "polski"]);
+/** Words a product may spell another way ("sos bbq" is "Sos barbecue"). */
+const SYNONYMS: Record<string, string> = { bbq: "(?:\\bbbq\\b|barbecue)" };
 
-/** An item no rule knows: its own words are the search, and the offer must say all of them. */
+/** Words too general to look an item up by. */
+const STOP_WORDS = new Set(["light", "gotowy", "mieszanka", "microwave", "chudy", "naturalny", "polski", "bez", "lub", "dla", "the"]);
+
+/** Sweets and snacks that carry an ingredient's name ("ciasteczka kakaowe", "pestki"). */
+const SNACKS = /ciastk|ciastecz|herbatnik|draz|baton|wafel|wafl|cukierk|lizak|zelk|chrup|chips|krakers|jerky|przekask/;
+
+/**
+ * An item no rule knows: its own words are the search, and the offer must
+ * say all of them. A short word must be the whole word ("pesto" is not
+ * "pestki"); longer ones may end differently ("sojowy" / "sojowa").
+ */
 function genericRule(itemName: string): Rule | undefined {
   const words = itemName
     .toLowerCase()
     .split(/[^\p{L}]+/u)
-    .filter((word) => word.length >= 4 && !STOP_WORDS.has(fold(word)));
-  if (words.length === 0) return undefined;
-  const stems = words.map((word) => fold(word).slice(0, Math.max(4, word.length - 1)));
+    .filter((word) => word.length >= 3 && !STOP_WORDS.has(fold(word)));
+  // Short words ("sos") must be in the offer too, as whole words; one alone says too little to look anything up.
+  if (!words.some((word) => word.length >= 4) && words.length < 2) return undefined;
+  const patterns = words.map((word) => {
+    const folded = fold(word);
+    if (SYNONYMS[folded]) return SYNONYMS[folded];
+    return folded.length <= 5 ? `\\b${folded}\\b` : folded.slice(0, folded.length - 1);
+  });
+  const snacks = SNACKS.test(fold(itemName));
+  // An item that is itself a sauce or a snack ("sos sojowy") keeps out only dishes, not its own kind.
+  const processed = PROCESSED.test(fold(itemName)) ? DISHES : PROCESSED;
   return {
     item: /./,
-    product: new RegExp(stems.map((stem) => `(?=.*${stem})`).join("")),
-    not: PROCESSED,
-    search: { sub: "", q: words[0] },
+    product: new RegExp(patterns.map((pattern) => `(?=.*${pattern})`).join("")),
+    // A flavour of the thing ("Curry Flavour", "o smaku curry") is not the thing.
+    not: either(processed, /\bsmak|o smaku|flavou?r/, ...(snacks ? [] : [SNACKS])),
+    search: { sub: "", q: words.find((word) => word.length >= 4) ?? words[0] },
   };
 }
 
 function ruleFor(itemName: string): Rule | undefined {
   const name = fold(itemName);
   return RULES.find((candidate) => candidate.item.test(name)) ?? genericRule(itemName);
+}
+
+/**
+ * The keyword rules alone: could this product be the item (its kind, not yet
+ * its variant). `grocery/matching.ts` adds the variant checks on top.
+ */
+export function ruleAccepts(itemName: string, productName: string): boolean {
+  const rule = ruleFor(itemName);
+  if (!rule) return false;
+  const product = fold(productName);
+  return rule.product.test(product) && !rule.not?.test(product) && !notPlainFor(itemName).test(product);
 }
 
 /** Where Blix should look for this shopping item; null when nothing can be searched. */
@@ -410,10 +456,11 @@ export function blixSearchFor(itemName: string): BlixSearch | null {
 export function promoCandidates(itemName: string, itemUnit: Unit | null, promos: ShopPromo[]): ShopPromo[] {
   const rule = ruleFor(itemName);
   if (!rule) return [];
+  const notPlain = notPlainFor(itemName);
   return promos
     .filter((promo) => {
       const product = fold(promo.name);
-      if (!rule.product.test(product) || rule.not?.test(product) || NOT_PLAIN.test(product)) return false;
+      if (!rule.product.test(product) || rule.not?.test(product) || notPlain.test(product)) return false;
       // An offer without a pack size gets the usual one below; a known pack must fit the list.
       if (promo.packQuantity === null || itemUnit === null) return true;
       return packInItemUnit(promo.packQuantity, promo.packUnit, itemUnit) !== null;
@@ -424,6 +471,11 @@ export function promoCandidates(itemName: string, itemUnit: Unit | null, promos:
 /** Never the plain ingredient, whatever the item: spreads, porridge, sauces, quail eggs, sausages. */
 const NOT_PLAIN =
   /parowk|\bpasta\b|owsiank|do mies|przepior|konfitur|serdel|kabanos|\bsos\b|zupa|danie|salatk|musl[iy]|kasza manna/;
+
+/** "Not the plain thing" does not apply to an item that is that thing ("sos sojowy" is a sauce): it keeps out only dishes. */
+function notPlainFor(itemName: string): RegExp {
+  return NOT_PLAIN.test(fold(itemName)) ? DISHES : NOT_PLAIN;
+}
 
 /**
  * The promos that could be any of these items, plus the ones I confirmed. The
@@ -462,10 +514,11 @@ export function catalogCandidates<T extends { name: string }>(
   const rule = ruleFor(itemName);
   if (!rule) return [];
   const liquid = LIQUID.test(fold(itemName));
+  const notPlain = notPlainFor(itemName);
   return entries
     .filter((entry) => {
       const name = fold(entry.name);
-      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name) || NOT_PLAIN.test(name)) return false;
+      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name) || notPlain.test(name)) return false;
       // A drink is not the fruit, unless the item is itself a liquid.
       if (!liquid && VOLUME.test(name)) return false;
       // A pack in pieces can never price an item in grams, and the other way round.

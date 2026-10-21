@@ -4,7 +4,7 @@ import { describe, test } from "node:test";
 
 import { parseBlixPromos } from "./blix.ts";
 import { parseLidlPromos } from "./lidl.ts";
-import { blixSearchFor, matchPromos, priceKey, promoCandidates, relevantPromos } from "./match.ts";
+import { blixSearchFor, catalogCandidates, matchPromos, priceKey, promoCandidates, relevantPromos } from "./match.ts";
 import type { ProductLink, ShopPromo } from "./types.ts";
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
@@ -341,5 +341,21 @@ describe("a pack named only in the offer's name", () => {
     };
     const [estimate] = matchPromos({ name: "mięso mielone", unit: "g" }, [offer], []).estimates;
     assert.deepEqual([estimate.promo.packQuantity, estimate.promo.packUnit, estimate.packAssumed], [400, "g", false]);
+  });
+});
+
+describe("items that are themselves sauces", () => {
+  test("a sauce on the list finds the sauce in a catalogue or a leaflet, never a dish in it", () => {
+    const entries = [{ name: "Sos sojowy jasny 150 ml" }, { name: "Kurczak w sosie sojowym 300 g" }, { name: "Sos teriyaki 250 ml" }];
+    assert.deepEqual(catalogCandidates("sos sojowy", "g", entries, 10).map((entry) => entry.name), ["Sos sojowy jasny 150 ml"]);
+    const promo: ShopPromo = {
+      shop: "lidl", productKey: "lidl:1", name: "Sos sojowy", packQuantity: 150, packUnit: "ml", loose: false,
+      promoPrice: 4.99, regularPrice: null, validFrom: "2026-10-19", validTo: "2026-10-25", conditions: "",
+      appOnly: false, multibuy: null, multibuyMin: 1, sourceUrl: "https://www.lidl.pl/", fetchedAt: "2026-10-19T08:00:00Z",
+    };
+    assert.equal(promoCandidates("sos sojowy", "ml", [promo]).length, 1);
+    assert.deepEqual(catalogCandidates("sos bbq", "g", [{ name: "Sos barbecue klasyczny 465 g" }], 10).length, 1);
+    // Sauces stay out of every other item.
+    assert.deepEqual(catalogCandidates("kurczak", "g", [{ name: "Sos do kurczaka 300 g" }], 10), []);
   });
 });
