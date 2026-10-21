@@ -54,6 +54,8 @@ community data:
 - Frisco's feed names leave out the brand: "Spaghetti Napoli" is Winiary's "Pomysł na…" seasoning mix and
   "pomidor oliwki" is Bake Rolls. Products whose URL names a seasoning-mix or snack line are dropped from the feed
   (`NOT_AN_INGREDIENT` in `frisco.ts`)
+- Final run: Piramidki proteinowe ser-cebula (a snack) → cebula; Max karbowane papryka (crisps) → papryka; Pesto
+  (czerwona papryka) → papryka
 - Kinds: penne for spaghetti, yellow for red pepper, raspberries for strawberries, forest for multiflower
   honey, organic for free-range eggs, Greek for natural yogurt and the other way round
 
@@ -62,7 +64,13 @@ community data:
 The rules keep sauces, dishes and snacks out ("not the plain ingredient"). An item that is itself a sauce
 ("sos sojowy", "sos teriyaki", "sos bbq") is exempt from that for its own kind and keeps out only dishes
 (`DISHES`: soups, salads, "w sosie", "o smaku", …). Before the pilot no sauce item could ever be priced.
-Two short words ("sos bbq") are enough when both must be whole words in the name; one ("xyz") is not.
+Two short words ("sos bbq") are enough when both must be whole words in the name; one ("xyz") is not. A few
+words have spellings (`SYNONYMS`: "bbq" = "barbecue").
+
+## Packs from Frisco
+
+A product Frisco's feed sells by weight but whose name counts pieces ("Tortilla pszenna - 25 cm (4 szt.)",
+0.25 kg) is priced by the weight, so it can price an item in grams; eggs, sold by the piece, keep their count.
 
 ## Limits
 

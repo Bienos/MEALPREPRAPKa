@@ -45,7 +45,7 @@ function either(...patterns: RegExp[]): RegExp {
 
 /** Not the plain ingredient: ready meals, cold cuts, sauces, snacks, drinks. */
 const PROCESSED =
-  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|krakers|\blays\b|crunchips|pringles|doritos|cheetos|\bsmak\b/;
+  /pasztet|parowk|serdel|kabanos|kielbas|nugget|bulion|zupa|przypraw|chips|\bsos\b|w sosie (?!wlasnym)|pierog|krokiet|pizza|zapiekank|salatk|panierk|frytk|baton|deser|lody|\bsok\b|napoj|bistro|sushi|onigiri|kebab|smoothie|chrupk|krakers|\blays\b|crunchips|pringles|doritos|cheetos|karbowan|piramidk|\bsmak\b/;
 
 /** Ready meals: never a pantry item, even when the item is a sauce. */
 const DISHES = /zupa|pizza|salatk|zapiekank|pierog|krokiet|sushi|kebab|\bdanie\b|w sosie|z sosem|chips|o smaku/;
@@ -305,7 +305,7 @@ const RULES: Rule[] = [
     item: /papryk/,
     product: /papryk/,
     not: either(
-      /mielon|proszek|konserw|marynow|w zalewie|ajvar|nadziew|wedzon|w oleju|pasta|mrozon|ostra|jalapeno|hummus|paprykow/,
+      /mielon|proszek|konserw|marynow|w zalewie|ajvar|nadziew|wedzon|w oleju|pasta|pesto|mrozon|ostra|jalapeno|hummus|paprykow/,
       PROCESSED,
       LISTED,
     ),
@@ -389,6 +389,9 @@ const RULES: Rule[] = [
   },
 ];
 
+/** Words a product may spell another way ("sos bbq" is "Sos barbecue"). */
+const SYNONYMS: Record<string, string> = { bbq: "(?:\\bbbq\\b|barbecue)" };
+
 /** Words too general to look an item up by. */
 const STOP_WORDS = new Set(["light", "gotowy", "mieszanka", "microwave", "chudy", "naturalny", "polski", "bez", "lub", "dla", "the"]);
 
@@ -409,6 +412,7 @@ function genericRule(itemName: string): Rule | undefined {
   if (!words.some((word) => word.length >= 4) && words.length < 2) return undefined;
   const patterns = words.map((word) => {
     const folded = fold(word);
+    if (SYNONYMS[folded]) return SYNONYMS[folded];
     return folded.length <= 5 ? `\\b${folded}\\b` : folded.slice(0, folded.length - 1);
   });
   const snacks = SNACKS.test(fold(itemName));
@@ -436,9 +440,7 @@ export function ruleAccepts(itemName: string, productName: string): boolean {
   const rule = ruleFor(itemName);
   if (!rule) return false;
   const product = fold(productName);
-  // "Not the plain thing" does not apply to an item that is that thing ("sos sojowy" is a sauce).
-  const notPlain = NOT_PLAIN.test(fold(itemName)) ? DISHES : NOT_PLAIN;
-  return rule.product.test(product) && !rule.not?.test(product) && !notPlain.test(product);
+  return rule.product.test(product) && !rule.not?.test(product) && !notPlainFor(itemName).test(product);
 }
 
 /** Where Blix should look for this shopping item; null when nothing can be searched. */
@@ -454,10 +456,11 @@ export function blixSearchFor(itemName: string): BlixSearch | null {
 export function promoCandidates(itemName: string, itemUnit: Unit | null, promos: ShopPromo[]): ShopPromo[] {
   const rule = ruleFor(itemName);
   if (!rule) return [];
+  const notPlain = notPlainFor(itemName);
   return promos
     .filter((promo) => {
       const product = fold(promo.name);
-      if (!rule.product.test(product) || rule.not?.test(product) || NOT_PLAIN.test(product)) return false;
+      if (!rule.product.test(product) || rule.not?.test(product) || notPlain.test(product)) return false;
       // An offer without a pack size gets the usual one below; a known pack must fit the list.
       if (promo.packQuantity === null || itemUnit === null) return true;
       return packInItemUnit(promo.packQuantity, promo.packUnit, itemUnit) !== null;
@@ -468,6 +471,11 @@ export function promoCandidates(itemName: string, itemUnit: Unit | null, promos:
 /** Never the plain ingredient, whatever the item: spreads, porridge, sauces, quail eggs, sausages. */
 const NOT_PLAIN =
   /parowk|\bpasta\b|owsiank|do mies|przepior|konfitur|serdel|kabanos|\bsos\b|zupa|danie|salatk|musl[iy]|kasza manna/;
+
+/** "Not the plain thing" does not apply to an item that is that thing ("sos sojowy" is a sauce): it keeps out only dishes. */
+function notPlainFor(itemName: string): RegExp {
+  return NOT_PLAIN.test(fold(itemName)) ? DISHES : NOT_PLAIN;
+}
 
 /**
  * The promos that could be any of these items, plus the ones I confirmed. The
@@ -506,10 +514,11 @@ export function catalogCandidates<T extends { name: string }>(
   const rule = ruleFor(itemName);
   if (!rule) return [];
   const liquid = LIQUID.test(fold(itemName));
+  const notPlain = notPlainFor(itemName);
   return entries
     .filter((entry) => {
       const name = fold(entry.name);
-      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name) || NOT_PLAIN.test(name)) return false;
+      if (!rule.product.test(name) || rule.not?.test(name) || NOT_FOOD.test(name) || notPlain.test(name)) return false;
       // A drink is not the fruit, unless the item is itself a liquid.
       if (!liquid && VOLUME.test(name)) return false;
       // A pack in pieces can never price an item in grams, and the other way round.

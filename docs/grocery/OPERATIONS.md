@@ -57,8 +57,9 @@ Signals to act on:
 
 ```
 npm run lint && npm run typecheck && npm test && npm run build
-node scripts/warsaw-pilot.mts            # live coverage measurement (~12 min, Open Food Facts rate limit)
-node scripts/warsaw-pilot.mts --skip-off # without Open Food Facts searches (~1 min)
+node scripts/warsaw-pilot.mts            # live coverage measurement (20–35 min: Open Food Facts 10/min, retries on 503)
+node scripts/warsaw-pilot.mts --skip-off # without Open Food Facts searches (under a minute)
+node scripts/warsaw-pilot.mts --reuse-off docs/grocery/pilot/off-searches-2026-10-21.json  # earlier search answers
 ```
 
 ## Going multi-user (not ready)

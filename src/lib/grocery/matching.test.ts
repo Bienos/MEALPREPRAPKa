@@ -116,6 +116,9 @@ describe("matching tiers", () => {
     assert.equal(tier(need("wołowina 5%"), product("Japońska wołowina smak wasabi 100 g")), "none");
     assert.equal(tier(need("papryka czerwona"), product("Oven Baked krakersy czerwona papryka 100 g")), "none");
     assert.equal(tier(need("filet z kurczaka"), product("Piratki Filet z Kurczaka 100 g")), "none");
+    assert.equal(tier(need("cebula"), product("Piramidki proteinowe Ser cebula 80 g")), "none");
+    assert.equal(tier(need("papryka"), product("Max karbowane papryka 120 g")), "none");
+    assert.equal(tier(need("papryka czerwona"), product("Pesto (czerwona papryka) 190 g")), "none");
   });
 
   test("an item that is itself a sauce matches that sauce, never a dish in it", () => {

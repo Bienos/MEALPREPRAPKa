@@ -2,7 +2,7 @@
  * Warsaw pilot: 100 products derived from the MealPrep meal library,
  * measured against the data sources this app may use. Reproducible:
  *
- *   node scripts/warsaw-pilot.mts [--skip-off]
+ *   node scripts/warsaw-pilot.mts [--skip-off | --reuse-off <earlier pilot json>]
  *
  * Reads live: the meal sheet's public CSV export (falls back to the snapshot
  * in src/lib/meals/test-data), Open Prices (all PLN prices, Poland gate),
@@ -37,6 +37,21 @@ import type { ShopPromo } from "../src/lib/prices/types.ts";
 const TODAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Warsaw" }).format(new Date());
 const NOW = new Date().toISOString();
 const SKIP_OFF = process.argv.includes("--skip-off");
+// Open Food Facts search is slow (10/min) and often answers 503: an earlier run's answers can be reused,
+// when the matching code they were judged with has not changed. The summary says so.
+const REUSE_OFF = process.argv.includes("--reuse-off") ? process.argv[process.argv.indexOf("--reuse-off") + 1] : null;
+const reused: { generatedAt: string; byProduct: Map<string, unknown> } | null = REUSE_OFF
+  ? (() => {
+      const earlier = JSON.parse(readFileSync(REUSE_OFF, "utf8")) as {
+        summary: { date: string; generatedAt?: string };
+        results: { product: string; off: unknown }[];
+      };
+      return {
+        generatedAt: earlier.summary.generatedAt ?? earlier.summary.date,
+        byProduct: new Map(earlier.results.map((one) => [one.product, one.off])),
+      };
+    })()
+  : null;
 const SHEET_ID = "10-ncMSZQxVM7n93-F2cPl2vQWz0atXexrzKieQAE1sI";
 const GID = 894227705;
 const SNAPSHOT = new URL("../src/lib/meals/test-data/sheet-2026-10-19.csv", import.meta.url);
@@ -228,7 +243,7 @@ console.log(`frisco: ${frisco.length} in-stock products${friscoError ? ` (error:
 const friscoCatalog = frisco.map((product) => ({ name: matchName(product), product }));
 
 type ProductResult = Need & {
-  off: { searched: boolean; results: number; best: (Hit & { gtin: string; url: string }) | null; error: string | null };
+  off: { searched: boolean; results: number; best: (Hit & { gtin: string; url: string }) | null; error: string | null; retried: boolean };
   openPrices: {
     poland: number;
     warsaw: number;
@@ -246,11 +261,23 @@ type ProductResult = Need & {
 const results: ProductResult[] = [];
 for (const need of needs) {
   // Open Food Facts: who is this product (a barcode), searched in Poland.
-  const off: ProductResult["off"] = { searched: false, results: 0, best: null, error: null };
-  if (!SKIP_OFF) {
+  const off: ProductResult["off"] = { searched: false, results: 0, best: null, error: null, retried: false };
+  const earlierOff = reused?.byProduct.get(need.product) as ProductResult["off"] | undefined;
+  if (earlierOff) {
+    Object.assign(off, earlierOff);
+  } else if (!SKIP_OFF) {
     off.searched = true;
     try {
-      const found: OffProduct[] = await searchOffProducts(need.name, UA, 10);
+      let found: OffProduct[];
+      try {
+        found = await searchOffProducts(need.name, UA, 10);
+      } catch (error) {
+        // Its search answers 503 now and then under load: one retry, 20 s later, never more.
+        if (!(error instanceof Error && /5\d\d|połączyć/.test(error.message))) throw error;
+        off.retried = true;
+        await new Promise((resolve) => setTimeout(resolve, 20_000));
+        found = await searchOffProducts(need.name, UA, 10);
+      }
       off.results = found.length;
       const judged = found
         .map((product) => ({ ...judge(need, product.name, product.pack), gtin: product.gtin, url: product.url }))
@@ -380,10 +407,13 @@ const byCategory = (predicate: (one: ProductResult) => boolean) =>
 const priority = ["biedronka", "lidl", "kaufland", "auchan", "carrefour"];
 const summary = {
   date: TODAY,
+  generatedAt: NOW,
+  offSource: reused ? `reused from the run of ${reused.generatedAt} (${REUSE_OFF?.split("/").pop()})` : SKIP_OFF ? "skipped" : "searched live",
   library: sheet.source,
   libraryIngredients: ingredients.length,
   products: results.length,
   offSearched: count((one) => one.off.searched),
+  offRetried: count((one) => one.off.retried),
   offErrors: count((one) => one.off.error !== null),
   offAnyResult: count((one) => one.off.results > 0),
   offExactProduct: count((one) => one.off.best !== null && exact(one.off.best.tier)),
@@ -405,8 +435,9 @@ const summary = {
   friscoAnyMatch: count((one) => one.frisco !== null),
   friscoExactPack: count((one) => one.pack !== null && one.frisco?.exactPack === true),
   lidlPublishedExact: count((one) => one.lidlEveryday !== null && one.lidlEveryday.state === "published_promotion" && exact(one.lidlEveryday.tier)),
-  verifiedCurrentByPriorityRetailer: Object.fromEntries(
-    priority.map((retailer) => [retailer, retailer === "lidl" ? count((one) => one.lidlEveryday !== null && exact(one.lidlEveryday.tier)) : 0]),
+  // Strict (verdict-eligible) prices per priority chain: only Lidl has any, its published everyday prices.
+  strictByPriorityRetailer: Object.fromEntries(
+    priority.map((retailer) => [retailer, retailer === "lidl" ? count((one) => one.lidlEveryday !== null && one.lidlEveryday.state === "published_promotion" && exact(one.lidlEveryday.tier)) : 0]),
   ),
   byCategory: {
     offExact: byCategory((one) => one.off.best !== null && exact(one.off.best.tier)),

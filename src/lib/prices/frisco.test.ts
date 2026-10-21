@@ -37,6 +37,16 @@ describe("Frisco feed", () => {
     assert.deepEqual([turkey?.packQuantity, turkey?.packUnit, turkey?.loose, turkey?.price], [1000, "g", true, 53.99]);
   });
 
+  test("a product weighed by the feed but counted in its name is priced by the weight", () => {
+    const tortilla = { ...items[0], name: "Tortilla pszenna - 25 cm (4 szt.)", unit: "Kilogram" as const, grammage: 0.25, price: 4.99 };
+    const shelf = toFriscoShelfPrice(tortilla);
+    assert.deepEqual([shelf?.packQuantity, shelf?.packUnit, shelf?.loose], [250, "g", false]);
+    assert.equal(matchName(tortilla), "Tortilla pszenna - 25 cm");
+    // Eggs are sold by the piece in the feed: the count stays the pack.
+    const eggs = priceOf("Jaja kurze z chowu ściółkowego");
+    assert.deepEqual([eggs?.packQuantity, eggs?.packUnit], [10, "szt"]);
+  });
+
   test("the weight range is left out of the name the matching reads", () => {
     const item = (name: string) => ({ ...items[0], name, unit: "Kilogram" as const });
     assert.equal(matchName(item("Banany kiść 4-6 szt. (800g-1200g)")), "Banany kiść");
