@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { BulkPrices, SHOP_ORDER } from "@/components/prep/bulk-prices";
+import { TrioCompare } from "@/components/prep/trio-compare";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ import {
   type Provider,
 } from "@/lib/prices/delivery";
 import { matchPromos, priceKey, type PromoMatch } from "@/lib/prices/match";
+import { buildTrio } from "@/lib/prices/trio";
 import {
   SHOP_IN,
   SHOP_LABELS,
@@ -291,6 +293,13 @@ export function ShopPrices({ items, pricing }: { items: NeededItem[]; pricing: S
           Dla tego, co zostało do kupienia. Każda cena ma źródło, datę i to, na ile jej ufać.
         </p>
       </div>
+
+      <TrioCompare
+        view={buildTrio(summary)}
+        fetchedLabel={pricing.fetchedLabel}
+        onOpenShop={setOpenShop}
+        onEdit={(shop, item) => setEditing({ shop, item })}
+      />
 
       <VerifiedVerdict verdict={verdict} />
 
